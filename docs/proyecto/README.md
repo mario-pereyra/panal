@@ -55,7 +55,7 @@ Se adelantó una pantalla completa para ver el diseño en código antes de segui
 
 | Fase | Hecho | Falta |
 | :---: | :--- | :--- |
-| 1 | Repositorio montado con Vite+. Motor: día lógico, gotas, qué toca hoy, resumen del día, racha, oficios, estado de Zum, constancia y avance de colmena, con 31 pruebas | `ocurrencias`, `sellosDe`, `celebracionesEntre`, el gasto automático de reservas en `rachaDe` y las pruebas con propiedades |
+| 1 | Repositorio montado con Vite+, versionado en git y publicado en GitHub como repositorio privado, con integración continua que corre formato, pruebas y compilación en cada cambio. Motor: día lógico, gotas, qué toca hoy, resumen del día, racha, oficios, estado de Zum, constancia y avance de colmena, con 31 pruebas | `ocurrencias`, `sellosDe`, `celebracionesEntre`, el gasto automático de reservas en `rachaDe` y las pruebas con propiedades |
 | 2 | Variables de diseño, estructura común con sus dos navegaciones, y P04 "Hoy" completa: Zum, casilla hexagonal, panal de hoy, rejilla de colmena y panal de constancia. Llenar una celda ya pasa por Redux y RTK Query | Las otras trece pantallas, la galería de piezas, la ventana de celebración y los avisos |
 | 3 a 6 | Nada | Todo |
 

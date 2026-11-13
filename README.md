@@ -27,7 +27,7 @@ Solo hace falta [Vite+](https://viteplus.dev) (`vp`): instala y administra Node 
 2. **Descarga el proyecto e instala sus dependencias.**
 
    ```bash
-   git clone <dirección-del-repositorio> panal
+   git clone https://github.com/mario-pereyra/panal.git panal
    cd panal
    vp install
    ```
