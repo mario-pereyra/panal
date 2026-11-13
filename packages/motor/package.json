@@ -1,0 +1,16 @@
+{
+  "name": "@panal/motor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reglas de Panal como funciones puras. Sin dependencias: lo usan el servidor y el navegador.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "vp test run"
+  },
+  "devDependencies": {
+    "vite-plus": "catalog:"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "panal",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Panal: plataforma gamificada para organizar y cumplir actividades, sola o en colmena.",
+  "type": "module",
+  "scripts": {
+    "dev": "vp run @panal/web#dev",
+    "build": "vp run -r build",
+    "test": "vp run -r test",
+    "check": "vp check",
+    "db": "wslc start panal-db"
+  },
+  "devDependencies": {
+    "vite-plus": "catalog:"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.18.0",
+      "onFail": "download"
+    }
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  }
+}

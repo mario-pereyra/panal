@@ -1,0 +1,21 @@
+# Finales de línea: LF en el repositorio y en disco, también en Windows.
+# El formateador escribe LF; así nadie sube un archivo entero "cambiado" por los saltos de línea.
+* text=auto eol=lf
+
+# Binarios: git no intenta leerlos ni convertirlos.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff2 binary
+*.zip binary
+
+# Generado por pnpm: fuera de los diffs.
+pnpm-lock.yaml -diff linguist-generated
+
+# Estadísticas de lenguajes de GitHub: cuenta solo el código de la aplicación.
+docs/** linguist-documentation
+assets-fuente/** linguist-vendored

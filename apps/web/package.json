@@ -1,0 +1,28 @@
+{
+  "name": "@panal/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Aplicación web de Panal: React, Redux Toolkit y RTK Query.",
+  "type": "module",
+  "scripts": {
+    "dev": "vp dev",
+    "build": "vp build",
+    "preview": "vp preview",
+    "test": "vp test run"
+  },
+  "dependencies": {
+    "@fontsource-variable/fredoka": "catalog:",
+    "@fontsource-variable/nunito": "catalog:",
+    "@panal/motor": "workspace:*",
+    "@reduxjs/toolkit": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-redux": "catalog:",
+    "react-router": "catalog:"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}

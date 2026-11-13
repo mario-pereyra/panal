@@ -1,0 +1,50 @@
+.fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-block-size: 58px;
+}
+
+.textos {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.titulo {
+  font-weight: 800;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.detalle {
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  color: var(--tinta-suave);
+}
+
+.vencida {
+  display: inline-block;
+  margin-inline-start: 8px;
+  padding: 1px 8px;
+  border-radius: var(--radio-control);
+  background: var(--cera);
+  color: var(--tinta);
+  font-weight: 800;
+  font-size: 0.75rem;
+}
+
+.gotas {
+  flex: none;
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  font-size: 1.0625rem;
+  color: var(--tinta-suave);
+}
+
+/* Las gotas de una celda llena ya son tuyas: pasan a tinta. */
+.fila[data-llena] .gotas {
+  color: var(--tinta);
+}

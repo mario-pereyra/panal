@@ -1,0 +1,78 @@
+/*
+ * Variables de diseño de Panal.
+ * Fuente: docs/propuestas/A-panal/DESIGN.md y el tablero "Hoy" del diseño 1.
+ * Ningún componente escribe a mano un color, un radio o una sombra: todo sale de aquí.
+ */
+:root {
+  color-scheme: light;
+
+  /* Color: base */
+  --papel: #fbfaf6;
+  --blanco: #ffffff;
+  --tinta: #2a1b0a;
+  --tinta-suave: #6b5a45;
+  --tinta-sobre-miel: #5a3d00;
+
+  /* Color: miel y cera */
+  --miel: #ffc421;
+  --miel-zum: #ffd23f;
+  --miel-oscura: #e69a00;
+  --miel-profunda: #d98200;
+  --miel-clara: #ffe08a;
+  --cera: #fff3c9;
+  --cera-clara: #fff7d6;
+
+  /* Color: apoyo */
+  --ala: #ddf0fa;
+  --coral: #ff8a5b;
+  --hoja: #2e7d4f;
+  --lino: #efe7d6;
+  --lino-claro: #f1eadb;
+  --lino-borde: #b9aa8c;
+
+  /* Color: integrantes de una colmena, por orden de llegada */
+  --abeja-1: #ffc421;
+  --abeja-2: #e8751a;
+  --abeja-3: #2f6fb7;
+  --abeja-4: #6b3f12;
+  --abeja-5: #2e7d4f;
+  --abeja-6: #b0457a;
+
+  /* Tipografía */
+  --fuente-titulos: "Fredoka Variable", "Trebuchet MS", sans-serif;
+  --fuente-texto: "Nunito Variable", "Segoe UI", sans-serif;
+
+  /* Forma */
+  --grosor: 2.5px;
+  --borde: var(--grosor) solid var(--tinta);
+  --radio-principal: 32px;
+  --radio-tarjeta: 28px;
+  --radio-control: 999px;
+  --sombra: 0 6px 0 var(--tinta);
+
+  /* Espacio */
+  --ancho-maximo: 1296px;
+  --margen-pagina: 16px;
+  --separacion: 16px;
+
+  /* Movimiento */
+  --resorte: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --suave: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* Lado mínimo de lo que se toca: 24 px con ratón, 44 px con el dedo */
+  --toque: 24px;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --toque: 44px;
+  }
+}
+
+/* Desde tableta: más aire alrededor */
+@media (min-width: 700px) {
+  :root {
+    --margen-pagina: 32px;
+    --separacion: 20px;
+  }
+}

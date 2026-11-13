@@ -1,0 +1,151 @@
+.principal {
+  /* El interior se acomoda según el ancho de la tarjeta, no el de la ventana. */
+  container: principal / inline-size;
+  border: var(--borde);
+  border-radius: var(--radio-principal);
+  background: var(--miel);
+  box-shadow: var(--sombra);
+}
+
+/* Día sin flores o invernada: la tarjeta descansa con Zum. */
+.principal[data-tono="ala"] {
+  background: var(--ala);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .principal {
+    transition: background-color 0.4s var(--suave);
+  }
+}
+
+/* Teléfono: Zum y el saludo arriba, el panal en medio, las acciones abajo. */
+.interior {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "zum saludo"
+    "frase frase"
+    "panal panal"
+    "acciones acciones";
+  align-items: center;
+  gap: 12px 16px;
+  padding: 20px;
+}
+
+.zum {
+  --tamano-zum: 120px;
+  grid-area: zum;
+}
+
+.saludo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  grid-area: saludo;
+  min-inline-size: 0;
+}
+
+.fecha {
+  font-weight: 800;
+  font-size: 0.875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tinta-sobre-miel);
+}
+
+.principal[data-tono="ala"] .fecha {
+  color: var(--tinta-suave);
+}
+
+.titulo {
+  font-weight: 700;
+  font-size: clamp(1.75rem, 1rem + 4.4cqi, 3rem);
+  line-height: 1.05;
+}
+
+.frase {
+  grid-area: frase;
+  max-inline-size: 28em;
+  font-size: clamp(1.0625rem, 1rem + 0.4cqi, 1.1875rem);
+}
+
+.panal {
+  grid-area: panal;
+  justify-self: center;
+  inline-size: min(100%, 200px);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  grid-area: acciones;
+  margin-block-start: 8px;
+}
+
+.fichas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* En teléfono el botón principal ocupa todo el ancho. */
+.crear {
+  flex: 1 1 100%;
+}
+
+/* Tableta: Zum a la izquierda, el texto a su lado y el panal debajo. */
+@container principal (inline-size >= 640px) {
+  .interior {
+    grid-template-areas:
+      "zum saludo"
+      "zum frase"
+      "zum acciones"
+      "panal panal";
+    gap: 12px 28px;
+    padding: 24px 32px;
+  }
+
+  .zum {
+    --tamano-zum: 200px;
+  }
+
+  .panal {
+    inline-size: auto;
+  }
+
+  .crear {
+    flex: none;
+  }
+}
+
+/* Computador: como en el diseño. Zum, el texto y el panal de hoy en una fila. */
+@container principal (inline-size >= 940px) {
+  .interior {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    /* Las filas de los extremos absorben el alto sobrante: el texto queda junto y centrado. */
+    grid-template-rows: 1fr auto auto auto 1fr;
+    grid-template-areas:
+      "zum . panal"
+      "zum saludo panal"
+      "zum frase panal"
+      "zum acciones panal"
+      "zum . panal";
+    gap: 12px 36px;
+    min-block-size: 335px;
+    padding: 8px 40px;
+  }
+
+  .zum {
+    --tamano-zum: 240px;
+  }
+
+  .saludo {
+    gap: 12px;
+  }
+
+  .panal {
+    margin-inline: 12px;
+  }
+}

@@ -1,0 +1,103 @@
+/* Estilos de base: lo que vale para toda la aplicación. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-block-size: 100dvh;
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--fuente-texto);
+  font-weight: 700;
+  line-height: 1.4;
+  /* Las palabras largas y las direcciones se parten en vez de ensanchar la página. */
+  overflow-wrap: anywhere;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--fuente-titulos);
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+img,
+svg {
+  display: block;
+  max-inline-size: 100%;
+}
+
+img {
+  block-size: auto;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+/* El foco del teclado siempre se ve; el del ratón no molesta. */
+:focus-visible {
+  outline: 3px solid var(--tinta);
+  outline-offset: 3px;
+}
+
+/* Texto que solo leen los lectores de pantalla. */
+.solo-lectores {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Enlace para saltar la navegación: aparece al recibir el foco. */
+.saltar {
+  position: absolute;
+  inset-block-start: 8px;
+  inset-inline-start: 8px;
+  z-index: 100;
+  padding: 10px 18px;
+  border: var(--borde);
+  border-radius: var(--radio-control);
+  background: var(--blanco);
+  font-weight: 800;
+  text-decoration: none;
+  translate: 0 -200%;
+}
+
+.saltar:focus-visible {
+  translate: 0 0;
+}

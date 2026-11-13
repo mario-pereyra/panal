@@ -1,0 +1,72 @@
+.zum {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  inline-size: var(--tamano-zum, 240px);
+  aspect-ratio: 1;
+}
+
+/* El círculo de cera donde vive Zum en la tarjeta principal. */
+.zum[data-fondo]::before {
+  content: "";
+  position: absolute;
+  inset: 2%;
+  border-radius: 50%;
+  background: var(--cera-clara);
+}
+
+.dibujo {
+  position: relative;
+  inline-size: 94%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dibujo {
+    animation:
+      aparecer 0.45s var(--resorte) both,
+      flotar 3.2s ease-in-out 0.45s infinite alternate;
+  }
+
+  .zum[data-estado="celebrando"] .dibujo {
+    animation:
+      aparecer 0.45s var(--resorte) both,
+      brincar 0.7s var(--suave) 0.45s infinite alternate;
+  }
+
+  .zum[data-estado="descansando"] .dibujo {
+    animation:
+      aparecer 0.45s var(--resorte) both,
+      respirar 4s ease-in-out 0.45s infinite alternate;
+  }
+
+  .zum[data-estado="preocupada"] .dibujo {
+    animation: aparecer 0.45s var(--resorte) both;
+  }
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    scale: 0.86;
+  }
+}
+
+@keyframes flotar {
+  to {
+    translate: 0 -6px;
+  }
+}
+
+@keyframes brincar {
+  to {
+    translate: 0 -12px;
+    rotate: 3deg;
+  }
+}
+
+@keyframes respirar {
+  to {
+    scale: 1.03;
+  }
+}

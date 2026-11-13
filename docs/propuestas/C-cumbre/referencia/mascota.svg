@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 244" width="400" height="488" role="img" aria-label="Kusi, la llama mascota, con su manta de colores">
+<title>Kusi, la llama mascota, con su manta de colores</title>
+<rect x="0.0" y="0.0" width="200.0" height="244.0" fill="#EEF4F3"></rect>
+<ellipse cx="100" cy="250" rx="96" ry="30" fill="#2F7A6B"></ellipse>
+<rect x="74" y="186" width="14" height="42" rx="7" fill="#8F5622"></rect>
+<rect x="126" y="186" width="14" height="42" rx="7" fill="#8F5622"></rect>
+<rect x="74" y="220" width="14" height="8" rx="3" fill="#17302B"></rect>
+<rect x="126" y="220" width="14" height="8" rx="3" fill="#17302B"></rect>
+<circle cx="50" cy="150" r="13" fill="#B8732F"></circle>
+<rect x="58" y="186" width="14" height="46" rx="7" fill="#B8732F"></rect>
+<rect x="142" y="186" width="14" height="46" rx="7" fill="#B8732F"></rect>
+<rect x="58" y="224" width="14" height="8" rx="3" fill="#17302B"></rect>
+<rect x="142" y="224" width="14" height="8" rx="3" fill="#17302B"></rect>
+<rect x="48" y="132" width="116" height="70" rx="34" fill="#B8732F"></rect>
+<ellipse cx="131" cy="20" rx="7" ry="16" transform="rotate(-16 131 20)" fill="#B8732F"></ellipse>
+<ellipse cx="161" cy="20" rx="7" ry="16" transform="rotate(16 161 20)" fill="#B8732F"></ellipse>
+<ellipse cx="131" cy="21" rx="3.2" ry="9" transform="rotate(-16 131 21)" fill="#F2A48C"></ellipse>
+<ellipse cx="161" cy="21" rx="3.2" ry="9" transform="rotate(16 161 21)" fill="#F2A48C"></ellipse>
+<rect x="124" y="50" width="40" height="112" rx="20" fill="#B8732F"></rect>
+<ellipse cx="146" cy="128" rx="13" ry="18" fill="#FFF1DC"></ellipse>
+<ellipse cx="146" cy="52" rx="31" ry="27" fill="#B8732F"></ellipse>
+<circle cx="137" cy="28" r="11" fill="#FFF1DC"></circle>
+<circle cx="150" cy="25" r="12" fill="#FFF1DC"></circle>
+<circle cx="160" cy="30" r="9" fill="#FFF1DC"></circle>
+<circle cx="123" cy="35" r="5" fill="#D8502F"></circle>
+<rect x="70" y="128" width="50" height="56" rx="10" fill="#1F5F54"></rect>
+<rect x="70" y="141" width="50" height="7" fill="#F2B441"></rect>
+<rect x="70" y="153" width="50" height="7" fill="#FFF1DC"></rect>
+<rect x="70" y="165" width="50" height="7" fill="#D8502F"></rect>
+<ellipse cx="146" cy="63" rx="16" ry="11" fill="#FFF1DC"></ellipse>
+<ellipse cx="146" cy="58.5" rx="4.2" ry="2.8" fill="#17302B"></ellipse>
+<path d="M146 61 V65 M140 65 Q146 70 152 65" fill="none" stroke="#17302B" stroke-width="2.2" stroke-linecap="round"></path>
+<circle cx="131" cy="48" r="3.8" fill="#17302B"></circle>
+<circle cx="161" cy="48" r="3.8" fill="#17302B"></circle>
+<circle cx="132.2" cy="46.8" r="1.2" fill="#FFFFFF"></circle>
+<circle cx="162.2" cy="46.8" r="1.2" fill="#FFFFFF"></circle>
+<circle cx="123" cy="59" r="4.5" fill="#F2A48C" opacity="0.8"></circle>
+<circle cx="169" cy="59" r="4.5" fill="#F2A48C" opacity="0.8"></circle>
+</svg>

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" width="440" height="440" role="img" aria-label="Zum, la abeja mascota, sonriendo">
+<title>Zum, la abeja mascota, sonriendo</title>
+<rect x="0.0" y="0.0" width="220.0" height="220.0" fill="#FBFAF6"></rect>
+<circle cx="110" cy="112" r="106" fill="#FFF7D6"></circle>
+<ellipse cx="42" cy="92" rx="26" ry="40" transform="rotate(-35 42 92)" fill="#DDF0FA" stroke="#2A1B0A" stroke-width="5"></ellipse>
+<ellipse cx="178" cy="92" rx="26" ry="40" transform="rotate(35 178 92)" fill="#DDF0FA" stroke="#2A1B0A" stroke-width="5"></ellipse>
+<path d="M92 63 Q84 40 70 36" fill="none" stroke="#2A1B0A" stroke-width="5" stroke-linecap="round"></path>
+<path d="M128 63 Q136 40 150 36" fill="none" stroke="#2A1B0A" stroke-width="5" stroke-linecap="round"></path>
+<circle cx="70" cy="36" r="7" fill="#2A1B0A"></circle>
+<circle cx="150" cy="36" r="7" fill="#2A1B0A"></circle>
+<polygon points="102,186 118,186 110,205" fill="#2A1B0A" stroke="#2A1B0A" stroke-width="4" stroke-linejoin="round"></polygon>
+<ellipse cx="110" cy="125" rx="72" ry="66" fill="#FFD23F" stroke="#2A1B0A" stroke-width="5"></ellipse>
+<path d="M58 150 Q110 168 162 150" fill="none" stroke="#2A1B0A" stroke-width="15" stroke-linecap="round"></path>
+<path d="M76 172 Q110 184 144 172" fill="none" stroke="#2A1B0A" stroke-width="13" stroke-linecap="round"></path>
+<ellipse cx="72" cy="126" rx="9" ry="6" fill="#FF8A5B" opacity="0.6"></ellipse>
+<ellipse cx="148" cy="126" rx="9" ry="6" fill="#FF8A5B" opacity="0.6"></ellipse>
+<ellipse cx="88" cy="110" rx="7" ry="9" fill="#2A1B0A"></ellipse>
+<ellipse cx="132" cy="110" rx="7" ry="9" fill="#2A1B0A"></ellipse>
+<circle cx="90.5" cy="106.5" r="2.6" fill="#FFFFFF"></circle>
+<circle cx="134.5" cy="106.5" r="2.6" fill="#FFFFFF"></circle>
+<path d="M101 124 Q110 134 119 124" fill="none" stroke="#2A1B0A" stroke-width="4" stroke-linecap="round"></path>
+</svg>

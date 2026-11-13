@@ -1,0 +1,27 @@
+node_modules
+dist
+*.local
+*.log
+
+# variables de entorno: nunca al repositorio
+.env
+.env.*
+!.env.example
+
+# editores y sistema
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea
+.DS_Store
+Thumbs.db
+
+# herramientas de agentes instaladas en esta máquina; skills-lock.json registra cuáles son
+# y se restauran con: vp dlx skills experimental_install
+.agents/
+.claude/skills/
+.claude/worktrees/
+.claude/settings.local.json
+
+# pantallas de Stitch descartadas: se conservan en disco, fuera del repositorio
+docs/propuestas/**/disenos-stitch*/

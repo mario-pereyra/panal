@@ -1,0 +1,24 @@
+name: Mejora o historia
+description: Una funcionalidad nueva, o un cambio en una que ya existe.
+title: "Mejora: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: necesidad
+    attributes:
+      label: Qué se necesita y para qué
+      description: Quién lo necesita, qué quiere lograr y por qué importa.
+    validations:
+      required: true
+  - type: input
+    id: historia
+    attributes:
+      label: Historia relacionada
+      description: Si corresponde a una de docs/proyecto/02-historias-de-usuario.md, su código. Por ejemplo, HU-12.
+  - type: textarea
+    id: terminado
+    attributes:
+      label: Cómo sabremos que está terminado
+      description: Lo que se podrá comprobar cuando esté hecho.
+    validations:
+      required: true

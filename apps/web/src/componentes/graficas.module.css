@@ -1,0 +1,127 @@
+/* Las gráficas de Panal: todas son panales. */
+
+/* Panal de hoy */
+
+.panalDeHoy {
+  block-size: auto;
+}
+
+.celdaDeHoy polygon {
+  fill: var(--cera);
+  stroke: var(--tinta);
+  stroke-width: 5;
+  stroke-linejoin: round;
+}
+
+.celdaDeHoy[data-llena] polygon {
+  fill: var(--miel-oscura);
+}
+
+.celdaDeHoy path {
+  fill: none;
+  stroke: var(--tinta);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.celdaDeHoy[data-llena] path {
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .celdaDeHoy polygon {
+    transition: fill 0.25s var(--suave);
+  }
+
+  .celdaDeHoy path {
+    transition: stroke-dashoffset 0.35s var(--suave) 0.1s;
+  }
+}
+
+/* Rejilla de colmena */
+
+.rejillaDeColmena {
+  inline-size: 100%;
+  block-size: 200px;
+}
+
+.celdaDeAbeja,
+.celdaSinLlenar {
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.celdaDeAbeja {
+  stroke: var(--tinta);
+}
+
+.celdaSinLlenar {
+  fill: var(--lino-claro);
+  stroke: var(--lino-borde);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .celdaDeAbeja {
+    animation: llenarse 0.35s var(--resorte);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+}
+
+@keyframes llenarse {
+  from {
+    scale: 0.6;
+  }
+}
+
+/* Panal de constancia */
+
+.panalDeConstancia {
+  inline-size: 100%;
+  block-size: 250px;
+}
+
+.inicialDeDia {
+  fill: var(--tinta-suave);
+  font-size: 10px;
+  font-weight: 800;
+  text-anchor: middle;
+}
+
+.diaDeConstancia {
+  fill: var(--lino);
+  stroke-linejoin: round;
+}
+
+.diaDeConstancia[data-nivel="1"] {
+  fill: var(--miel-clara);
+}
+
+.diaDeConstancia[data-nivel="2"] {
+  fill: var(--miel);
+}
+
+.diaDeConstancia[data-nivel="3"] {
+  fill: var(--miel-profunda);
+}
+
+.diaDeConstancia[data-hoy] {
+  stroke: var(--tinta);
+  stroke-width: 2.5;
+}
+
+.diaDeConstancia[data-futuro] {
+  fill: none;
+  stroke: var(--lino-borde);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .diaDeConstancia {
+    transition: fill 0.25s var(--suave);
+  }
+}

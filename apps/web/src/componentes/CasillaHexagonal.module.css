@@ -1,0 +1,99 @@
+/* La etiqueta es la zona que se toca: 44 px, aunque el hexágono sea más pequeño. */
+.casilla {
+  position: relative;
+  display: block;
+  flex: none;
+  inline-size: 44px;
+  block-size: 44px;
+  color: var(--tinta);
+  cursor: pointer;
+}
+
+/* La casilla real cubre toda la zona, invisible pero presente y enfocable. */
+.control {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.dibujo {
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: 14px;
+  /* Los toques son para la casilla, no para el dibujo. */
+  pointer-events: none;
+}
+
+.celda {
+  fill: var(--blanco);
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.marca {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* La marca se dibuja de principio a fin: mide 1 gracias a pathLength. */
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.control:checked + .dibujo .celda {
+  fill: var(--miel);
+}
+
+.control:checked + .dibujo .marca {
+  stroke-dashoffset: 0;
+}
+
+.control:focus-visible + .dibujo {
+  outline: 3px solid var(--tinta);
+  outline-offset: 1px;
+}
+
+@media (hover: hover) {
+  .control:not(:checked):hover + .dibujo .celda {
+    fill: var(--cera);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .celda {
+    transition: fill 0.18s var(--suave);
+  }
+
+  .marca {
+    transition: stroke-dashoffset 0.28s var(--suave);
+  }
+
+  .dibujo {
+    transition: scale 0.25s var(--resorte);
+  }
+
+  .control:active + .dibujo {
+    scale: 0.88;
+  }
+}
+
+/* Con colores forzados por el sistema, la celda llena se distingue igual. */
+@media (forced-colors: active) {
+  .celda {
+    fill: Canvas;
+  }
+
+  .control:checked + .dibujo .celda {
+    fill: Highlight;
+  }
+
+  .control:checked + .dibujo .marca {
+    stroke: HighlightText;
+  }
+}
