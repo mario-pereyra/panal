@@ -62,6 +62,7 @@ Lo que se decidió al escribir el código y no estaba cerrado en los documentos 
 | **Node 24.2 o más nuevo** | `migrar.js` y `semilla.js` usan `import.meta.main`. Con el mínimo anterior (22.18) no habrían hecho nada, y en silencio | `engines` en `package.json` |
 | **Neon desde el Marketplace de Vercel, en São Paulo** | La integración crea la base y carga `DATABASE_URL` en Production y Preview: la clave no se copia a mano. `gru1` es la región más cercana a Bolivia, y la función va a la misma (`regions`) para que cada consulta no cruce el continente | `vercel.json`, [README](../../README.md#desplegar) |
 | **`sslmode=require` se pide como `verify-full`** | Neon entrega `require`. En `pg` eso ya verifica el certificado, pero avisa en cada arranque que cambiará; pedirlo explícito deja lo mismo, sin el aviso | `crearPostgres` en `datos/base.js` |
+| **Cada push a `main` sale a producción** | Lo publicado es siempre lo que está en `main`, y no depende de la carpeta de nadie. La CLI queda para probar algo sin commit | `vercel git connect`, [README](../../README.md#desplegar) |
 | **`.vercelignore`** | `vercel deploy` sube la carpeta: sin la lista, también irían `docs/`, `assets-fuente/` y la base PGlite local, unos 70 MB que no hacen falta para compilar | `.vercelignore` |
 | **`vp run preview` prueba lo que se publicaría** | Compila la web con su service worker y la sirve en 4173 junto a la API, en una sola orden | `package.json` de la raíz, `apps/web`, `apps/api` |
 

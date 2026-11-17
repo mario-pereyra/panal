@@ -205,6 +205,7 @@ Vercel Hobby, según su página oficial actualizada el 14 de septiembre de 2026:
 - Las migraciones corren al compilar. Por eso los scripts de `package.json` van sin caché en `vp run`: con caché, Vite+ solo pasa las variables declaradas y `migrar` corría sin `DATABASE_URL` (ver [`07-decisiones.md`](07-decisiones.md#despliegue-y-herramientas)).
 - Node 24.2 o más nuevo (`engines`): los scripts usan `import.meta.main`. Vercel compila con Node 24 y con el pnpm 12.18 de `devEngines`.
 - La base se creó desde el Marketplace de Vercel (`vercel integration add neon`), que carga `DATABASE_URL` sin que la clave se copie a mano. La base y la función están en São Paulo (`gru1`, `regions` en `vercel.json`): la región más cercana a Bolivia, y las dos juntas para que cada consulta no cruce el continente.
+- Vercel está conectado al repositorio de GitHub: cada push a `main` sale a producción, y las demás ramas, como vista previa. El repositorio es privado; la aplicación de Vercel tiene acceso solo a él.
 
 Los pasos, también para montarlo desde cero, están en el [README](../../README.md#desplegar).
 

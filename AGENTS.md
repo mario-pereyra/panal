@@ -80,7 +80,7 @@ La estructura de `feature/` con slice, selector y hook es la del ejemplo del doc
 - **El reloj.** Ni el motor ni los selectores leen la hora: llega del slice `reloj` en el navegador y de `reloj()` en el servidor. "Hoy" lo decide el servidor.
 - **El tamaño de Zum.** Se fija con `--tamano-zum` en la clase que recibe la pieza, no con `inline-size`.
 - **El service worker.** Solo existe en la compilación; para verlo, `vp run preview` (en 4173, con `vp run dev` apagado). Un cambio de estrategia se prueba primero en `sw.test.js`. Guarda las respuestas `GET /api/*` en `panal-datos`, que se borra al cerrar sesión.
-- **La CLI de Vercel.** `npx vercel …` se niega dentro del repositorio (`devEngines` pide pnpm): se corre desde otra carpeta con `--cwd`. `vercel deploy --prod` sube la carpeta tal cual, con o sin commit.
+- **Publicar.** Cada push a `main` sale a producción: Vercel está conectado al repositorio. `npx vercel …` se niega dentro del repositorio (`devEngines` pide pnpm): se corre desde otra carpeta con `--cwd`.
 - **Las variables de entorno.** `vp run` no guarda los scripts en caché para que reciban todo el entorno (`DATABASE_URL`). No se activa `run.cache.scripts`.
 - **La cookie de sesión no distingue puertos.** Entrar en 5173 también deja la sesión abierta en 4173.
 - **Las dependencias.** Cada elección del stack tiene su razón en `04-stack-y-arquitectura.md`. Una dependencia nueva se justifica ahí antes de instalarla.

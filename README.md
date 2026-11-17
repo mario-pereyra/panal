@@ -86,11 +86,13 @@ docs/                  proyecto, guías por área, propuestas de diseño y mater
 
 Publicado en **<https://panal-drab.vercel.app>**: la web y la API en [Vercel](https://vercel.com) (plan Hobby) y la base en [Neon](https://neon.com) (plan Free, desde el Marketplace de Vercel), las dos en São Paulo (`gru1`). Gratis y sin tarjeta; las razones están en [`04-stack-y-arquitectura.md` D13](docs/proyecto/04-stack-y-arquitectura.md#d13-despliegue-gratuito).
 
-La CLI corre con `npx`, pero **desde fuera del repositorio**: dentro, `npx` se niega porque `devEngines` pide pnpm. Por eso cada orden lleva `--cwd` con la ruta del proyecto (aquí, `$PANAL`):
+**Cada push a `main` sale a producción**: Vercel está conectado a este repositorio y compila cada commit; las demás ramas quedan como vista previa.
+
+La CLI sirve para publicar sin commit y para traer las variables. Corre con `npx`, pero **desde fuera del repositorio**: dentro, `npx` se niega porque `devEngines` pide pnpm. Por eso cada orden lleva `--cwd` con la ruta del proyecto (aquí, `$PANAL`):
 
 ```bash
 npx vercel login                                  # una vez: abre el navegador
-npx vercel deploy --prod --cwd "$PANAL"           # publica lo que hay en la carpeta, con o sin commit
+npx vercel deploy --prod --cwd "$PANAL"           # publica la carpeta tal cual, sin pasar por GitHub
 npx vercel env pull neon.env --environment production --cwd "$PANAL"   # la DATABASE_URL de Neon, a un archivo fuera del repositorio
 ```
 
@@ -102,8 +104,7 @@ npx vercel env pull neon.env --environment production --cwd "$PANAL"   # la DATA
 2. `npx vercel integration add neon --billing-plan free_v3 --meta region=gru1 --meta auth=false --cwd "$PANAL"`: crea la base y carga `DATABASE_URL` en Production y Preview. La primera vez pide aceptar los términos de Neon en el navegador.
 3. `npx vercel deploy --prod --cwd "$PANAL"`.
 4. La demostración, una vez: con la `DATABASE_URL` de `vercel env pull`, `node apps/api/src/datos/semilla.js`.
-
-El proyecto no está conectado a GitHub: se publica con `vercel deploy`. Para que cada envío a `main` se publique solo, `npx vercel git connect --cwd "$PANAL"`.
+5. `npx vercel git connect --cwd "$PANAL"`, para que cada push a `main` se publique solo. Con el repositorio privado, antes hay que instalar la [aplicación de Vercel en GitHub](https://github.com/apps/vercel/installations/new) con acceso a él.
 
 ## Cómo está hecho
 
