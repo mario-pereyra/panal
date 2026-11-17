@@ -1,6 +1,6 @@
 import { defineConfig } from "vite-plus";
 
-// Configuración común del repositorio: formato, reglas de estilo y caché de tareas.
+// Configuración común del repositorio: formato, reglas de estilo y tareas.
 export default defineConfig({
   // Solo se formatea y se revisa el código del proyecto: apps/ y packages/.
   // Las skills instaladas, la documentación y las ilustraciones no se tocan.
@@ -20,6 +20,9 @@ export default defineConfig({
     rules: { "vite-plus/prefer-vite-plus-imports": "error" },
   },
   run: {
-    cache: true,
+    // Los scripts de package.json no van a la caché: con caché, Vite+ solo les
+    // pasa las variables de entorno declaradas, y `migrar` corría sin
+    // DATABASE_URL (sobre PGlite) o se daba por hecha sin ejecutarse.
+    cache: { scripts: false, tasks: true },
   },
 });

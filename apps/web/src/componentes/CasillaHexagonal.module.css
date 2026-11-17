@@ -54,6 +54,12 @@
   stroke-dashoffset: 0;
 }
 
+.control:disabled,
+.control:disabled + .dibujo {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .control:focus-visible + .dibujo {
   outline: 3px solid var(--tinta);
   outline-offset: 1px;

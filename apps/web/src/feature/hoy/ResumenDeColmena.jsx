@@ -1,8 +1,9 @@
+import { Link } from "react-router";
 import { Boton } from "../../componentes/Controles.jsx";
 import { RejillaDeColmena } from "../../componentes/RejillaDeColmena.jsx";
 import { Tarjeta } from "../../componentes/Tarjeta.jsx";
 import estilos from "./Hoy.module.css";
-import { plural } from "./textos.js";
+import { plural } from "../../componentes/textos.js";
 
 /** Resumen de la colmena con actividad más reciente: avance, rejilla y aporte de cada abeja. */
 export function ResumenDeColmena({ colmena }) {
@@ -48,6 +49,11 @@ export function ResumenDeColmena({ colmena }) {
           </li>
         ))}
       </ul>
+      {colmena.otras > 0 && (
+        <Link className={estilos.verTodas} to="/colmenas">
+          Ver todas tus colmenas
+        </Link>
+      )}
     </Tarjeta>
   );
 }

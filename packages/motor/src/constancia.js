@@ -1,4 +1,4 @@
-import { lunesDe, sumarDias } from "./dia.js";
+import { ajustesDelDia, lunesDe, sumarDias } from "./dia.js";
 
 /**
  * Intensidad de un día en el panal de constancia.
@@ -16,7 +16,7 @@ export function nivelDeConstancia(llenas, meta) {
  * Panal de constancia: las últimas semanas, de lunes a domingo, terminando en la semana de hoy.
  *
  * @param {Array<{ dia: string }>} celdas Celdas llenas.
- * @param {{ metaDiaria: number }} ajustes
+ * @param {import("./dia.js").Ajustes} ajustes Con `historial`, cada día usa la meta de entonces.
  * @param {string} hoy
  * @param {number} [semanas]
  * @returns {Array<Array<{ dia: string, llenas: number, nivel: 0 | 1 | 2 | 3, esHoy: boolean, futuro: boolean }>>}
@@ -33,7 +33,7 @@ export function constanciaDe(celdas, ajustes, hoy, semanas = 5) {
       return {
         dia,
         llenas,
-        nivel: nivelDeConstancia(llenas, ajustes.metaDiaria),
+        nivel: nivelDeConstancia(llenas, ajustesDelDia(ajustes, dia).metaDiaria),
         esHoy: dia === hoy,
         futuro: dia > hoy,
       };

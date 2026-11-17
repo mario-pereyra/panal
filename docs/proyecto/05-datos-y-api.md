@@ -40,6 +40,7 @@ En la base solo hay **hechos**: quién llenó qué celda y qué día. Las gotas,
 ```mermaid
 erDiagram
     personas ||--o{ sesiones : "tiene"
+    personas ||--o{ tramos_de_ajustes : "cambia"
     personas ||--o{ actividades : "crea"
     personas ||--o{ celdas_llenas : "llena"
     personas ||--o{ integrantes : "es"
@@ -50,7 +51,7 @@ erDiagram
     actividades ||--o{ celdas_llenas : "se cumple en"
 ```
 
-Son ocho tablas. Las tablas `eventos` e `insignias_usuario` de la propuesta base desaparecen: los hechos ya están en `celdas_llenas` y los sellos se calculan.
+Son nueve tablas del dominio, más `intentos_fallidos` (límite de entradas) y `migraciones`. Las tablas `eventos` e `insignias_usuario` de la propuesta base desaparecen: los hechos ya están en `celdas_llenas` y los sellos se calculan.
 
 ## 3. Tablas
 
@@ -64,13 +65,26 @@ Todas las claves primarias son identificadores `uuid`. Los que crea el navegador
 | `nombre` | `text` | De 1 a 40 caracteres |
 | `correo` | `text` | Único, en minúsculas |
 | `clave_hash` | `text` | `scrypt` con sal propia; nunca sale de la API |
-| `meta_diaria` | `smallint` | 3, 5 o 7 |
-| `meta_siguiente` | `smallint` | Cambio pendiente; rige desde el día siguiente |
+| `meta_diaria` | `smallint` | 3, 5 o 7: la que rige hoy |
+| `meta_siguiente`, `meta_cambia_el` | `smallint`, `date` | Cambio pendiente y el día desde el que rige (el siguiente) |
 | `zona_horaria` | `text` | Nombre IANA; por defecto `America/La_Paz` |
-| `dia_sin_flores` | `smallint` | De 1 (lunes) a 7 (domingo), o nulo |
+| `dia_sin_flores` | `smallint` | De 0 (lunes) a 6 (domingo), o nulo |
 | `invernada_desde`, `invernada_hasta` | `date` | Pausa en curso, o nulos |
 | `primer_vuelo_en` | `timestamptz` | Nulo hasta completar el recorrido inicial |
 | `creada_en` | `timestamptz` | |
+
+### `tramos_de_ajustes`
+
+Desde qué día rigió cada meta y cada día sin flores. La fila de `personas` dice lo que rige hoy; los tramos guardan el pasado, para que un cambio no reescriba los panales de días anteriores (migración `002`).
+
+| Columna | Tipo | Notas |
+| :--- | :--- | :--- |
+| `persona_id` | `uuid` | Clave primaria con `desde` |
+| `desde` | `date` | Día lógico desde el que rige, hasta el tramo siguiente |
+| `meta_diaria` | `smallint` | 3, 5 o 7 |
+| `dia_sin_flores` | `smallint` | De 0 a 6, o nulo |
+
+Se escriben en la misma transacción que el cambio, con `anotarAjustes` (`servicios/ajustes.js`): al crear la cuenta, en el primer vuelo y al cambiar la meta o el día sin flores. Una meta nueva rige desde mañana; un día sin flores nuevo, desde hoy. Los tramos anteriores a hoy no se tocan.
 
 ### `sesiones`
 
@@ -89,7 +103,7 @@ Todas las claves primarias son identificadores `uuid`. Los que crea el navegador
 | `colmena_id` | `uuid` | Nulo si es personal |
 | `asignada_a` | `uuid` | Nulo si es personal o si está libre |
 | `titulo` | `text` | De 1 a 80 caracteres |
-| `tipo` | `text` | `unica` o `ronda` |
+| `tipo` | `text` | `unica` o `recurrente` |
 | `prioridad_alta` | `boolean` | Solo en únicas |
 | `vence_el` | `date` | Solo en únicas; puede ser nulo |
 | `archivada_en` | `timestamptz` | Nulo si está activa |
@@ -97,7 +111,7 @@ Todas las claves primarias son identificadores `uuid`. Los que crea el navegador
 
 ### `repeticiones`
 
-Una fila por actividad de ronda.
+Una fila por actividad recurrente.
 
 | Columna | Tipo | Notas |
 | :--- | :--- | :--- |
@@ -175,7 +189,10 @@ Vive en `packages/motor`, sin dependencias, y lo usan el servidor (como autorida
 | `tocaHoy(actividad, regla, hechos, hoy)` | Una actividad y su contexto | Si aparece hoy, y si está vencida |
 | `gotasDeCelda(celda, contexto)` | Una celda llena y lo que pasó ese día | Sus gotas, aplicando los límites contra el abuso |
 | `resumenDelDia(hechos, ajustes, dia)` | Los hechos de un día | Celdas llenas, meta, si el panal cerró y gotas del día |
-| `rachaDe(dias, ajustes, hoy)` | Los días con actividad | Racha actual, mejor racha, reservas y reservas usadas |
+| `ajustesDelDia(ajustes, dia)` | Los ajustes con su `historial` de tramos | La meta y el día sin flores que regían ese día. La usan `resumenDelDia`, `esDescanso` y `constanciaDe` |
+| `duenaDe(actividad)` y `ocupaCupoDeAlta(actividad)` | Una actividad | De quién es y si ocupa uno de sus tres cupos de prioridad alta. Las usan el servidor al guardar y el formulario al ofrecer el interruptor |
+| `avanzarDia(vuelo, dia, ajustes)` y `recorrerVuelo` | El vuelo de ayer y lo que pasó en un día | El vuelo del día siguiente: racha, mejor racha, reservas, hitos. `rachaParaHoy` lo dice para la pantalla |
+| `progresoDe(historial, ajustes, hoy)` | El historial completo | El vuelo hasta ayer, las gotas hasta ayer y los bonos de hoy |
 | `oficioDe(gotas)` | Un total de gotas | Nivel, nombre del oficio y gotas que faltan |
 | `avanceDeColmena(celdas)` | Las celdas de una colmena, cada una con quién la llenó | Porcentaje, cuadro actual, faltan para el siguiente y aporte por persona |
 | `sellosDe(historial)` | El historial completo | Sellos ganados con su fecha y progreso de los demás |
@@ -184,7 +201,7 @@ Vive en `packages/motor`, sin dependencias, y lo usan el servidor (como autorida
 
 `celebracionesEntre` es lo que permite que el servidor responda a "llené una celda" con todo lo que se ganó, sin guardar nada más: compara el resumen de antes con el de después.
 
-**Estado al 13 de noviembre de 2026.** Están escritas y probadas las que usa la pantalla "Hoy": `diaLogico`, `tocaHoy`, `gotasDeCelda`, `resumenDelDia`, `rachaDe`, `oficioDe`, `avanceDeColmena`, `estadoDeZum` y, además, `constanciaDe`, que agrupa las celdas por día para el panal de constancia. Faltan `ocurrencias`, `sellosDe` y `celebracionesEntre`. A `rachaDe` le falta gastar sola una reserva cuando un día programado queda en cero: por ahora recibe las reservas ya contadas.
+**Estado al 17 de noviembre de 2026.** Están todas, con sus pruebas, más `constanciaDe` (panal de constancia) y `avanceDeLaSemana` (cuotas de las recurrentes). La racha dejó de ser una función sobre una lista de días: es un **vuelo** que avanza día por día (`avanzarDia`), y así la reserva se gasta sola cuando un día programado queda en cero. El servidor manda el vuelo hasta ayer (`progreso`) y el navegador da el paso de hoy, de modo que la racha cambia al instante al llenar la primera celda.
 
 ## 6. El store de Redux
 
@@ -192,17 +209,22 @@ Sigue la estructura del ejemplo de clase: `app/store.js` y una carpeta por funci
 
 ```
 store
-├── api            RTK Query: caché de todo lo que viene del servidor
-├── sesion         quién soy, estado del inicio de sesión, invitación pendiente
-├── interfaz       ventana abierta, pestaña y filtros de cada lista, avisos
-├── celebraciones  cola de logros por mostrar
-├── borradores     formularios a medio escribir (nueva actividad, nueva colmena)
+├── api            RTK Query: caché de todo lo que viene del servidor (el perfil incluido)
+├── sesion         invitación pendiente
+├── hoy            día en que se cerró la franja de la racha
+├── celdas         filtros de la lista (la pestaña va en la dirección)
+├── actividad      borradores del formulario de actividad
+├── colmenas       pestaña del detalle de una colmena
+├── reportes       periodo elegido
+├── miVuelo        sello abierto y preferencia de movimiento
 ├── primerVuelo    paso actual del recorrido inicial
-├── conexion       con o sin red, versión nueva disponible, se puede instalar
+├── celebraciones  cola de logros por mostrar
+├── avisos         cola de avisos
+├── conexion       con o sin red, se puede instalar
 └── reloj          la hora actual, para que los selectores no la lean por su cuenta
 ```
 
-Hoy existen `api` y `reloj`; los demás se suman con sus pantallas.
+Hay un slice por funcionalidad en lugar de un `interfaz` y un `borradores` comunes: cada pantalla es dueña de su estado, como en el ejemplo de clase. Los efectos (guardar en el navegador, encolar logros, avisar de errores) viven en `app/escuchas.js`. Detalle en [`../guias/frontend.md`](../guias/frontend.md).
 
 **Qué va en cada lado.**
 
@@ -218,12 +240,12 @@ Hoy existen `api` y `reloj`; los demás se suman con sus pantallas.
 | :--- | :--- | :--- |
 | `selectCeldasDeHoy` | Actividades, celdas llenas y `tocaHoy` | P04, P05 |
 | `selectPanalDeHoy` | `resumenDelDia` | P04, P12 |
-| `selectRacha` | `rachaDe` | P04, P10, P11 |
+| `selectRacha` | `avanzarDia` sobre `progreso.vueloHastaAyer`, y `rachaParaHoy` | P04, P10 |
 | `selectOficio` | `oficioDe` | Cabecera, P11 |
 | `selectEstadoDeZum` | `estadoDeZum` sobre los tres anteriores | P04 |
-| `selectAvanceDeColmena(id)` | `avanceDeColmena` | P04, P07, P08 |
+| `selectResumenColmenaActiva`, `selectColmena(id)` | El avance que calcula el servidor con `avanceDeColmena` | P04, P07, P08 |
 | `selectConstancia` | Celdas llenas agrupadas por día | P04, P10 |
-| `selectSellos` | `sellosDe` | P11 |
+| `selectSellos` | Los sellos de `GET /api/yo/progreso`, con el siguiente a ganar | P11 |
 
 **Llenar una celda, paso a paso.**
 
@@ -249,13 +271,14 @@ REST con JSON, bajo `/api`. La sesión viaja en una cookie; no hay cabeceras de 
 | `GET /api/yo` | Perfil y ajustes | 200, o 401 sin sesión |
 | `PATCH /api/yo` | Cambiar nombre, meta, zona horaria, día sin flores o invernada | 200 |
 | `POST /api/yo/primer-vuelo` | Terminar el recorrido inicial | 200 |
+| `GET /api/yo/progreso` | Lo que muestra "Mi vuelo": oficio, gotas con su desglose, racha y sellos | 200 |
 
 ### Actividades y celdas
 
 | Método y ruta | Uso | Respuesta |
 | :--- | :--- | :--- |
-| `GET /api/panal` | Todo lo necesario para "Hoy" en una sola llamada: actividades activas, celdas llenas de las últimas cinco semanas y resumen | 200 |
-| `GET /api/actividades?ver=` | Listas de "Celdas": próximas, de ronda o archivadas | 200 |
+| `GET /api/panal` | Todo lo necesario para "Hoy" en una sola llamada: actividades activas, celdas llenas de las últimas cinco semanas, los tramos de ajustes y resumen | 200 |
+| `GET /api/actividades?ver=` | `activas` (por defecto) o `archivadas`. Las pestañas de "Celdas" se arman en el navegador | 200 |
 | `PUT /api/actividades/:id` | Crear o reemplazar. El identificador lo pone el navegador | 200 o 201 |
 | `PATCH /api/actividades/:id` | Editar, posponer, archivar o recuperar | 200 |
 | `PUT /api/celdas/:id` | Llenar una celda. Cuerpo: la actividad. El servidor calcula el día | 200 con las gotas y las celebraciones |
@@ -269,6 +292,7 @@ REST con JSON, bajo `/api`. La sesión viaja en una cookie; no hay cabeceras de 
 | `POST /api/colmenas` | Fundar | 201 |
 | `GET /api/colmenas/:id` | Detalle: enjambre, celdas y avance | 200, o 403 si no soy integrante |
 | `PATCH /api/colmenas/:id` | Editar o archivar | 200 |
+| `GET /api/colmenas/:id/invitacion` | El enlace vigente, o `null` | 200 |
 | `POST /api/colmenas/:id/invitacion` | Crear el enlace, o anular el actual y crear otro | 201 con el código |
 | `GET /api/invitaciones/:codigo` | Ver a qué colmena invita | 200, o 410 si venció |
 | `POST /api/invitaciones/:codigo/aceptar` | Unirme | 200 con la colmena |
@@ -278,7 +302,7 @@ REST con JSON, bajo `/api`. La sesión viaja en una cookie; no hay cabeceras de 
 
 | Método y ruta | Uso | Respuesta |
 | :--- | :--- | :--- |
-| `GET /api/reportes?desde=&hasta=` | Celdas por día, cumplimiento por ronda, reparto por tipo y aporte por colmena | 200 |
+| `GET /api/reportes?desde=&hasta=` | Celdas por día, cumplimiento de cada recurrente, reparto por tipo y aporte por colmena | 200 |
 
 ### Convenciones
 

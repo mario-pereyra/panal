@@ -7,13 +7,25 @@ import estilos from "./Controles.module.css";
  *
  * @param {object} props
  * @param {string} [props.a] Ruta de destino.
- * @param {"tinta" | "claro"} [props.tono]
+ * @param {object} [props.estado] Estado que viaja con la navegación (por ejemplo, la pantalla de fondo).
+ * @param {"tinta" | "claro" | "miel" | "peligro" | "sutil"} [props.tono]
+ * @param {"normal" | "chico"} [props.tamano]
  */
-export function Boton({ a, tono = "tinta", className, children, ...resto }) {
-  const clase = [estilos.boton, estilos[tono], className].filter(Boolean).join(" ");
+export function Boton({
+  a,
+  estado,
+  tono = "tinta",
+  tamano = "normal",
+  className,
+  children,
+  ...resto
+}) {
+  const clase = [estilos.boton, estilos[tono], tamano === "chico" && estilos.chico, className]
+    .filter(Boolean)
+    .join(" ");
   if (a) {
     return (
-      <Link to={a} className={clase} {...resto}>
+      <Link to={a} state={estado} className={clase} {...resto}>
         {children}
       </Link>
     );

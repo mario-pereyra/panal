@@ -2,13 +2,17 @@
   "name": "panal",
   "version": "0.1.0",
   "private": true,
-  "description": "Panal: plataforma gamificada para organizar y cumplir actividades, sola o en colmena.",
+  "description": "Panal: plataforma gamificada para organizar y cumplir actividades, por tu cuenta o en colmena.",
   "type": "module",
   "scripts": {
-    "dev": "vp run @panal/web#dev",
+    "dev": "vp run -r --parallel --log labeled dev",
+    "dev:web": "vp run @panal/web#dev",
+    "dev:api": "vp run @panal/api#dev",
     "build": "vp run -r build",
     "test": "vp run -r test",
     "check": "vp check",
+    "preview": "vp run -r --parallel --log labeled preview",
+    "migrar": "vp run @panal/api#migrar",
     "db": "wslc start panal-db"
   },
   "devDependencies": {
@@ -22,6 +26,6 @@
     }
   },
   "engines": {
-    "node": ">=22.18.0"
+    "node": ">=24.2.0"
   }
 }

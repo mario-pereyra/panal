@@ -1,5 +1,5 @@
-import { Boton } from "../../componentes/Controles.jsx";
-import { Tarjeta } from "../../componentes/Tarjeta.jsx";
+import { ErrorAlCargar, FranjaDeEstado } from "../../componentes/Estados.jsx";
+import { IconoTarro } from "../../componentes/iconos.jsx";
 import { CeldasDeHoy } from "./CeldasDeHoy.jsx";
 import { Constancia } from "./Constancia.jsx";
 import estilos from "./Hoy.module.css";
@@ -17,12 +17,7 @@ export function Hoy() {
     return (
       <div className={estilos.hoy}>
         <title>Hoy · Panal</title>
-        <Tarjeta titulo="No pudimos traer tus celdas">
-          <div className={estilos.vacio}>
-            <p>Tu panal sigue a salvo. Revisa tu conexión y vuelve a intentarlo.</p>
-            <Boton onClick={hoy.reintentar}>Reintentar</Boton>
-          </div>
-        </Tarjeta>
+        <ErrorAlCargar alReintentar={hoy.reintentar} />
       </div>
     );
   }
@@ -30,6 +25,11 @@ export function Hoy() {
   return (
     <div className={estilos.hoy}>
       <title>Hoy · Panal</title>
+      {hoy.franja && (
+        <FranjaDeEstado tono={hoy.franja.tono} icono={<IconoTarro />} alCerrar={hoy.cerrarFranja}>
+          {hoy.franja.texto}
+        </FranjaDeEstado>
+      )}
       <TarjetaPrincipal
         hoy={hoy.hoy}
         nombre={hoy.persona.nombre}

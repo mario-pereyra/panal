@@ -1,0 +1,29 @@
+{
+  "name": "@panal/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Servidor de Panal: Hono sobre Node, con PostgreSQL o PGlite.",
+  "type": "module",
+  "exports": {
+    ".": "./src/app.js"
+  },
+  "scripts": {
+    "dev": "node --watch --env-file-if-exists=../../.env src/servidor.js",
+    "start": "node --env-file-if-exists=../../.env src/servidor.js",
+    "preview": "node --env-file-if-exists=../../.env src/servidor.js",
+    "test": "vp test run",
+    "migrar": "node --env-file-if-exists=../../.env src/datos/migrar.js",
+    "semilla": "node --env-file-if-exists=../../.env src/datos/semilla.js"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "catalog:",
+    "@hono/node-server": "catalog:",
+    "@panal/contratos": "workspace:*",
+    "@panal/motor": "workspace:*",
+    "hono": "catalog:",
+    "pg": "catalog:"
+  },
+  "devDependencies": {
+    "vite-plus": "catalog:"
+  }
+}

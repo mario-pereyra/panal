@@ -1,0 +1,15 @@
+# Lo que no hace falta para compilar ni para correr en Vercel. Sin esta lista,
+# `vercel deploy` subiría también la documentación, los originales de las
+# ilustraciones y la base PGlite local (unos 70 MB).
+node_modules
+dist
+*.log
+.env
+.env.*
+/apps/api/.datos
+/docs
+/assets-fuente
+/.agents
+/.claude
+/.github
+/.vscode

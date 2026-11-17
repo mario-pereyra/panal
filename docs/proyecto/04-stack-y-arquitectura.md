@@ -40,7 +40,7 @@ Hechos comprobados el 13 de noviembre de 2026. El stack sale de aquí, no de la 
 | Navegación | React Router, aplicación de una sola página | Toda la aplicación está tras el inicio de sesión: no hace falta renderizar en servidor |
 | Estilos | CSS propio con variables y CSS Modules | El estilo de pegatina es a medida; un kit de componentes estorbaría |
 | Gráficas | Componentes SVG propios | Las gráficas del diseño son panales de hexágonos: ninguna librería las trae |
-| PWA | `vite-plugin-pwa` | Instalable y con arranque sin conexión, sin escribir a mano el service worker |
+| PWA | Service worker propio (`apps/web/pwa/`) | Instalable y con arranque sin conexión. Se pensó en `vite-plugin-pwa`, pero no reconoce el Vite de Vite+ (ver §8) |
 | Servidor | Hono sobre Node | Pequeño, basado en estándares web y se prueba sin levantar un servidor |
 | Base de datos | PostgreSQL 18. En local, un contenedor de `wslc`; en las pruebas, PGlite; desplegado, Neon | Código abierto, el mismo motor y la misma versión en tu máquina y en la nube |
 | Acceso a datos | SQL escrito a la vista, con parámetros, y migraciones en archivos `.sql` | Transparente y fácil de defender ante un docente de bases de datos |
@@ -198,6 +198,16 @@ Neon, según su página oficial actualizada el 1 de octubre de 2026: 100 horas d
 
 Vercel Hobby, según su página oficial actualizada el 14 de septiembre de 2026: 1 000 000 de invocaciones de función, 4 horas de procesador activo, 360 GB-hora de memoria y 100 GB de transferencia al mes; cada función puede durar hasta 300 segundos; 100 despliegues por día. Si se supera un límite, hay que esperar 30 días para volver a usar esa función; no se cobra. Para un proyecto universitario sobra.
 
+**Cómo quedó (17 de noviembre de 2026).** Publicado en <https://panal-drab.vercel.app>, con la forma clásica, sin Services:
+
+- `vercel.json` compila con `pnpm run build && pnpm run migrar`, publica `apps/web/dist` y reescribe `/api/*` a la función y el resto a `index.html`. Los archivos con huella se guardan un año en caché; `sw.js` nunca.
+- `api/index.js` es la función: abre la base con `DATABASE_URL` una vez por instancia y pasa cada petición a la misma aplicación Hono de `apps/api`. Sin `DATABASE_URL` se niega a arrancar, en lugar de intentar PGlite en un disco de solo lectura.
+- Las migraciones corren al compilar. Por eso los scripts de `package.json` van sin caché en `vp run`: con caché, Vite+ solo pasa las variables declaradas y `migrar` corría sin `DATABASE_URL` (ver [`07-decisiones.md`](07-decisiones.md#despliegue-y-herramientas)).
+- Node 24.2 o más nuevo (`engines`): los scripts usan `import.meta.main`. Vercel compila con Node 24 y con el pnpm 12.18 de `devEngines`.
+- La base se creó desde el Marketplace de Vercel (`vercel integration add neon`), que carga `DATABASE_URL` sin que la clave se copie a mano. La base y la función están en São Paulo (`gru1`, `regions` en `vercel.json`): la región más cercana a Bolivia, y las dos juntas para que cada consulta no cruce el continente.
+
+Los pasos, también para montarlo desde cero, están en el [README](../../README.md#desplegar).
+
 ## 4. Dónde se ve la materia en el código
 
 | Unidad | Idea | Dónde aparece en Panal |
@@ -222,9 +232,10 @@ Proyecto-final/
 ├── apps/
 │   ├── web/                   React, Redux Toolkit y PWA
 │   │   ├── public/            iconos de la PWA y manifiesto
+│   │   ├── pwa/               service worker, su complemento de Vite y el registro en la página
 │   │   └── src/
-│   │       ├── app/           store y proveedores
-│   │       ├── features/      una carpeta por funcionalidad (slice, selectores, hook, componentes)
+│   │       ├── app/           store, rutas, estructura y efectos
+│   │       ├── feature/       una carpeta por funcionalidad (slice, selectores, hook, componentes)
 │   │       ├── componentes/   piezas compartidas: Zum, hexágonos, tarjetas, botones
 │   │       ├── assets/        imágenes optimizadas que usa la interfaz
 │   │       └── estilos/       variables y base
@@ -234,18 +245,20 @@ Proyecto-final/
 │           ├── rutas/         una por recurso
 │           ├── datos/         consultas SQL en funciones pequeñas
 │           └── servicios/     usan el motor y los datos
+├── api/index.js               la API como función de Vercel
+├── vercel.json                compilación, reescrituras y cabeceras del despliegue
 ├── pnpm-workspace.yaml
 └── package.json
 ```
 
 ## 6. Lo que no está verificado
 
-- **Compatibilidad de `vite-plugin-pwa` con Vite+.** La versión 2.0.0 del complemento declara compatibilidad con Vite 3 a 8. Qué versión de Vite instala Vite+ 1.3 se sabrá al crear el proyecto. Si no coincidieran, el service worker se escribe a mano: para este tamaño son unas sesenta líneas.
+- **Compatibilidad de `vite-plugin-pwa` con Vite+.** La versión 2.0.0 del complemento declara compatibilidad con Vite 3 a 8. Qué versión de Vite instala Vite+ 1.3 se sabrá al crear el proyecto. Si no coincidieran, el service worker se escribe a mano: para este tamaño son unas sesenta líneas. **Resultado:** no coinciden (Vite+ se presenta como `vite-plus-core@1.3.0`) y se escribió a mano; está en [`07-decisiones.md`](07-decisiones.md#pwa-e-ilustraciones).
 - **PGlite sigue en versión 0.x** (0.5.16 hoy). Es estable para desarrollo y pruebas, que es para lo que se usa aquí, pero puede cambiar entre versiones. Por eso la versión se fija en el proyecto y la base desplegada es PostgreSQL real.
-- **Web y API en un mismo proyecto de Vercel.** La función que lo permite, Services, está en beta en todos los planes. Si diera problemas, queda la forma clásica: la aplicación como archivos estáticos y la API como una función en la carpeta `api/`, con una regla de reescritura. El código de Hono no cambia.
+- **Web y API en un mismo proyecto de Vercel.** La función que lo permite, Services, está en beta en todos los planes. Si diera problemas, queda la forma clásica: la aplicación como archivos estáticos y la API como una función en la carpeta `api/`, con una regla de reescritura. El código de Hono no cambia. **Resultado:** se eligió directamente la forma clásica, que no depende de una beta (D13).
 - **Diferencias entre PGlite y PostgreSQL real.** Usan el mismo motor, pero PGlite atiende una sola conexión. Como el desarrollo diario ya ocurre contra PostgreSQL real, una diferencia se notaría pronto; además, las pruebas se pueden correr contra el contenedor cambiando `DATABASE_URL`.
 - **`wslc` es reciente.** No ofrece la interfaz de Docker ni está confirmado que admita Docker Compose, así que el proyecto no depende de ninguno de los dos: bastan las órdenes de D9. No se ha comprobado si el contenedor vuelve a arrancar solo tras reiniciar Windows; por eso hay una orden para iniciarlo.
-- **Nada de esto se ha montado todavía.** Es un diseño razonado sobre hechos comprobados, no un proyecto en marcha.
+- **El primer despliegue.** Lo que solo se podía ver desplegando ya se vio: Vercel respeta el pnpm de `devEngines` y la función arranca contra Neon. Queda por medir el arranque en frío tras horas sin uso, cuando Neon también está suspendida.
 
 ## 7. Decisiones confirmadas
 

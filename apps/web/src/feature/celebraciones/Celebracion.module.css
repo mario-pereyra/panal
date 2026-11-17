@@ -1,0 +1,55 @@
+.celebracion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.zum {
+  --tamano-zum: 160px;
+}
+
+.logro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  inline-size: 100%;
+}
+
+.logro:not([data-principal]) {
+  padding-block-start: 14px;
+  border-block-start: 2px dashed var(--lino);
+}
+
+.dibujo {
+  max-inline-size: 220px;
+}
+
+.textos {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.tituloSecundario {
+  font-weight: 600;
+  font-size: 1.1875rem;
+}
+
+.fichas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.detalle {
+  color: var(--tinta-suave);
+}
+
+.seguir {
+  inline-size: min(100%, 280px);
+}

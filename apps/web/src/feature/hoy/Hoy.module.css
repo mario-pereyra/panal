@@ -152,3 +152,14 @@
     opacity: 1;
   }
 }
+
+/* Colmena: enlace a todas las colmenas */
+
+.verTodas {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 44px;
+  font-weight: 800;
+  text-underline-offset: 3px;
+}

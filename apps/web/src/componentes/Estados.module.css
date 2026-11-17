@@ -1,0 +1,168 @@
+/* Vacío */
+
+.vacio {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px 8px;
+  text-align: center;
+}
+
+.dibujo {
+  inline-size: min(100%, 180px);
+  block-size: auto;
+}
+
+.celdaVacia polygon {
+  fill: var(--cera-clara);
+  stroke: var(--tinta);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.flor path {
+  fill: none;
+  stroke: var(--hoja);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.flor ellipse {
+  fill: var(--blanco);
+  stroke: var(--tinta);
+  stroke-width: 1.8;
+}
+
+.flor circle {
+  fill: var(--miel);
+  stroke: var(--tinta);
+  stroke-width: 1.8;
+}
+
+.frase {
+  max-inline-size: 30rem;
+  color: var(--tinta-suave);
+  font-size: 1.0625rem;
+}
+
+/* Silueta de carga */
+
+.silueta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--separacion);
+  opacity: 0;
+  animation: asomar 0.2s ease-out 0.2s forwards;
+}
+
+.bloque {
+  border: var(--borde);
+  border-color: var(--lino-borde);
+  border-radius: var(--radio-tarjeta);
+  background: var(--lino-claro);
+}
+
+@keyframes asomar {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Error al cargar */
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 22px 24px;
+  border: var(--borde);
+  border-radius: var(--radio-tarjeta);
+  background: var(--blanco);
+  box-shadow: var(--sombra);
+  color: var(--tinta-suave);
+}
+
+.tituloDeError {
+  color: var(--tinta);
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+/* Franja */
+
+.franja {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-block-size: 52px;
+  padding: 6px 8px 6px 18px;
+  border: var(--borde);
+  border-radius: 20px;
+  background: var(--cera);
+}
+
+.franja[data-tono="ala"] {
+  background: var(--ala);
+}
+
+.franja[data-tono="coral"] {
+  background: var(--coral-claro);
+}
+
+.franja > svg {
+  flex: none;
+  inline-size: 22px;
+  block-size: 22px;
+}
+
+.textoDeFranja {
+  flex: 1 1 auto;
+  padding-block: 6px;
+  font-size: 0.9375rem;
+}
+
+.accionDeFranja {
+  flex: none;
+  min-block-size: 44px;
+  padding: 0 18px;
+  border: var(--borde);
+  border-radius: var(--radio-control);
+  background: var(--tinta);
+  color: var(--miel);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.accionDeFranja:focus-visible {
+  outline: 3px solid var(--tinta);
+  outline-offset: 3px;
+}
+
+.cerrarFranja {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.cerrarFranja svg {
+  inline-size: 20px;
+  block-size: 20px;
+}
+
+@media (hover: hover) {
+  .cerrarFranja:hover {
+    background: rgb(42 27 10 / 0.08);
+  }
+}

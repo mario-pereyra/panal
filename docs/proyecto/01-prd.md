@@ -22,7 +22,7 @@ Estado: **borrador para tu revisión**. Las preguntas abiertas están en la [sec
 
 ## 1. Resumen
 
-Panal es una aplicación web gamificada para organizar y cumplir actividades, sola o en equipo. Funciona en el navegador del computador y se instala en el teléfono como una aplicación. Cada actividad cumplida llena una celda de un panal; los proyectos en equipo son colmenas que se llenan entre todos; y Zum, una abeja, acompaña y celebra. El avance se entiende de un vistazo, con gráficas hechas de hexágonos.
+Panal es una aplicación web gamificada para organizar y cumplir actividades, por cuenta propia o en equipo. Funciona en el navegador del computador y se instala en el teléfono como una aplicación. Cada actividad cumplida llena una celda de un panal; los proyectos en equipo son colmenas que se llenan entre todos; y Zum, una abeja, acompaña y celebra. El avance se entiende de un vistazo, con gráficas hechas de hexágonos.
 
 Es el proyecto final de la materia Gamificación y Programación Funcional. Cumple los cuatro casos de uso del enunciado y sus tres requisitos técnicos.
 
@@ -68,7 +68,7 @@ Cada palabra del mundo nombra una mecánica. Este es el vocabulario que usa la i
 | Reserva de miel | Protege la racha un día en que no se cumplió nada. Máximo 2 |
 | Día sin flores | Día de descanso elegido; no rompe la racha |
 | Invernada | Pausa de hasta 14 días; la racha queda congelada |
-| De ronda | Actividad recurrente |
+| Recurrente | Actividad que se repite según su regla (en la propuesta original, "de ronda") |
 | Colmena | Un proyecto en equipo |
 | Enjambre | El equipo de una colmena |
 | Cuadro | Un hito de la colmena. Son cinco: al 20, 40, 60, 80 y 100 % |
@@ -86,7 +86,7 @@ Cada palabra del mundo nombra una mecánica. Este es el vocabulario que usa la i
 | **Actividades** | Únicas y recurrentes con cuatro tipos de repetición; cumplir, desmarcar, editar, posponer y archivar | Marcar celdas sin conexión | Subtareas, adjuntos, comentarios |
 | **Juego** | Gotas, oficios, racha, reservas, panal de hoy, Zum con seis estados, celebración al cerrar el panal, sellos de cera | Alacena de mieles y sorpresa; sugerencia de Zum ("la danza") | Tienda, monedas, tablas globales de posiciones |
 | **Equipo** | Colmenas, invitación por enlace, asignar celdas, avance con cuadros y aporte por persona | Zumbidos, "llamar al enjambre", reconocimientos de la semana, invitación por correo | Chat, roles y permisos finos |
-| **Reportes** | Mapa de constancia, cumplimiento por actividad recurrente, celdas por día, reparto entre únicas y de ronda | Elegir periodo ("Todo") | Exportar a PDF o Excel |
+| **Reportes** | Mapa de constancia, cumplimiento por actividad recurrente, celdas por día, reparto entre únicas y recurrentes | Elegir periodo ("Todo") | Exportar a PDF o Excel |
 | **Plataforma** | Web adaptable de 360 px en adelante; instalable como PWA; abre sin conexión mostrando lo último visto | Notificaciones | Aplicación nativa en tiendas |
 
 La versión 1 cubre por sí sola los cuatro casos de uso del enunciado. Lo de la versión 1.1 mejora la nota de gamificación, pero no es condición para entregar.

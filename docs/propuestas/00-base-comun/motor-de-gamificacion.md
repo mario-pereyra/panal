@@ -2,7 +2,7 @@
 
 Este documento define las **mecánicas** con sus números exactos. No habla de abejas, estrellas ni cuñapés: eso es la piel y vive en la carpeta de cada dirección. Sigue los cinco pasos de diseño del curso (narrativa, objetivos, jugadores, Octalysis y línea base) y termina con el diccionario que traduce cada mecánica a los cinco mundos.
 
-Fundamento teórico: `docs/fundamentos-gamificacion.md` y `docs/casos-de-exito-y-patrones.md`.
+Fundamento teórico: `docs/materia/fundamentos-gamificacion.md` y `docs/materia/casos-de-exito-y-patrones.md`.
 
 ## Tabla de contenidos
 

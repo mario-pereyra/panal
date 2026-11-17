@@ -1,0 +1,219 @@
+.perfil {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+}
+
+.retrato {
+  --tamano-zum: 160px;
+  flex: none;
+}
+
+.datos {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nombre {
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  font-size: 1.75rem;
+}
+
+.nivel {
+  align-self: flex-start;
+  padding: 4px 14px;
+  border-radius: var(--radio-control);
+  background: var(--tinta);
+  color: var(--miel);
+  font-weight: 800;
+}
+
+.totales,
+.nota {
+  color: var(--tinta-suave);
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border: var(--borde);
+  border-radius: var(--radio-tarjeta);
+  background: var(--blanco);
+  box-shadow: var(--sombra);
+}
+
+.cabeza {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.titulo {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.subtitulo {
+  margin-block-start: 8px;
+  font-size: 1rem;
+}
+
+.conteo {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.siguiente {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Sellos */
+
+.sellos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 8px;
+}
+
+.sello {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  inline-size: 100%;
+  min-block-size: 44px;
+  padding: 10px 6px;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8125rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.sello[data-siguiente] {
+  border-color: var(--miel-oscura);
+  border-style: dashed;
+  background: var(--cera-clara);
+}
+
+@media (hover: hover) {
+  .sello:hover {
+    background: var(--lino-claro);
+  }
+}
+
+.nombreDeSello {
+  line-height: 1.2;
+}
+
+.detalleDeSello {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.criterio {
+  font-size: 1.0625rem;
+}
+
+/* Ajustes */
+
+.ajustes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 16px;
+}
+
+.ajuste {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 16px;
+  border: 2px solid var(--lino);
+  border-radius: 20px;
+}
+
+.ajuste > * {
+  inline-size: 100%;
+}
+
+.ajuste > button {
+  inline-size: auto;
+}
+
+.sinMarco {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.invernada {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.comoSeGanan {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comoSeGanan summary {
+  min-block-size: 44px;
+  align-content: center;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.comoSeGanan table {
+  inline-size: 100%;
+  max-inline-size: 520px;
+  border-collapse: collapse;
+}
+
+.comoSeGanan th,
+.comoSeGanan td {
+  padding: 6px 0;
+  border-block-end: 1px solid var(--lino);
+  text-align: start;
+}
+
+.comoSeGanan th {
+  font-weight: 700;
+}
+
+.comoSeGanan td {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 699px) {
+  .retrato {
+    --tamano-zum: 120px;
+  }
+}

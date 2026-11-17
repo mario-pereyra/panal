@@ -1,7 +1,9 @@
 import { useSelector } from "react-redux";
+import { Suspense } from "react";
 import { Link, NavLink, Outlet } from "react-router";
 import { useObtenerPanalQuery } from "../api/panalApi.js";
 import { Ficha } from "../componentes/Controles.jsx";
+import { LimiteDeError, Silueta } from "../componentes/Estados.jsx";
 import {
   IconoCeldas,
   IconoColmenas,
@@ -11,7 +13,12 @@ import {
   IconoReportes,
   LogoPanal,
 } from "../componentes/iconos.jsx";
-import { selectOficio, selectPanalDeHoy, selectPersona } from "../feature/hoy/hoySelector.js";
+import { useFondo } from "../componentes/useFondo.js";
+import { Avisos } from "../feature/avisos/Avisos.jsx";
+import { Celebracion } from "../feature/celebraciones/Celebracion.jsx";
+import { FranjaDeVersion } from "../feature/conexion/FranjaDeVersion.jsx";
+import { FranjaSinConexion } from "../feature/conexion/FranjaSinConexion.jsx";
+import { selectGotasDeHoy, selectOficio, selectPersona } from "../feature/hoy/hoySelector.js";
 import { useReloj } from "../feature/reloj/useReloj.js";
 import estilos from "./Estructura.module.css";
 
@@ -24,7 +31,8 @@ export function Estructura() {
   useObtenerPanalQuery();
   const persona = useSelector(selectPersona);
   const oficio = useSelector(selectOficio);
-  const resumen = useSelector(selectPanalDeHoy);
+  const gotasDeHoy = useSelector(selectGotasDeHoy);
+  const { fondo } = useFondo();
 
   return (
     <div className={estilos.estructura}>
@@ -47,13 +55,18 @@ export function Estructura() {
               </NavLink>
             </li>
             <li>
-              <NavLink to="/celdas" end className={estilos.seccion}>
+              <NavLink to="/celdas" className={estilos.seccion}>
                 <IconoCeldas className={estilos.icono} />
                 Celdas
               </NavLink>
             </li>
             <li className={estilos.itemCrear}>
-              <Link to="/celdas/nueva" className={estilos.crear} aria-label="Nueva actividad">
+              <Link
+                to="/celdas/nueva"
+                state={{ fondo }}
+                className={estilos.crear}
+                aria-label="Nueva actividad"
+              >
                 <IconoMas className={estilos.icono} />
               </Link>
             </li>
@@ -72,19 +85,18 @@ export function Estructura() {
           </ul>
         </nav>
 
-        {persona && oficio && resumen && (
+        {persona && oficio && (
           <div className={estilos.perfil}>
             <span className={estilos.oficio}>
               Nivel {oficio.nivel} · {oficio.nombre}
             </span>
             <Ficha className={estilos.gotasDeHoy} icono={<IconoGota />}>
-              {resumen.gotas}
+              {gotasDeHoy}
               <span className="solo-lectores"> gotas hoy</span>
             </Ficha>
             <Link
               to="/mi-vuelo"
               className={estilos.avatar}
-              style={{ background: persona.color }}
               aria-label={`Mi vuelo: el perfil de ${persona.nombre}`}
             >
               {persona.nombre.charAt(0).toUpperCase()}
@@ -93,9 +105,23 @@ export function Estructura() {
         )}
       </header>
 
-      <main id="contenido" className={estilos.contenido}>
-        <Outlet />
+      <div className={estilos.franjas}>
+        <FranjaSinConexion />
+        <FranjaDeVersion />
+      </div>
+
+      {/* tabIndex -1: al cerrar un aviso, el foco vuelve aquí y no se pierde en el documento. */}
+      <main id="contenido" className={estilos.contenido} tabIndex={-1}>
+        {/* Cada pantalla se descarga la primera vez que se visita. */}
+        <LimiteDeError key={fondo.pathname}>
+          <Suspense fallback={<Silueta etiqueta="Abriendo la pantalla" />}>
+            <Outlet />
+          </Suspense>
+        </LimiteDeError>
       </main>
+
+      <Avisos />
+      <Celebracion />
     </div>
   );
 }

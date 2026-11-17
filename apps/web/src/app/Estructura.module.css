@@ -13,6 +13,7 @@
 }
 
 .cabecera,
+.franjas,
 .contenido {
   inline-size: 100%;
   max-inline-size: calc(var(--ancho-maximo) + 2 * var(--margen-pagina));
@@ -28,6 +29,17 @@
   gap: 12px 16px;
   min-block-size: 52px;
   padding-block-start: max(12px, env(safe-area-inset-top, 0px));
+}
+
+/* Las franjas de estado (sin conexión, versión nueva) van en el ancho de la página. */
+.franjas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.franjas:has(> :not(:empty)) {
+  padding-block-start: 8px;
 }
 
 .contenido {
@@ -149,7 +161,8 @@
   block-size: 44px;
   border: var(--borde);
   border-radius: 50%;
-  color: var(--blanco);
+  background: var(--tinta);
+  color: var(--miel);
   font-family: var(--fuente-titulos);
   font-weight: 600;
   font-size: 1.1875rem;
@@ -222,4 +235,8 @@
   .oficio {
     display: inline;
   }
+}
+
+.contenido:focus {
+  outline: none;
 }

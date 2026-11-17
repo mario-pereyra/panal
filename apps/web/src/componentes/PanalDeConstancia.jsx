@@ -1,12 +1,12 @@
 import estilos from "./graficas.module.css";
 import { puntosDeHexagono } from "./hexagono.js";
+import { INICIALES_DE_LA_SEMANA } from "./textos.js";
 
 const RADIO = 13;
 const PASO = 23; // de una columna a la siguiente
 const SALTO = 26; // de una semana a la siguiente
 const MARGEN_X = 18;
 const PRIMERA_FILA = 34;
-const INICIALES = ["L", "M", "X", "J", "V", "S", "D"];
 
 /**
  * El panal de constancia: una celda por día, una columna por día de la semana.
@@ -28,7 +28,7 @@ export function PanalDeConstancia({ semanas, descripcion }) {
       aria-label={descripcion}
       viewBox={`0 0 ${ancho} ${alto}`}
     >
-      {INICIALES.map((inicial, columna) => (
+      {INICIALES_DE_LA_SEMANA.map((inicial, columna) => (
         <text key={inicial} className={estilos.inicialDeDia} x={MARGEN_X + PASO * columna} y="12">
           {inicial}
         </text>

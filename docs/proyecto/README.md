@@ -2,7 +2,7 @@
 
 Documentación del proyecto que se va a construir. Parte de la dirección elegida, **A · Panal**, y del tablero "Hoy" del diseño 1.
 
-Estado al 13 de noviembre de 2026: **stack confirmado, base de datos local probada y la pantalla "Hoy" funcionando con datos de ejemplo**. Cómo correrla: [`../../README.md`](../../README.md).
+Estado al 17 de noviembre de 2026: **las 14 pantallas, el servidor con su base de datos y la PWA funcionando de punta a punta, publicado en <https://panal-drab.vercel.app>**; falta la versión 1.1. Cómo correrlo y desplegarlo: [`../../README.md`](../../README.md).
 
 ## Documentos
 
@@ -14,6 +14,9 @@ Estado al 13 de noviembre de 2026: **stack confirmado, base de datos local proba
 | 4 | [`04-stack-y-arquitectura.md`](04-stack-y-arquitectura.md) | Con qué se construye y por qué, decisión por decisión |
 | 5 | [`05-datos-y-api.md`](05-datos-y-api.md) | Qué se guarda, qué se calcula, el store de Redux, la API y las pruebas |
 | 6 | [`06-assets.md`](06-assets.md) | Qué ilustraciones hacen falta, dónde va cada una y cómo se generan con `agy` |
+| 7 | [`07-decisiones.md`](07-decisiones.md) | Lo que se decidió al construir y cambia o completa los documentos anteriores |
+
+Cómo se trabaja en cada área del código está en las guías: [`../guias/`](../README.md#guías-de-trabajo).
 
 ## De dónde sale cada cosa
 
@@ -21,7 +24,7 @@ Estos documentos no repiten lo que ya está escrito; lo enlazan.
 
 | Tema | Fuente |
 | :--- | :--- |
-| Enunciado del docente | [`../Enuncido-original-proyecto-gamificacion.md`](../Enuncido-original-proyecto-gamificacion.md) |
+| Enunciado del docente | [`../materia/enunciado.md`](../materia/enunciado.md) |
 | Reglas del juego, con sus números | [`../propuestas/00-base-comun/motor-de-gamificacion.md`](../propuestas/00-base-comun/motor-de-gamificacion.md) |
 | El mundo de Panal: mecánicas con nombre, sellos, mieles, estados de Zum | [`../propuestas/A-panal/estrategia-gamificacion.md`](../propuestas/A-panal/estrategia-gamificacion.md) |
 | Voz y textos de la interfaz | [`../propuestas/A-panal/propuesta.md`](../propuestas/A-panal/propuesta.md) |
@@ -49,14 +52,32 @@ Donde este proyecto se aparta de la propuesta base, manda este proyecto. Las dif
 
 La fase 2 es donde se diseñan las pantallas: se maquetan directamente con las piezas reales y datos de ejemplo, de modo que el diseño aprobado ya es código de la aplicación y no una maqueta que haya que rehacer.
 
-### Avance al 13 de noviembre de 2026
-
-Se adelantó una pantalla completa para ver el diseño en código antes de seguir.
+### Avance al 17 de noviembre de 2026
 
 | Fase | Hecho | Falta |
 | :---: | :--- | :--- |
-| 1 | Repositorio montado con Vite+, versionado en git y publicado en GitHub como repositorio privado, con integración continua que corre formato, pruebas y compilación en cada cambio. Motor: día lógico, gotas, qué toca hoy, resumen del día, racha, oficios, estado de Zum, constancia y avance de colmena, con 31 pruebas | `ocurrencias`, `sellosDe`, `celebracionesEntre`, el gasto automático de reservas en `rachaDe` y las pruebas con propiedades |
-| 2 | Variables de diseño, estructura común con sus dos navegaciones, y P04 "Hoy" completa: Zum, casilla hexagonal, panal de hoy, rejilla de colmena y panal de constancia. Llenar una celda ya pasa por Redux y RTK Query | Las otras trece pantallas, la galería de piezas, la ventana de celebración y los avisos |
-| 3 a 6 | Nada | Todo |
+| 1 | Repositorio con Vite+, publicado en GitHub como privado, con integración continua (formato, pruebas y compilación). Motor completo: día lógico, gotas, qué toca hoy, vuelo y reservas, oficios, sellos, celebraciones, constancia, cuotas, avance de colmena y estado de Zum, con pruebas de propiedades | Nada |
+| 2 | Variables de diseño y piezas compartidas: ventana, formularios, avisos, estados vacíos y de error, gráficas de celdas, sellos de cera. Las 14 pantallas, de P01 a P14 | La galería de piezas, que se reemplazó por las pantallas reales |
+| 3 | API en Hono con sesión por cookie, PostgreSQL o PGlite, migraciones y semilla de demostración. Cuenta, actividades, celdas y progreso | Nada |
+| 4 | Colmenas, invitación por enlace, unirse, reportes con sus periodos | Nada |
+| 5 | PWA: manifiesto, iconos, service worker que abre sin conexión y aviso de versión nueva, todo en `apps/web/pwa/` y con pruebas. Pantallas que se descargan al visitarlas: la carga inicial bajó de 578 a unos 415 kB. Desplegado en Vercel y Neon, con la demostración cargada. Revisión en el navegador a 1366, 900, 768 y 390 px, también en producción | Nada |
+| 6 | Nada | Sugerencia de Zum, alacena, zumbidos |
 
-Zum usa las ilustraciones de [`06-assets.md`](06-assets.md); los estados "feliz" y "descansando" siguen siendo recortes provisionales.
+Pruebas: 202 en verde (motor 62, contratos 5, API 96, interfaz 39).
+
+**Defectos conocidos.**
+
+- **Ilustraciones pendientes.** Las escenas E01 a E06 y los sellos S01 a S17 se dibujan en SVG mientras no se generen; el icono de la aplicación se compuso con la pose "feliz" (ver `07-decisiones.md`).
+
+**Corregido el 17 de noviembre.** Los ajustes ya no valen hacia atrás: cada día se cuenta con la meta y el día sin flores de entonces (tabla `tramos_de_ajustes`). La tarjeta principal en tableta lleva el panal de hoy a la derecha. Una auditoría del código encontró dos defectos más, también corregidos: el formulario contaba mal el cupo de prioridad alta, y en una colmena un doble toque mandaba dos peticiones. Al desplegar apareció otro: en Entrar, volver a la pestaña borraba lo escrito. Los detalles están en [`07-decisiones.md`](07-decisiones.md).
+
+**Refactorizaciones propuestas, sin hacer.** Salieron de la misma auditoría. Ninguna corrige un defecto; cada una deja el código más fácil de cambiar:
+
+| Propuesta | Dónde | Esfuerzo |
+| :--- | :--- | :--- |
+| Mover el cálculo de reportes (90 líneas) y los permisos de celdas de las rutas a `servicios/` | `rutas/reportes.js`, `rutas/celdas.js` | Medio |
+| Un solo ayudante para validar el identificador de la ruta, con un código de respuesta claro (hoy hay 400, 404 y 204) | `rutas/actividades.js`, `rutas/celdas.js`, `servicios/colmenas.js` | Bajo |
+| `componentes/abejas.js` con el color y la inicial de cada abeja, y una lista del enjambre compartida | `colmenasSelector.js`, `hoySelector.js`, `Colmena.jsx`, `Invitar.jsx` | Bajo |
+| Un `MarcoDeCampo` para la etiqueta, la ayuda y el error de los tres controles de formulario | `componentes/Formulario.jsx` | Bajo |
+| Archivar con "Deshacer" en un hook compartido | `useCeldas.js`, `useActividad.js` | Bajo |
+| Textos de Hoy que repiten los de Colmenas, Celdas y Mi vuelo | `ResumenDeColmena.jsx`, `CeldasDeHoy.jsx`, `Estructura.jsx` | Bajo |

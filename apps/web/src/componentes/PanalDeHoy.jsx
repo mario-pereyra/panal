@@ -9,7 +9,7 @@ const RADIO = 38;
  * @param {object} props
  * @param {number} props.llenas
  * @param {number} props.meta
- * @param {string} props.descripcion Lo que oye quien no ve el dibujo.
+ * @param {string} [props.descripcion] Lo que oye quien no ve el dibujo. Sin ella, es decorativo.
  */
 export function PanalDeHoy({ llenas, meta, descripcion, className }) {
   const { centros, ancho, alto } = panalDe(meta, { radio: RADIO });
@@ -18,8 +18,9 @@ export function PanalDeHoy({ llenas, meta, descripcion, className }) {
   return (
     <svg
       className={[estilos.panalDeHoy, className].filter(Boolean).join(" ")}
-      role="img"
-      aria-label={descripcion}
+      role={descripcion ? "img" : undefined}
+      aria-label={descripcion || undefined}
+      aria-hidden={descripcion ? undefined : "true"}
       width={ancho}
       height={alto}
       viewBox={`0 0 ${ancho} ${alto}`}

@@ -95,24 +95,26 @@
   flex: 1 1 100%;
 }
 
-/* Tableta: Zum a la izquierda, el texto a su lado y el panal debajo. */
+/* Tableta: dos columnas. Zum y el saludo arriba, la frase y las acciones debajo,
+   y el panal de hoy a la derecha, como en el computador. */
 @container principal (inline-size >= 640px) {
   .interior {
+    grid-template-columns: auto minmax(0, 1fr) auto;
     grid-template-areas:
-      "zum saludo"
-      "zum frase"
-      "zum acciones"
-      "panal panal";
-    gap: 12px 28px;
+      "zum saludo panal"
+      "frase frase panal"
+      "acciones acciones panal";
+    gap: 12px 24px;
     padding: 24px 32px;
   }
 
   .zum {
-    --tamano-zum: 200px;
+    --tamano-zum: 128px;
   }
 
   .panal {
-    inline-size: auto;
+    inline-size: clamp(160px, 24cqi, 220px);
+    block-size: auto;
   }
 
   .crear {
@@ -146,6 +148,7 @@
   }
 
   .panal {
+    inline-size: auto;
     margin-inline: 12px;
   }
 }

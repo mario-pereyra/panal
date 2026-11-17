@@ -199,6 +199,8 @@ Salen todos de I01, redimensionando en local. No se generan por separado.
 
 Color de tema del manifiesto: miel `#FFC421`. Color de fondo al abrir: papel `#FBFAF6`.
 
+**Estado.** Los cinco archivos están en `apps/web/public/iconos/` y en `assets-fuente/listos/icono/`. I01 no se generó con `agy`: se compuso en local con la pose "feliz" de Zum dentro de un círculo de cera sobre miel, con el dibujo en el 60 % central ([`07-decisiones.md`](07-decisiones.md#pwa-e-ilustraciones)).
+
 ## 8. Textos alternativos
 
 | Asset | Texto alternativo |
@@ -211,13 +213,13 @@ Color de tema del manifiesto: miel `#FFC421`. Color de fondo al abrir: papel `#F
 
 ## 9. Estado
 
-Al 13 de noviembre de 2026, 12:30.
+Al 13 de noviembre de 2026, 19:00.
 
 | Lote | Contenido | Estado |
 | :---: | :--- | :--- |
 | 0 | Hoja de personaje | Generada: `originales/zum/Z00-hoja-de-personaje.jpg` |
-| 1 | Seis estados de Zum | Cuatro generados y listos; dos provisionales (ver abajo) |
-| 2 | Tres poses, cuatro escenas e icono | Encargo escrito (`encargos/02-poses-escenas-e-icono.md`), sin lanzar |
+| 1 | Seis estados de Zum | Los seis generados, listos y en la aplicación |
+| 2 | Tres poses, cuatro escenas e icono | El icono I01 se compuso en local el 17 de noviembre (§7). Poses y escenas: encargo escrito (`encargos/02-poses-escenas-e-icono.md`), sin lanzar |
 | 3 | Etapas de la colmena y dos escenas | Encargo sin escribir |
 | 4 | Diecisiete sellos | Encargo sin escribir |
 
@@ -227,21 +229,21 @@ Al 13 de noviembre de 2026, 12:30.
 | :--- | :--- | :--- | :--- | :--- |
 | Z01 | Esperando | 1024 px, una generación | `esperando-720`, `-360`, `-128` | Sin observaciones |
 | Z02 | Animando | 1024 px, tres generaciones | `animando-720`, `-360`, `-128` | Sin observaciones |
-| Z03 | Feliz | **Sin generar: cuota agotada** | Provisional, sacada de la hoja (430 px) | Contorno más fino que el resto; el tamaño 720 está ampliado |
+| Z03 | Feliz | 1024 px, dos generaciones | `feliz-720`, `-360`, `-128` | El cuerpo quedó vertical, sin la inclinación leve que pedía el encargo. Los trazos de movimiento ensanchan el dibujo, así que Zum se ve un 7 % más pequeña que en los otros estados |
 | Z04 | Celebrando | 1024 px, dos generaciones | `celebrando-720`, `-360`, `-128` | Las gotas tienen un brillo interior leve |
 | Z05 | Preocupada | 1024 px, una generación | `preocupada-720`, `-360`, `-128` | Sin observaciones |
-| Z06 | Descansando | **Sin generar: cuota agotada** | Provisional, sacada de la hoja (375 px) | Contorno más fino; el tamaño 720 está ampliado |
+| Z06 | Descansando | 1024 px, una generación | `descansando-720`, `-360`, `-128` | Sin observaciones |
 
-**Cómo retomar** cuando se restablezca la cuota (a partir de las 17:10, hora de Bolivia, del 13 de noviembre):
+**Lo que sigue.** El lote 2, en tres sesiones de dos o tres imágenes cada una. Cada sesión se lanza como en la sección 2, con una línea más al final del encargo que dice qué imágenes tocan:
 
 ```bash
 cd assets-fuente
-agy -p "$(cat encargos/01-estados-de-zum.md)
+agy -p "$(cat encargos/02-poses-escenas-e-icono.md)
 
-En esta sesión genera solo Z03 (feliz) y Z06 (descansando)."     --model gemini-4-hydrogen-xhigh --dangerously-skip-permissions
-python herramientas/preparar_todo.py Z03 Z06
+En esta sesión genera solo Z07 y Z08." --model gemini-4-hydrogen-xhigh --dangerously-skip-permissions
+python herramientas/preparar_todo.py Z07 Z08
 ```
 
-Después, el lote 2 en tres sesiones de dos o tres imágenes cada una, y `python herramientas/preparar_todo.py`.
+Los archivos de `listos/` que usa la aplicación se copian después a `apps/web/src/assets/`.
 
 **Lo que no está comprobado.** No se ha visto todavía cómo responde el generador con escenas (colmena, flor, panal) ni con los sellos; solo con Zum. El primer encargo de cada tipo conviene lanzarlo con una sola imagen.

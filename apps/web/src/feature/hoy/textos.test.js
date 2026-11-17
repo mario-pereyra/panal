@@ -1,10 +1,9 @@
 import { describe, expect, test } from "vite-plus/test";
 import {
   descripcionDelPanal,
-  detalleDeActividad,
-  fechaLarga,
   fraseDeZum,
   saludoDeHoy,
+  textoDeFranja,
   textoDeRacha,
   textoDeReservas,
 } from "./textos.js";
@@ -18,10 +17,6 @@ const resumen = (llenas, meta = 5) => ({
 });
 
 describe("textos de Hoy", () => {
-  test("la fecha se escribe como en el diseño", () => {
-    expect(fechaLarga("2026-11-13")).toBe("Viernes 13 de noviembre");
-  });
-
   test("el saludo cambia al cerrar el panal y al descansar", () => {
     expect(saludoDeHoy("feliz", "Ana")).toBe("¡Buen vuelo, Ana!");
     expect(saludoDeHoy("celebrando", "Ana")).toBe("¡Panal cerrado, Ana!");
@@ -55,21 +50,14 @@ describe("textos de Hoy", () => {
     expect(textoDeReservas(0)).toBe("Sin reservas de miel");
   });
 
-  test("el detalle de cada actividad", () => {
-    const recurrente = { tipo: "recurrente" };
-    expect(detalleDeActividad({ ...recurrente, regla: { clase: "diaria" } })).toBe(
-      "Recurrente · diaria",
+  test("las franjas hablan de la racha sin culpa", () => {
+    expect(textoDeFranja({ perdidaAyer: 0, reservaUsadaAyer: true, mejor: 9 })).toBe(
+      "Ayer usaste una reserva de miel: tu racha sigue intacta.",
     );
-    expect(
-      detalleDeActividad({ ...recurrente, regla: { clase: "semanal", dias: [0, 2, 4] } }),
-    ).toBe("Recurrente · lunes, miércoles y viernes");
-    expect(detalleDeActividad({ tipo: "unica", venceHoy: true })).toBe("Única · vence hoy");
-    expect(detalleDeActividad({ tipo: "unica", colmena: "Proyecto final" })).toBe(
-      "Única · Proyecto final",
+    expect(textoDeFranja({ perdidaAyer: 6, reservaUsadaAyer: false, mejor: 9 })).toBe(
+      "Tu racha de 6 días descansó ayer. Tu mejor racha sigue siendo de 9 días: hoy empieza otra.",
     );
-    expect(detalleDeActividad({ tipo: "unica", vencida: true, vence: "2026-11-10" })).toBe(
-      "Única · vencía el 10 de noviembre",
-    );
+    expect(textoDeFranja({ perdidaAyer: 0, reservaUsadaAyer: false, mejor: 9 })).toBeNull();
   });
 
   test("el panal de hoy se describe para quien no lo ve", () => {

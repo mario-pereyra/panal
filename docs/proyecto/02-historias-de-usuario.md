@@ -109,7 +109,7 @@ Como Ana, quiero anotar algo que se hace una sola vez, con fecha y prioridad, pa
 - Al guardar, aparece en "Hoy" si vence hoy, si ya venció o si no tiene fecha; si vence más adelante, aparece en "Próximas".
 - Solo puedo tener dos actividades de prioridad alta por día; al intentar una tercera, se explica el límite.
 
-### HU-07. Crear una actividad de ronda
+### HU-07. Crear una actividad recurrente
 
 Como Ana, quiero anotar algo que se repite, eligiendo cómo se repite, para sostener una costumbre.
 
@@ -130,7 +130,7 @@ Como Ana, quiero marcar una actividad como cumplida con un toque, para ver mi av
 - Al tocar el hexágono, la celda se llena de inmediato, suben las gotas y se llena la celda correspondiente del panal de hoy, sin esperar al servidor.
 - Si el servidor no confirma, la celda vuelve a su estado anterior y un aviso lo explica.
 - Si toco dos veces seguidas o la red repite el envío, la actividad cuenta una sola vez.
-- Una actividad de ronda se puede llenar una sola vez por día.
+- Una actividad recurrente se puede llenar una sola vez por día.
 - La celda se puede llenar también con el teclado y anuncia su estado a los lectores de pantalla.
 
 ### HU-09. Deshacer una celda llena
@@ -161,9 +161,9 @@ Como Ana, quiero ver todas mis actividades ordenadas, para planear mi semana.
 
 **Debe** · P05 · RF-03
 
-- Hay cuatro pestañas: "Hoy", "Próximas", "De ronda" y "Archivadas", cada una con su cantidad.
+- Hay cuatro pestañas: "Hoy", "Próximas", "Recurrentes" y "Archivadas", cada una con su cantidad.
 - Puedo filtrar por colmena y por prioridad.
-- Las actividades de ronda con cuota muestran su avance de la semana con celdas pequeñas: "2 de 3 esta semana".
+- Las actividades recurrentes con cuota muestran su avance de la semana con celdas pequeñas: "2 de 3 esta semana".
 - Una pestaña vacía muestra un mensaje y un botón para crear, nunca una pantalla en blanco.
 
 ### HU-12. Ponerme al día con lo vencido
@@ -174,7 +174,7 @@ Como Ana, quiero ver qué se me pasó y poder cumplirlo igual, para ponerme al d
 
 - Una actividad única con fecha pasada sigue en "Hoy" con la etiqueta "Vencida".
 - Al cumplirla vale 15 gotas en lugar de 25.
-- Una actividad de ronda no se acumula: el día que no se cumplió queda sin llenar y no aparece como vencida.
+- Una actividad recurrente no se acumula: el día que no se cumplió queda sin llenar y no aparece como vencida.
 
 ## 5. Épica 3. El día
 
@@ -382,13 +382,13 @@ Como Ana, quiero ver mis últimas semanas en un mapa, para saber qué tan consta
 - Una frase lo resume ("Cerraste el panal 9 de los últimos 14 días") y hay una tabla equivalente para lectores de pantalla.
 - Sin datos veo "Aquí aparecerá tu panal de constancia cuando llenes tu primera celda."
 
-### HU-31. Ver cómo voy con cada actividad de ronda
+### HU-31. Ver cómo voy con cada actividad recurrente
 
 Como Ana, quiero ver el cumplimiento de cada costumbre, para saber cuál estoy sosteniendo y cuál no.
 
 **Debe** · P10 · RF-11
 
-- Por cada actividad de ronda veo una tira con los últimos siete días que tocaba y su porcentaje: "6 de 7 · 86 %".
+- Por cada actividad recurrente veo una tira con los últimos siete días que tocaba y su porcentaje: "6 de 7 · 86 %".
 - La lista se ordena de menor a mayor cumplimiento, para ver primero la que necesita atención.
 - Solo cuentan los días en que la actividad tocaba.
 
@@ -400,7 +400,7 @@ Como Ana, quiero ver cuántas celdas llené cada día y de qué tipo, para enten
 
 - Veo una columna por día de la semana actual, con su cifra encima.
 - Una frase lo resume: "21 celdas esta semana. Tu mejor día fue el jueves."
-- Veo cuántas fueron únicas y cuántas de ronda.
+- Veo cuántas fueron únicas y cuántas recurrentes.
 - Puedo comparar con la semana anterior.
 
 ### HU-33. Ver el aporte de cada persona

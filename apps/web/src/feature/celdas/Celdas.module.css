@@ -1,0 +1,207 @@
+/* Pestañas: una fila que se desliza en horizontal si no cabe. */
+
+.pestanas ul {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: inline proximity;
+  scrollbar-width: none;
+  padding: 4px;
+  margin: -4px;
+}
+
+/* El elemento de la lista es quien ocupa la fila: si se encoge, la palabra se parte. */
+.pestanas li {
+  flex: none;
+}
+
+.pestana {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 44px;
+  padding: 6px 18px;
+  border: var(--borde);
+  border-radius: var(--radio-control);
+  background: var(--blanco);
+  font-weight: 800;
+  white-space: nowrap;
+  text-decoration: none;
+  scroll-snap-align: start;
+}
+
+.pestana[aria-current="page"] {
+  background: var(--tinta);
+  color: var(--miel);
+}
+
+.conteo {
+  min-inline-size: 26px;
+  padding: 1px 8px;
+  border-radius: var(--radio-control);
+  background: var(--lino);
+  color: var(--tinta);
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+.pestana[aria-current="page"] .conteo {
+  background: var(--miel);
+}
+
+@media (hover: hover) {
+  .pestana:not([aria-current="page"]):hover {
+    background: var(--cera);
+  }
+}
+
+/* Filtros en fichas */
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filtro {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 44px;
+  padding: 0 16px;
+  border: 2px solid var(--tinta);
+  border-radius: var(--radio-control);
+  background: var(--blanco);
+  font-weight: 800;
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.filtro select {
+  min-block-size: 40px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.filtro select:focus-visible {
+  outline: none;
+}
+
+.filtro:has(:focus-visible) {
+  outline: 3px solid var(--tinta);
+  outline-offset: 3px;
+}
+
+.filtro input {
+  inline-size: 18px;
+  block-size: 18px;
+  margin: 0;
+  accent-color: var(--tinta);
+}
+
+.filtro[data-activo] {
+  background: var(--miel);
+}
+
+/* Lista */
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 18px 20px;
+  border: var(--borde);
+  border-radius: var(--radio-tarjeta);
+  background: var(--blanco);
+  box-shadow: var(--sombra);
+}
+
+.filas {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filas > li + li {
+  padding-block-start: 4px;
+  border-block-start: 1px solid var(--lino);
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tituloDeGrupo {
+  font-weight: 600;
+  font-size: 1.1875rem;
+}
+
+.menu {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.menu svg {
+  inline-size: 22px;
+  block-size: 22px;
+}
+
+@media (hover: hover) {
+  .menu:hover {
+    background: var(--lino);
+  }
+}
+
+/* Cuota de la semana: celdas pequeñas */
+
+.semana {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: var(--tinta-suave);
+}
+
+.celdasDeSemana {
+  flex: none;
+}
+
+.celdasDeSemana polygon {
+  fill: var(--blanco);
+  stroke: var(--tinta);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.celdasDeSemana [data-llena] {
+  fill: var(--miel-oscura);
+}
+
+/* Menú de una fila */
+
+.acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sinRed {
+  color: var(--tinta-suave);
+}

@@ -92,13 +92,48 @@ export function lunesDe(dia) {
 }
 
 /**
+ * @typedef {object} TramoDeAjustes Lo que rige desde un día hasta el tramo siguiente.
+ * @property {string} desde
+ * @property {number} metaDiaria
+ * @property {number | null} diaSinFlores
+ *
+ * @typedef {object} Ajustes
+ * @property {number} metaDiaria La meta de hoy.
+ * @property {number | null} [diaSinFlores] El día sin flores de hoy.
+ * @property {{ desde: string, hasta: string } | null} [invernada] Ya trae sus fechas.
+ * @property {TramoDeAjustes[]} [historial] Desde qué día rigió cada meta y día sin
+ *   flores, ordenado por `desde`. Sin él, los ajustes de hoy valen para todos los días.
+ */
+
+/**
+ * Los ajustes que regían un día. Así un cambio de meta no reescribe los
+ * panales de días pasados: cada día se cuenta con lo que regía entonces.
+ *
+ * @template {Ajustes} T
+ * @param {T} ajustes
+ * @param {string} dia
+ * @returns {T}
+ */
+export function ajustesDelDia(ajustes, dia) {
+  const { historial } = ajustes;
+  if (!historial?.length) return ajustes;
+  // Antes del primer tramo no hubo actividad: vale el primero.
+  let vigente = historial[0];
+  for (const tramo of historial) {
+    if (tramo.desde > dia) break;
+    vigente = tramo;
+  }
+  return { ...ajustes, metaDiaria: vigente.metaDiaria, diaSinFlores: vigente.diaSinFlores };
+}
+
+/**
  * Si ese día no se espera nada de la persona: su día sin flores o una invernada.
- * @param {{ diaSinFlores?: number | null, invernada?: { desde: string, hasta: string } | null }} ajustes
+ * @param {Ajustes} ajustes
  * @param {string} dia
  * @returns {boolean}
  */
 export function esDescanso(ajustes, dia) {
-  if (ajustes.diaSinFlores != null && diaDeLaSemana(dia) === ajustes.diaSinFlores) return true;
-  const { invernada } = ajustes;
+  const { diaSinFlores, invernada } = ajustesDelDia(ajustes, dia);
+  if (diaSinFlores != null && diaDeLaSemana(dia) === diaSinFlores) return true;
   return Boolean(invernada && dia >= invernada.desde && dia <= invernada.hasta);
 }

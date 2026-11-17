@@ -1,14 +1,17 @@
 import { describe, expect, test } from "vite-plus/test";
 import {
+  ajustesDelDia,
+  duenaDe,
+  ocupaCupoDeAlta,
   avanceDeColmena,
   constanciaDe,
+  esDescanso,
   diaDeLaSemana,
   diaLogico,
   estadoDeZum,
   gotasDeCelda,
   nivelDeConstancia,
   oficioDe,
-  rachaDe,
   resumenDelDia,
   sumarDias,
   tocaHoy,
@@ -90,7 +93,7 @@ describe("qué toca hoy", () => {
   const viernes = "2026-11-13";
 
   test("una recurrente semanal solo aparece en sus días", () => {
-    const regla = { clase: "semanal", dias: [0, 2, 4] };
+    const regla = { clase: "dias", dias: [0, 2, 4] };
     expect(tocaHoy({ tipo: "recurrente" }, regla, [], viernes).toca).toBe(true);
     expect(tocaHoy({ tipo: "recurrente" }, regla, [], "2026-11-14").toca).toBe(false);
   });
@@ -157,42 +160,6 @@ describe("resumen del día y estado de Zum", () => {
   });
 });
 
-describe("racha de vuelo", () => {
-  const hoy = "2026-11-13";
-  const seguidos = (cantidad, hasta) =>
-    Array.from({ length: cantidad }, (_, i) => sumarDias(hasta, -i));
-
-  test("cuenta los días seguidos hasta hoy", () => {
-    expect(rachaDe(seguidos(12, hoy), {}, hoy)).toMatchObject({ actual: 12, hoyCuenta: true });
-  });
-
-  test("sin celdas hoy, la racha sigue en pie desde ayer", () => {
-    const ayer = sumarDias(hoy, -1);
-    expect(rachaDe(seguidos(11, ayer), {}, hoy)).toMatchObject({ actual: 11, hoyCuenta: false });
-  });
-
-  test("un día en blanco la corta, pero se conserva la mejor", () => {
-    const dias = [hoy, ...seguidos(6, sumarDias(hoy, -2))];
-    expect(rachaDe(dias, { mejorRacha: 30 }, hoy)).toMatchObject({ actual: 1, mejor: 30 });
-  });
-
-  test("el día sin flores no rompe ni suma", () => {
-    // Domingo libre: viernes y sábado activos, domingo en blanco, lunes a viernes activos.
-    const dias = ["2026-11-06", "2026-11-07", ...seguidos(5, hoy)];
-    expect(rachaDe(dias, { diaSinFlores: 6 }, hoy).actual).toBe(7);
-    expect(rachaDe(dias, {}, hoy).actual).toBe(5);
-  });
-
-  test("sin historial no hay racha", () => {
-    expect(rachaDe([], { reservas: 1 }, hoy)).toEqual({
-      actual: 0,
-      mejor: 0,
-      reservas: 1,
-      hoyCuenta: false,
-    });
-  });
-});
-
 describe("panal de constancia", () => {
   test("los niveles: nada, algo, la mitad o más, panal cerrado", () => {
     expect([0, 1, 2, 3, 4, 5, 8].map((llenas) => nivelDeConstancia(llenas, 5))).toEqual([
@@ -211,6 +178,61 @@ describe("panal de constancia", () => {
     expect(semanas[0][0].dia).toBe("2026-10-12");
     expect(semanas[4][4]).toMatchObject({ dia: hoy, llenas: 3, nivel: 2, esHoy: true });
     expect(semanas[4][5]).toMatchObject({ dia: "2026-11-14", futuro: true });
+  });
+});
+
+describe("cupo de prioridad alta", () => {
+  const alta = { tipo: "unica", prioridad: "alta", creadaPor: "ana", colmenaId: null };
+
+  test("la dueña es quien la creó o, en una colmena, la abeja asignada", () => {
+    expect(duenaDe(alta)).toBe("ana");
+    expect(duenaDe({ ...alta, colmenaId: "c", asignadaA: "luis" })).toBe("luis");
+    expect(duenaDe({ ...alta, colmenaId: "c", asignadaA: null })).toBeNull();
+  });
+
+  test("ocupa cupo una única alta pendiente en el panal de alguien", () => {
+    expect(ocupaCupoDeAlta(alta)).toBe(true);
+    expect(ocupaCupoDeAlta({ ...alta, llena: true })).toBe(false);
+    expect(ocupaCupoDeAlta({ ...alta, archivada: true })).toBe(false);
+    expect(ocupaCupoDeAlta({ ...alta, prioridad: "normal" })).toBe(false);
+    expect(ocupaCupoDeAlta({ ...alta, tipo: "recurrente" })).toBe(false);
+    // Libre en una colmena: no es de nadie todavía.
+    expect(ocupaCupoDeAlta({ ...alta, colmenaId: "c", asignadaA: null })).toBe(false);
+    expect(ocupaCupoDeAlta(null)).toBe(false);
+  });
+});
+
+describe("ajustes que regían cada día", () => {
+  // Meta 5 desde el 2 de noviembre; desde el 10, meta 3 y el domingo sin flores.
+  const ajustes = {
+    metaDiaria: 3,
+    diaSinFlores: 6,
+    historial: [
+      { desde: "2026-11-02", metaDiaria: 5, diaSinFlores: null },
+      { desde: "2026-11-10", metaDiaria: 3, diaSinFlores: 6 },
+    ],
+  };
+
+  test("cada día toma el tramo que regía entonces", () => {
+    expect(ajustesDelDia(ajustes, "2026-11-09").metaDiaria).toBe(5);
+    expect(ajustesDelDia(ajustes, "2026-11-10").metaDiaria).toBe(3);
+    expect(ajustesDelDia(ajustes, "2026-10-30").metaDiaria).toBe(5);
+  });
+
+  test("sin historial, los ajustes de hoy valen para todos los días", () => {
+    expect(ajustesDelDia({ metaDiaria: 7 }, "2020-01-01").metaDiaria).toBe(7);
+  });
+
+  test("un día sin flores nuevo no convierte en descanso los domingos de antes", () => {
+    expect(esDescanso(ajustes, "2026-11-08")).toBe(false);
+    expect(esDescanso(ajustes, "2026-11-15")).toBe(true);
+  });
+
+  test("bajar la meta no cierra panales de días pasados", () => {
+    const celdas = Array.from({ length: 3 }, () => ({ dia: "2026-11-09", gotas: 10 }));
+    expect(resumenDelDia({ celdas, programadas: 6 }, ajustes, "2026-11-09").cerrado).toBe(false);
+    const constancia = constanciaDe(celdas, ajustes, "2026-11-13");
+    expect(constancia[4][0]).toMatchObject({ dia: "2026-11-09", nivel: 2 });
   });
 });
 

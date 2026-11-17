@@ -1,0 +1,68 @@
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.aviso {
+  color: var(--tinta-suave);
+  font-size: 1.0625rem;
+}
+
+.nota {
+  color: var(--tinta-suave);
+  font-size: 0.9375rem;
+}
+
+.repeticion,
+.colmena {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border: 2px solid var(--lino);
+  border-radius: 20px;
+}
+
+.regla {
+  font-weight: 800;
+}
+
+.vistaPrevia {
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: var(--cera);
+  font-weight: 800;
+}
+
+/* Pie */
+
+.pie {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  inline-size: 100%;
+}
+
+.descarte {
+  min-block-size: 1.4em;
+  font-weight: 800;
+  visibility: hidden;
+}
+
+.descarte[data-visible] {
+  visibility: visible;
+}
+
+.botones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 699px) {
+  .botones > * {
+    flex: 1 1 auto;
+  }
+}

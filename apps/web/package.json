@@ -7,12 +7,13 @@
   "scripts": {
     "dev": "vp dev",
     "build": "vp build",
-    "preview": "vp preview",
+    "preview": "vp build && vp preview",
     "test": "vp test run"
   },
   "dependencies": {
     "@fontsource-variable/fredoka": "catalog:",
     "@fontsource-variable/nunito": "catalog:",
+    "@panal/contratos": "workspace:*",
     "@panal/motor": "workspace:*",
     "@reduxjs/toolkit": "catalog:",
     "react": "catalog:",

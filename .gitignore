@@ -2,6 +2,10 @@ node_modules
 dist
 *.local
 *.log
+__pycache__/
+
+# base de datos local de respaldo (PGlite) cuando no hay DATABASE_URL
+apps/api/.datos/
 
 # variables de entorno: nunca al repositorio
 .env
@@ -25,3 +29,6 @@ Thumbs.db
 
 # pantallas de Stitch descartadas: se conservan en disco, fuera del repositorio
 docs/propuestas/**/disenos-stitch*/
+
+# enlace local con el proyecto de Vercel (lo crea `vercel link`)
+.vercel

@@ -1,11 +1,12 @@
+import { useFondo } from "../../componentes/useFondo.js";
 import { Boton, Ficha } from "../../componentes/Controles.jsx";
 import { IconoGota, IconoTarro } from "../../componentes/iconos.jsx";
 import { PanalDeHoy } from "../../componentes/PanalDeHoy.jsx";
 import { Zum } from "../../componentes/Zum.jsx";
 import estilos from "./TarjetaPrincipal.module.css";
+import { fechaLarga } from "../../componentes/textos.js";
 import {
   descripcionDelPanal,
-  fechaLarga,
   fraseDeZum,
   saludoDeHoy,
   textoDeRacha,
@@ -17,6 +18,7 @@ import {
  * momento y el panal de hoy.
  */
 export function TarjetaPrincipal({ hoy, nombre, zum, resumen, racha }) {
+  const { fondo } = useFondo();
   return (
     <section
       className={estilos.principal}
@@ -50,7 +52,7 @@ export function TarjetaPrincipal({ hoy, nombre, zum, resumen, racha }) {
           descripcion={descripcionDelPanal(resumen)}
         />
         <div className={estilos.acciones}>
-          <Boton a="/celdas/nueva" className={estilos.crear}>
+          <Boton a="/celdas/nueva" estado={{ fondo }} className={estilos.crear}>
             Nueva actividad
           </Boton>
           {/* Las dos fichas van juntas: si no caben junto al botón, bajan las dos. */}

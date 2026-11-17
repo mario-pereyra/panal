@@ -1,4 +1,4 @@
-import { esDescanso } from "./dia.js";
+import { ajustesDelDia, esDescanso } from "./dia.js";
 import { GOTAS } from "./gotas.js";
 
 /**
@@ -10,14 +10,15 @@ import { GOTAS } from "./gotas.js";
  *
  * @param {{ celdas: Array<{ dia: string, gotas: number }>, programadas: number }} hechos
  *   Celdas llenas (de cualquier día) y cuántas actividades tocan ese día.
- * @param {{ metaDiaria: number, diaSinFlores?: number | null, invernada?: { desde: string, hasta: string } | null }} ajustes
+ * @param {import("./dia.js").Ajustes} ajustes Con `historial`, cuenta la meta que regía ese día.
  * @param {string} dia
  */
 export function resumenDelDia(hechos, ajustes, dia) {
   const delDia = hechos.celdas.filter((celda) => celda.dia === dia);
   const llenas = delDia.length;
   const { programadas } = hechos;
-  const meta = programadas > 0 ? Math.min(ajustes.metaDiaria, programadas) : ajustes.metaDiaria;
+  const { metaDiaria } = ajustesDelDia(ajustes, dia);
+  const meta = programadas > 0 ? Math.min(metaDiaria, programadas) : metaDiaria;
   const descanso = esDescanso(ajustes, dia);
   const cerrado = !descanso && programadas > 0 && llenas >= meta;
   const gotasDeCeldas = delDia.reduce((suma, celda) => suma + celda.gotas, 0);

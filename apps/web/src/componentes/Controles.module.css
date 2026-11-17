@@ -25,13 +25,55 @@
   color: var(--tinta);
 }
 
+.miel {
+  background: var(--miel);
+  color: var(--tinta);
+}
+
+/* Acciones que archivan, anulan o sacan de una colmena. */
+.peligro {
+  border-color: var(--coral-oscuro);
+  background: var(--blanco);
+  color: var(--coral-oscuro);
+}
+
+/* Una acción secundaria, sin borde, como "Cancelar". */
+.sutil {
+  border-color: transparent;
+  background: none;
+  color: var(--tinta);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.chico {
+  min-block-size: 44px;
+  padding: 6px 18px;
+  font-size: 1rem;
+}
+
+.boton:disabled,
+.boton[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 @media (hover: hover) {
-  .tinta:hover {
+  .tinta:not(:disabled):hover {
     background: #47300f;
   }
 
-  .claro:hover {
+  .claro:not(:disabled):hover,
+  .miel:not(:disabled):hover {
     background: var(--cera);
+  }
+
+  .peligro:not(:disabled):hover {
+    background: var(--coral-claro);
+  }
+
+  .sutil:not(:disabled):hover {
+    background: var(--lino);
   }
 }
 
@@ -42,7 +84,7 @@
       scale 0.2s var(--resorte);
   }
 
-  .boton:active {
+  .boton:not(:disabled):active {
     scale: 0.96;
   }
 }

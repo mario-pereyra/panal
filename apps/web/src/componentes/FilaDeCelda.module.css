@@ -5,6 +5,27 @@
   min-block-size: 58px;
 }
 
+/* El dibujo de una celda que no se llena desde esta lista. */
+.hexagono {
+  flex: none;
+  inline-size: 44px;
+  block-size: 44px;
+}
+
+.hexagono polygon {
+  fill: var(--cera-clara);
+  stroke: var(--lino-borde);
+  stroke-width: 2.5;
+  stroke-dasharray: 4 3;
+  stroke-linejoin: round;
+}
+
+.fila[data-llena] .hexagono polygon {
+  fill: var(--miel);
+  stroke: var(--tinta);
+  stroke-dasharray: none;
+}
+
 .textos {
   display: flex;
   flex: 1 1 auto;
@@ -25,7 +46,7 @@
   color: var(--tinta-suave);
 }
 
-.vencida {
+.etiqueta {
   display: inline-block;
   margin-inline-start: 8px;
   padding: 1px 8px;

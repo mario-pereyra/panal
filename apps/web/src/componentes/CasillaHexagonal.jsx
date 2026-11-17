@@ -12,14 +12,22 @@ import estilos from "./CasillaHexagonal.module.css";
  * @param {(llena: boolean) => void} props.alCambiar
  * @param {string} props.nombradaPor Identificador del elemento que le da nombre (el título).
  * @param {string} [props.descritaPor] Identificador del elemento que la describe.
+ * @param {boolean} [props.deshabilitada]
  */
-export function CasillaHexagonal({ llena, alCambiar, nombradaPor, descritaPor }) {
+export function CasillaHexagonal({
+  llena,
+  alCambiar,
+  nombradaPor,
+  descritaPor,
+  deshabilitada = false,
+}) {
   return (
     <label className={estilos.casilla}>
       <input
         className={estilos.control}
         type="checkbox"
         checked={llena}
+        disabled={deshabilitada}
         onChange={(evento) => alCambiar(evento.target.checked)}
         aria-labelledby={nombradaPor}
         aria-describedby={descritaPor}

@@ -178,11 +178,11 @@ En cada pantalla, **Datos** nombra los selectores de Redux que la alimentan y **
 **Contenido.**
 
 1. Título "Celdas" y el botón "Nueva actividad".
-2. Pestañas con su cantidad: "Hoy", "Próximas", "De ronda", "Archivadas".
+2. Pestañas con su cantidad: "Hoy", "Próximas", "Recurrentes", "Archivadas". Son enlaces: la pestaña va en la dirección.
 3. Filtros en fichas: colmena y prioridad.
-4. Lista. Cada fila: casilla hexagonal, título, detalle (tipo, regla o fecha, colmena), gotas y un menú con "Editar", "Posponer" y "Archivar". En "Próximas", las filas se agrupan por día. En "De ronda", cada fila muestra su cuota de la semana con celdas pequeñas ("2 de 3 esta semana").
+4. Lista. Cada fila: casilla hexagonal, título, detalle (tipo, regla o fecha, colmena), gotas y un menú con "Editar", "Posponer" y "Archivar". En "Próximas", las filas se agrupan por día. En "Recurrentes", cada fila muestra su cuota de la semana con celdas pequeñas ("2 de 3 esta semana").
 
-**Estados.** Cada pestaña tiene su vacío: "No hay nada en el horizonte. Buen momento para planear la semana." (Próximas), "Todavía no tienes celdas de ronda. Son las que se repiten." (De ronda), "Aquí guardas lo que ya no necesitas ver." (Archivadas). Filtros sin resultados: "Ninguna celda coincide" y "Quitar filtros".
+**Estados.** Cada pestaña tiene su vacío: "No hay nada en el horizonte. Buen momento para planear la semana." (Próximas), "Todavía no tienes celdas recurrentes. Son las que se repiten." (Recurrentes), "Aquí guardas lo que ya no necesitas ver." (Archivadas). Filtros sin resultados: "Ninguna celda coincide" y "Quitar filtros".
 
 **Teléfono.** Las pestañas se deslizan en horizontal; el menú de cada fila se abre como hoja inferior.
 
@@ -195,9 +195,9 @@ En cada pantalla, **Datos** nombra los selectores de Redux que la alimentan y **
 **Contenido.** Ventana con el título "Nueva actividad" o "Editar actividad".
 
 1. Campo de título.
-2. Selector de dos opciones: "Única" y "De ronda".
+2. Selector de dos opciones: "Única" y "Recurrente". Una celda de colmena siempre es única.
 3. Si es única: fecha (opcional) y el interruptor "Prioridad alta".
-4. Si es de ronda: cuatro opciones ("Todos los días", "Ciertos días", "Veces por semana", "Día del mes") y, según la elegida, siete fichas con los días, un contador de 1 a 6 o un selector de día. Debajo, la regla en palabras.
+4. Si es recurrente: cuatro opciones ("Todos los días", "Ciertos días", "Veces por semana", "Día del mes") y, según la elegida, siete fichas con los días, un contador de 1 a 6 o un selector de día. Debajo, la regla en palabras.
 5. Colmena (opcional) y, si se elige una, "Asignar a" con el enjambre y la opción "Libre".
 6. Vista previa: "Esta celda vale +25 gotas de miel".
 7. Botones "Guardar" y "Cancelar". Al editar, además, "Archivar".
@@ -266,8 +266,8 @@ En cada pantalla, **Datos** nombra los selectores de Redux que la alimentan y **
 1. Título "Reportes" y tres cifras: celdas de la semana, racha de vuelo actual y mejor racha.
 2. **Panal de constancia**, grande, con su frase y su leyenda.
 3. **Celdas por día**: columnas de la semana, con su frase y la comparación con la semana anterior.
-4. **Tus rondas**: una tira de siete celdas por actividad de ronda, con su porcentaje.
-5. **Únicas y de ronda**: dos tarros que se llenan en proporción.
+4. **Tus recurrentes**: una tira de siete celdas por actividad recurrente, con su porcentaje.
+5. **Únicas y recurrentes**: dos tarros que se llenan en proporción.
 6. **Tus colmenas**: por cada una, el aporte de cada integrante.
 
 Cada gráfica tiene título, una frase que la resume y el enlace "Ver como tabla".

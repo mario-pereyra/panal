@@ -25,6 +25,9 @@
   /* Color: apoyo */
   --ala: #ddf0fa;
   --coral: #ff8a5b;
+  /* Errores y acciones que borran: texto coral oscuro (5,6:1 sobre blanco) sobre fondo coral claro */
+  --coral-oscuro: #a8401c;
+  --coral-claro: #fff0ea;
   --hoja: #2e7d4f;
   --lino: #efe7d6;
   --lino-claro: #f1eadb;
@@ -49,6 +52,7 @@
   --radio-tarjeta: 28px;
   --radio-control: 999px;
   --sombra: 0 6px 0 var(--tinta);
+  --sombra-chica: 0 4px 0 var(--tinta);
 
   /* Espacio */
   --ancho-maximo: 1296px;

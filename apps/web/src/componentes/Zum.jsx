@@ -1,4 +1,5 @@
 import estilos from "./Zum.module.css";
+import { DESCRIPCIONES_DE_ZUM } from "./textos.js";
 
 /**
  * Zum, la abeja de Panal, en uno de sus seis estados.
@@ -12,16 +13,6 @@ const archivos = import.meta.glob("../assets/zum/*.webp", {
 });
 
 const ruta = (estado, ancho) => archivos[`../assets/zum/${estado}-${ancho}.webp`];
-
-/** Lo que oye quien no ve la ilustración. */
-const DESCRIPCIONES = {
-  esperando: "Zum, la abeja de Panal, te espera con una sonrisa",
-  animando: "Zum, la abeja de Panal, señala la siguiente celda",
-  feliz: "Zum, la abeja de Panal, vuela contenta",
-  celebrando: "Zum, la abeja de Panal, celebra con los brazos en alto entre gotas de miel",
-  preocupada: "Zum, la abeja de Panal, mira con ternura y un poco de preocupación",
-  descansando: "Zum, la abeja de Panal, duerme tranquila",
-};
 
 /**
  * @param {object} props
@@ -53,7 +44,7 @@ export function Zum({
         sizes={tamanos}
         width="360"
         height="360"
-        alt={DESCRIPCIONES[estado]}
+        alt={DESCRIPCIONES_DE_ZUM[estado]}
         fetchPriority={principal ? "high" : undefined}
         decoding="async"
       />
