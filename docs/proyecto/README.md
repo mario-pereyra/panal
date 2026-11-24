@@ -71,13 +71,14 @@ Pruebas: 202 en verde (motor 62, contratos 5, API 96, interfaz 39).
 
 **Corregido el 17 de noviembre.** Los ajustes ya no valen hacia atrás: cada día se cuenta con la meta y el día sin flores de entonces (tabla `tramos_de_ajustes`). La tarjeta principal en tableta lleva el panal de hoy a la derecha. Una auditoría del código encontró dos defectos más, también corregidos: el formulario contaba mal el cupo de prioridad alta, y en una colmena un doble toque mandaba dos peticiones. Al desplegar apareció otro: en Entrar, volver a la pestaña borraba lo escrito. Los detalles están en [`07-decisiones.md`](07-decisiones.md).
 
-**Refactorizaciones propuestas, sin hacer.** Salieron de la misma auditoría. Ninguna corrige un defecto; cada una deja el código más fácil de cambiar:
+**Reestructuración del frontend (24 de noviembre).** `apps/web/src` quedó en `store/` (Redux), `nucleo/` (lo que comparten varias pantallas), `feature/` (una carpeta por pantalla), `componentes/ui` y `componentes/panal`, y `lib/`. Se fue el *listener middleware*: cada efecto vive con su causa. De paso se corrigieron la leyenda del panal de constancia en Reportes (no coincidía con los colores de la gráfica), un aviso que podía durar 12 s en vez de 6, el error de un campo que no aparecía al salir de él en la ventana de actividad, Reportes, que se rompía al cambiar de periodo, las gotas de bono de hoy, que no se movían al llenar o vaciar una celda, una actividad que se creaba dos veces si el envío se repetía tras un fallo, las gotas de una colmena vencida, dos logros iguales que chocaban en la celebración, el color de una celda llenada por alguien que ya salió de la colmena, y Celdas, que no avisaba si fallaba el panal de hoy. Queda una duda: en Reportes, "Celdas por día" marca un día como cerrado con la meta de hoy, porque el servidor no manda si cada día se cerró. Ver [`07-decisiones.md`](07-decisiones.md) y [`../guias/frontend.md`](../guias/frontend.md).
+
+**Gestión de celdas y colmenas (24 de noviembre).** El título de una celda la abre para editarla desde Hoy, Celdas y Colmena. Los permisos viven en una sola función que usan el servidor y la interfaz: una celda de colmena la cambian quien la creó, su persona asignada y la fundadora. Celdas tiene la pestaña "Hechas" con lo llenado los últimos siete días, para deshacerlo. La fundadora quita abejas, pasa la fundación y recupera una colmena archivada, que ahora aparece en Colmenas. Ver [`07-decisiones.md`](07-decisiones.md).
+
+**Refactorizaciones propuestas, sin hacer.** Salieron de la auditoría del 17 de noviembre. Ninguna corrige un defecto; cada una deja el código más fácil de cambiar:
 
 | Propuesta | Dónde | Esfuerzo |
 | :--- | :--- | :--- |
 | Mover el cálculo de reportes (90 líneas) y los permisos de celdas de las rutas a `servicios/` | `rutas/reportes.js`, `rutas/celdas.js` | Medio |
 | Un solo ayudante para validar el identificador de la ruta, con un código de respuesta claro (hoy hay 400, 404 y 204) | `rutas/actividades.js`, `rutas/celdas.js`, `servicios/colmenas.js` | Bajo |
-| `componentes/abejas.js` con el color y la inicial de cada abeja, y una lista del enjambre compartida | `colmenasSelector.js`, `hoySelector.js`, `Colmena.jsx`, `Invitar.jsx` | Bajo |
-| Un `MarcoDeCampo` para la etiqueta, la ayuda y el error de los tres controles de formulario | `componentes/Formulario.jsx` | Bajo |
-| Archivar con "Deshacer" en un hook compartido | `useCeldas.js`, `useActividad.js` | Bajo |
-| Textos de Hoy que repiten los de Colmenas, Celdas y Mi vuelo | `ResumenDeColmena.jsx`, `CeldasDeHoy.jsx`, `Estructura.jsx` | Bajo |
+| Un `MarcoDeCampo` para la etiqueta, la ayuda y el error de los tres controles de formulario | `componentes/ui/Formulario.jsx` | Bajo |

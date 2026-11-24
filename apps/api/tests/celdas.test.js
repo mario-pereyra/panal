@@ -54,7 +54,11 @@ describe("llenar una celda", () => {
     entorno.avanzar(MINUTO_MS);
     const segunda = await abeja.put(`/api/celdas/${id}`, { actividadId });
     expect(segunda.estado).toBe(200);
-    expect(segunda.datos).toEqual({ celda: primera.datos.celda, celebraciones: [] });
+    expect(segunda.datos).toEqual({
+      celda: primera.datos.celda,
+      celebraciones: [],
+      bonosDeHoy: primera.datos.bonosDeHoy,
+    });
     const filas = await entorno.base.consulta(
       "select count(*)::int as n from celdas_llenas where actividad_id = $1",
       [actividadId],

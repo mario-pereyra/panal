@@ -1,26 +1,33 @@
+import { actividad as esquemaDeActividad } from "@panal/contratos";
+import { gotasDeCelda } from "@panal/motor";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useSearchParams } from "react-router";
-import { leerError } from "../../api/errores.js";
-import { useFondo } from "../../componentes/useFondo.js";
+import { leerError } from "../../store/errores.js";
+import { useFondo } from "../../componentes/ui/useFondo.js";
+import { useFormulario } from "../../componentes/ui/useFormulario.js";
 import {
-  useCambiarActividadMutation,
+  selectYo,
   useGuardarActividadMutation,
   useObtenerActividadesQuery,
   useObtenerColmenasQuery,
   useObtenerPanalQuery,
-} from "../../api/panalApi.js";
-import { useAvisar } from "../avisos/useAvisos.js";
-import { useConexion } from "../conexion/useConexion.js";
+} from "../../store/api.js";
+import { useAvisar } from "../../nucleo/avisos/useAvisos.js";
+import { permisosDe } from "../../nucleo/panal/filas.js";
+import { useArchivarActividad } from "../../nucleo/panal/useCelda.js";
+import { useConexion } from "../../nucleo/conexion/useConexion.js";
 import { descartarBorrador, guardarBorrador } from "./actividadSlice.js";
 import {
   selectActividadAEditar,
   selectBorradorDeCelda,
-  selectColmenasParaElegir,
   selectPuedeMarcarAlta,
 } from "./actividadSelector.js";
+import { selectColmenasActivas } from "../../nucleo/panal/panalSelector.js";
+import { CAMBIOS_GUARDADOS, CELDA_CREADA, TIPOS } from "./textos.js";
 
 /** Los campos del formulario: más cómodos de editar que la forma del contrato. */
-export const VALORES_NUEVOS = {
+const VALORES_NUEVOS = {
   id: null,
   titulo: "",
   tipo: "unica",
@@ -48,7 +55,7 @@ function reglaDe(valores) {
 }
 
 /** De los campos a la forma del contrato `actividad`. */
-export function aActividad(valores) {
+function aActividad(valores) {
   const unica = valores.tipo === "unica";
   return {
     titulo: valores.titulo,
@@ -61,7 +68,6 @@ export function aActividad(valores) {
   };
 }
 
-/** De una actividad guardada a los campos del formulario. */
 function aValores(actividad) {
   const regla = actividad.regla ?? {};
   return {
@@ -80,10 +86,6 @@ function aValores(actividad) {
   };
 }
 
-/**
- * Todo lo que necesita la ventana de actividad: si crea o edita, los valores
- * de partida (el borrador, si lo hay), las colmenas y cómo guardar.
- */
 export function useActividad() {
   const { id } = useParams();
   const [parametros] = useSearchParams();
@@ -99,64 +101,50 @@ export function useActividad() {
   const archivadas = useObtenerActividadesQuery("archivadas", { skip: !editando });
   useObtenerColmenasQuery();
   const [guardarActividad, guardado] = useGuardarActividadMutation();
-  const [cambiarActividad, cambio] = useCambiarActividadMutation();
+  const archivarActividad = useArchivarActividad();
 
   const actividad = useSelector((estado) => selectActividadAEditar(estado, id));
+  const yo = useSelector(selectYo);
   const borrador = useSelector((estado) => selectBorradorDeCelda(estado, clave));
-  const colmenas = useSelector(selectColmenasParaElegir);
+  const colmenas = useSelector(selectColmenasActivas);
   const puedeMarcarAlta = useSelector((estado) => selectPuedeMarcarAlta(estado, id));
 
+  // Una actividad nueva nace con su identificador: si el envío se repite tras
+  // un fallo, el servidor no crea otra.
+  const [idNuevo] = useState(() => crypto.randomUUID());
   const colmenaPedida = parametros.get("colmena");
   const inicial = editando
     ? actividad
       ? aValores(actividad)
       : null
-    : { ...VALORES_NUEVOS, colmenaId: colmenaPedida ?? "" };
+    : { ...VALORES_NUEVOS, id: idNuevo, colmenaId: colmenaPedida ?? "" };
 
-  const buscando = editando && !actividad && (activas.isLoading || archivadas.isLoading);
-  const noExiste = editando && !actividad && !buscando;
+  const hoy = panal.data?.hoy ?? activas.data?.hoy;
+  const permisos = actividad && yo && hoy ? permisosDe(actividad, { miId: yo.id, hoy }) : null;
+  const buscando = editando && (actividad ? !permisos : activas.isLoading || archivadas.isLoading);
+  const noExiste = editando && !buscando && !permisos?.editar;
 
   /** Cerrar la ventana: vuelve a la pantalla de fondo o, si se abrió con un enlace directo, a su lugar. */
   const salir = () => salirDeLaVentana(colmenaPedida ? `/colmenas/${colmenaPedida}` : "/celdas");
 
-  const recordar = (valores) => dispatch(guardarBorrador({ clave, valores }));
+  const recordar = useCallback(
+    (valores) => dispatch(guardarBorrador({ clave, valores })),
+    [dispatch, clave],
+  );
   const olvidar = () => dispatch(descartarBorrador(clave));
 
-  /**
-   * Guarda. Una actividad nueva lleva su identificador desde el borrador:
-   * si el envío se repite, el servidor no crea otra.
-   * @returns {Promise<{ ok: boolean, campos?: Record<string, string> }>}
-   */
   const guardar = async (datos, valores) => {
-    let resultado;
-    if (editando) {
-      // El tipo no cambia al editar, y una única no lleva regla.
-      const { tipo: _tipo, regla, ...cambios } = datos;
-      resultado = await cambiarActividad({ id, ...cambios, ...(regla ? { regla } : {}) });
-    } else {
-      const nuevoId = valores.id ?? crypto.randomUUID();
-      if (!valores.id) recordar({ ...valores, id: nuevoId });
-      resultado = await guardarActividad({ id: nuevoId, ...datos });
-    }
+    const resultado = await guardarActividad({ id: valores.id, ...datos });
     if (resultado.error) return { ok: false, campos: leerError(resultado.error).campos };
     olvidar();
-    avisar({ texto: editando ? "Cambios guardados" : "Celda creada: ya está en tu panal" });
+    avisar({ texto: editando ? CAMBIOS_GUARDADOS : CELDA_CREADA });
     return { ok: true };
   };
 
   const archivar = async () => {
-    const resultado = await cambiarActividad({ id, archivada: true });
-    if (resultado.error) return false;
-    olvidar();
-    avisar({
-      texto: "Celda archivada",
-      accion: {
-        etiqueta: "Deshacer",
-        mutacion: "cambiarActividad",
-        argumentos: { id, archivada: false },
-      },
-    });
-    return true;
+    const bien = await archivarActividad(id);
+    if (bien) olvidar();
+    return bien;
   };
 
   return {
@@ -167,16 +155,55 @@ export function useActividad() {
     buscando,
     noExiste,
     archivada: Boolean(actividad?.archivadaEl),
-    hoy: panal.data?.hoy ?? activas.data?.hoy,
+    hoy,
+    puedeArchivar: Boolean(permisos?.archivar),
+    puedeCambiarDeTipo: !editando || Boolean(permisos?.cambiarDeTipo),
     colmenas,
     puedeMarcarAlta: puedeMarcarAlta || actividad?.prioridad === "alta",
     enLinea,
-    guardando: guardado.isLoading || cambio.isLoading,
-    error: leerError(guardado.error ?? cambio.error),
+    guardando: guardado.isLoading,
+    error: leerError(guardado.error),
     recordar,
     olvidar,
     guardar,
     archivar,
     salir,
+  };
+}
+
+/**
+ * El formulario abierto de la ventana: sus valores, lo que se deduce de ellos
+ * y el borrador al día. Va dentro del formulario, que se monta de nuevo al
+ * cambiar de celda.
+ */
+export function useFormularioDeActividad(actividad) {
+  const formulario = useFormulario(esquemaDeActividad, actividad.inicial, {
+    convertir: aActividad,
+  });
+  const { valores, cambiar } = formulario;
+  const { puedeCambiarDeTipo, colmenas, recordar } = actividad;
+
+  const [deInicio] = useState(valores);
+  useEffect(() => {
+    if (valores !== deInicio) recordar(valores);
+  }, [valores, deInicio, recordar]);
+
+  const deducido = useMemo(() => {
+    const datos = aActividad(valores);
+    return {
+      unica: datos.tipo === "unica",
+      regla: datos.regla,
+      gotas: gotasDeCelda(datos),
+      enColmena: Boolean(datos.colmenaId),
+      colmena: colmenas.find((una) => una.id === datos.colmenaId) ?? null,
+      tipos: puedeCambiarDeTipo ? TIPOS : TIPOS.filter((tipo) => tipo.valor === datos.tipo),
+    };
+  }, [valores, colmenas, puedeCambiarDeTipo]);
+
+  return {
+    ...formulario,
+    ...deducido,
+    conCambios: !formulario.sinCambios || actividad.hayBorrador,
+    elegirColmena: (colmenaId) => cambiar({ colmenaId, asignadaA: "", tipo: "unica" }),
   };
 }

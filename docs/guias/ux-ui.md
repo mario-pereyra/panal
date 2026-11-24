@@ -34,7 +34,7 @@ Las reglas de experiencia que valen en todas las pantallas. Qué contiene cada p
 
 ## 3. Patrones de interacción
 
-**Ventanas.** Un `<dialog>` modal (`componentes/Ventana.jsx`). En teléfono es una hoja que sube desde abajo; desde 700 px, una ventana centrada. Los menús se cierran al tocar fuera; los formularios no, y si tienen cambios preguntan antes de descartar. El mensaje de confirmación reserva su espacio para no mover los botones bajo el dedo.
+**Ventanas.** Un `<dialog>` modal (`componentes/ui/Ventana.jsx`). En teléfono es una hoja que sube desde abajo; desde 700 px, una ventana centrada. Los menús se cierran al tocar fuera; los formularios no, y si tienen cambios preguntan antes de descartar. El mensaje de confirmación reserva su espacio para no mover los botones bajo el dedo.
 
 **Confirmar.** Solo para lo que no se deshace solo: salir o archivar una colmena. El foco empieza en "Cancelar", la opción segura, y el botón destructivo va en tono coral.
 
@@ -52,7 +52,7 @@ Las reglas de experiencia que valen en todas las pantallas. Qué contiene cada p
 
 - Español neutro, tuteo, frases cortas. Ortografía completa y sin emojis.
 - Sin género cuando se habla a la persona: "Te damos la bienvenida", no "Bienvenida".
-- Los números se escriben con la palabra que cuentan: "1 celda", "3 celdas" (`cuenta()` de `componentes/textos.js`).
+- Los números se escriben con la palabra que cuentan: "1 celda", "3 celdas" (`cuenta()` de `lib/formato.js`).
 - Las fechas, en palabras y con el día: "Viernes 13 de noviembre", "Mañana", "Faltan 9 días".
 - El botón dice la acción con verbo: "Fundar", "Guardar", "Reintentar". Nunca "Aceptar" ni "OK".
 - Los errores dicen qué pasó y qué hacer: "Sin conexión: la celda volvió a como estaba. Inténtalo con señal."

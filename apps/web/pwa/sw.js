@@ -2,7 +2,8 @@
  * Service worker de Panal (D7 de 04-stack-y-arquitectura.md).
  *
  * No se publica tal cual: al compilar, `complemento.js` le antepone
- * `self.__PANAL__` con la versión y la lista de archivos de esa compilación.
+ * `self.__PANAL__` con la versión, la lista de archivos de esa compilación y
+ * los nombres que comparte con la página (`acuerdos.js`).
  *
  * - La aplicación (JS, CSS, fuentes latinas, iconos) se guarda al instalar y se
  *   sirve desde el caché: abre sin red.
@@ -11,9 +12,8 @@
  * - Una versión nueva espera a que la persona pulse "Actualizar".
  */
 
-const { version, precarga } = self.__PANAL__;
+const { version, precarga, cacheDeDatos, mensajeActualizar } = self.__PANAL__;
 const CACHE_DE_LA_APP = `panal-app-${version}`;
-const CACHE_DE_DATOS = "panal-datos";
 
 self.addEventListener("install", (evento) => {
   evento.waitUntil(caches.open(CACHE_DE_LA_APP).then((cache) => cache.addAll(precarga)));
@@ -33,9 +33,8 @@ self.addEventListener("activate", (evento) => {
   );
 });
 
-// La página pide activar la versión nueva cuando la persona pulsa "Actualizar".
 self.addEventListener("message", (evento) => {
-  if (evento.data === "actualizar") self.skipWaiting();
+  if (evento.data === mensajeActualizar) self.skipWaiting();
 });
 
 self.addEventListener("fetch", (evento) => {
@@ -53,23 +52,22 @@ self.addEventListener("fetch", (evento) => {
   }
 });
 
-/** Datos: la red manda; el caché solo cubre la falta de señal. */
 async function primeroLaRed(peticion) {
   try {
     const respuesta = await fetch(peticion);
     if (respuesta.ok) {
-      const cache = await caches.open(CACHE_DE_DATOS);
+      const cache = await caches.open(cacheDeDatos);
       await cache.put(peticion, respuesta.clone());
     }
     return respuesta;
   } catch (error) {
-    const guardada = await caches.match(peticion, { cacheName: CACHE_DE_DATOS });
+    const guardada = await caches.match(peticion, { cacheName: cacheDeDatos });
     if (guardada) return guardada;
     throw error;
   }
 }
 
-/** Archivos con huella en el nombre: si está guardado, no cambia. */
+// Los archivos llevan la huella del contenido en el nombre: si está guardado, no cambió.
 async function primeroLoGuardado(peticion) {
   const guardada = await caches.match(peticion);
   if (guardada) return guardada;

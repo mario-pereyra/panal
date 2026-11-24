@@ -16,8 +16,8 @@
   </head>
   <body>
     <div id="raiz"></div>
-    <!-- Lo que Panal anuncia a los lectores de pantalla cuando el navegador no tiene document.ariaNotify. -->
-    <div id="anuncios" class="solo-lectores" aria-live="polite" aria-atomic="true"></div>
+    <!-- La región de src/lib/anunciar.js, para los navegadores sin document.ariaNotify. -->
+    <div id="anuncios" class="solo-lectores" aria-live="polite"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

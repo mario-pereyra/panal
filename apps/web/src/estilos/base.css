@@ -102,14 +102,6 @@ button {
   translate: 0 0;
 }
 
-/* Pantalla de arranque: la silueta mientras se comprueba la sesión. */
-.arranque {
-  inline-size: 100%;
-  max-inline-size: calc(var(--ancho-maximo) + 2 * var(--margen-pagina));
-  margin-inline: auto;
-  padding: 24px var(--margen-pagina);
-}
-
 /* "Reducir animaciones" en Mi vuelo: vale aunque el sistema no lo pida. */
 :root[data-movimiento="reducido"] *,
 :root[data-movimiento="reducido"] *::before,

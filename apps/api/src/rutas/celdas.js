@@ -38,8 +38,12 @@ export function rutasDeCeldas({ base, reloj }) {
           if (previa.persona_id !== persona.id || previa.actividad_id !== actividadId) {
             throw falla("celda_ya_llena");
           }
-          const gotas = gotasPorCelda(progresoDe((await hechosDe(tx, persona, ahora)).entrada));
-          return { celda: celdaDe(previa, gotas.get(id) ?? 0), celebraciones: [] };
+          const progreso = progresoDe((await hechosDe(tx, persona, ahora)).entrada);
+          return {
+            celda: celdaDe(previa, gotasPorCelda(progreso).get(id) ?? 0),
+            celebraciones: [],
+            bonosDeHoy: progreso.gotas.bonosDeHoy,
+          };
         }
 
         const actividad = await actividadPorId(tx, actividadId);
@@ -76,6 +80,7 @@ export function rutasDeCeldas({ base, reloj }) {
         return {
           celda: celdaDe(celda, gotasPorCelda(despues).get(id) ?? 0),
           celebraciones: celebracionesEntre(antes, despues),
+          bonosDeHoy: despues.gotas.bonosDeHoy,
         };
       });
 

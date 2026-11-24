@@ -1,26 +1,36 @@
-import { useSelector } from "react-redux";
 import { Suspense } from "react";
 import { Link, NavLink, Outlet } from "react-router";
-import { useObtenerPanalQuery } from "../api/panalApi.js";
-import { Ficha } from "../componentes/Controles.jsx";
-import { LimiteDeError, Silueta } from "../componentes/Estados.jsx";
 import {
   IconoCeldas,
   IconoColmenas,
   IconoGota,
   IconoHoy,
-  IconoMas,
   IconoReportes,
   LogoPanal,
-} from "../componentes/iconos.jsx";
-import { useFondo } from "../componentes/useFondo.js";
-import { Avisos } from "../feature/avisos/Avisos.jsx";
-import { Celebracion } from "../feature/celebraciones/Celebracion.jsx";
-import { FranjaDeVersion } from "../feature/conexion/FranjaDeVersion.jsx";
-import { FranjaSinConexion } from "../feature/conexion/FranjaSinConexion.jsx";
-import { selectGotasDeHoy, selectOficio, selectPersona } from "../feature/hoy/hoySelector.js";
-import { useReloj } from "../feature/reloj/useReloj.js";
+} from "../componentes/panal/iconos.jsx";
+import { EnlaceAVentana, Ficha } from "../componentes/ui/Controles.jsx";
+import { LimiteDeError, Silueta } from "../componentes/ui/Estados.jsx";
+import { IconoMas } from "../componentes/ui/iconos.jsx";
+import { Principal } from "../componentes/ui/Pagina.jsx";
+import { useFondo } from "../componentes/ui/useFondo.js";
+import { Avisos } from "../nucleo/avisos/Avisos.jsx";
+import { Celebracion } from "../nucleo/celebraciones/Celebracion.jsx";
+import { FranjaDeVersion } from "../nucleo/conexion/FranjaDeVersion.jsx";
+import { FranjaSinConexion } from "../nucleo/conexion/FranjaSinConexion.jsx";
+import { inicialDe } from "../nucleo/panal/abejas.js";
+import { useResumenDelDia } from "../nucleo/panal/usePanal.js";
+import { useReloj } from "../nucleo/reloj/useReloj.js";
+import { NUEVA_ACTIVIDAD, PANAL, textoDeNivel } from "../nucleo/textos.js";
 import estilos from "./Estructura.module.css";
+import {
+  ABRIENDO_LA_PANTALLA,
+  GOTAS_HOY,
+  IR_A_HOY,
+  NOMBRES_DE_SECCION,
+  perfilDe,
+  SALTAR_AL_CONTENIDO,
+  SECCIONES,
+} from "./textos.js";
 
 /**
  * Lo que comparten todas las pantallas: la cabecera, la navegación y el
@@ -28,78 +38,48 @@ import estilos from "./Estructura.module.css";
  */
 export function Estructura() {
   useReloj();
-  useObtenerPanalQuery();
-  const persona = useSelector(selectPersona);
-  const oficio = useSelector(selectOficio);
-  const gotasDeHoy = useSelector(selectGotasDeHoy);
+  const { persona, oficio, gotasDeHoy } = useResumenDelDia();
   const { fondo } = useFondo();
 
   return (
     <div className={estilos.estructura}>
       <a className="saltar" href="#contenido">
-        Saltar al contenido
+        {SALTAR_AL_CONTENIDO}
       </a>
 
       <header className={estilos.cabecera}>
-        <Link to="/" className={estilos.marca} aria-label="Panal, ir a Hoy">
+        <Link to="/" className={estilos.marca} aria-label={IR_A_HOY}>
           <LogoPanal />
-          <span>Panal</span>
+          <span>{PANAL}</span>
         </Link>
 
-        <nav className={estilos.secciones} aria-label="Secciones">
+        <nav className={estilos.secciones} aria-label={SECCIONES}>
           <ul className={estilos.lista} role="list">
-            <li>
-              <NavLink to="/" end className={estilos.seccion}>
-                <IconoHoy className={estilos.icono} />
-                Hoy
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/celdas" className={estilos.seccion}>
-                <IconoCeldas className={estilos.icono} />
-                Celdas
-              </NavLink>
-            </li>
+            <Seccion a="/" end Icono={IconoHoy} nombre={NOMBRES_DE_SECCION.hoy} />
+            <Seccion a="/celdas" Icono={IconoCeldas} nombre={NOMBRES_DE_SECCION.celdas} />
             <li className={estilos.itemCrear}>
-              <Link
+              <EnlaceAVentana
                 to="/celdas/nueva"
-                state={{ fondo }}
                 className={estilos.crear}
-                aria-label="Nueva actividad"
+                aria-label={NUEVA_ACTIVIDAD}
               >
                 <IconoMas className={estilos.icono} />
-              </Link>
+              </EnlaceAVentana>
             </li>
-            <li>
-              <NavLink to="/colmenas" className={estilos.seccion}>
-                <IconoColmenas className={estilos.icono} />
-                Colmenas
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/reportes" className={estilos.seccion}>
-                <IconoReportes className={estilos.icono} />
-                Reportes
-              </NavLink>
-            </li>
+            <Seccion a="/colmenas" Icono={IconoColmenas} nombre={NOMBRES_DE_SECCION.colmenas} />
+            <Seccion a="/reportes" Icono={IconoReportes} nombre={NOMBRES_DE_SECCION.reportes} />
           </ul>
         </nav>
 
         {persona && oficio && (
           <div className={estilos.perfil}>
-            <span className={estilos.oficio}>
-              Nivel {oficio.nivel} · {oficio.nombre}
-            </span>
+            <span className={estilos.oficio}>{textoDeNivel(oficio)}</span>
             <Ficha className={estilos.gotasDeHoy} icono={<IconoGota />}>
               {gotasDeHoy}
-              <span className="solo-lectores"> gotas hoy</span>
+              <span className="solo-lectores">{GOTAS_HOY}</span>
             </Ficha>
-            <Link
-              to="/mi-vuelo"
-              className={estilos.avatar}
-              aria-label={`Mi vuelo: el perfil de ${persona.nombre}`}
-            >
-              {persona.nombre.charAt(0).toUpperCase()}
+            <Link to="/mi-vuelo" className={estilos.avatar} aria-label={perfilDe(persona.nombre)}>
+              {inicialDe(persona.nombre)}
             </Link>
           </div>
         )}
@@ -110,18 +90,33 @@ export function Estructura() {
         <FranjaDeVersion />
       </div>
 
-      {/* tabIndex -1: al cerrar un aviso, el foco vuelve aquí y no se pierde en el documento. */}
-      <main id="contenido" className={estilos.contenido} tabIndex={-1}>
-        {/* Cada pantalla se descarga la primera vez que se visita. */}
+      <Principal className={estilos.contenido}>
         <LimiteDeError key={fondo.pathname}>
-          <Suspense fallback={<Silueta etiqueta="Abriendo la pantalla" />}>
+          <Suspense
+            fallback={<Silueta etiqueta={ABRIENDO_LA_PANTALLA} bloques={[180, 320, 320]} />}
+          >
             <Outlet />
           </Suspense>
         </LimiteDeError>
-      </main>
+      </Principal>
 
       <Avisos />
       <Celebracion />
     </div>
+  );
+}
+
+function Seccion({ a, end = false, Icono, nombre }) {
+  return (
+    <li>
+      <NavLink to={a} end={end} className={estilos.seccion}>
+        {({ isActive }) => (
+          <>
+            <Icono className={estilos.icono} lleno={isActive} />
+            {nombre}
+          </>
+        )}
+      </NavLink>
+    </li>
   );
 }

@@ -9,6 +9,7 @@ import { z } from "zod";
  */
 
 export * from "./errores.js";
+export * from "./permisos.js";
 
 /** Un día de Panal: AAAA-MM-DD. */
 export const dia = z.iso.date({ error: "Usa una fecha con el formato AAAA-MM-DD." });
@@ -58,6 +59,10 @@ const zonaHoraria = z.string().refine(
 );
 
 /** Día de la semana: 0 es lunes y 6, domingo, como en el motor. */
+export const MAXIMO_DE_VECES_POR_SEMANA = 6;
+
+export const ULTIMO_DIA_DEL_MES = 31;
+
 const diaDeLaSemana = z.number().int().min(0).max(6);
 
 const invernada = z
@@ -102,8 +107,11 @@ export const regla = z.discriminatedUnion("clase", [
       .max(7)
       .transform((dias) => [...new Set(dias)].sort((a, b) => a - b)),
   }),
-  z.object({ clase: z.literal("veces"), veces: z.number().int().min(1).max(6) }),
-  z.object({ clase: z.literal("mes"), dia: z.number().int().min(1).max(31) }),
+  z.object({
+    clase: z.literal("veces"),
+    veces: z.number().int().min(1).max(MAXIMO_DE_VECES_POR_SEMANA),
+  }),
+  z.object({ clase: z.literal("mes"), dia: z.number().int().min(1).max(ULTIMO_DIA_DEL_MES) }),
 ]);
 
 export const titulo = z
@@ -172,8 +180,11 @@ export const cambiosDeActividad = z
 /** Llenar una celda (`PUT /api/celdas/:id`). El día lo pone el servidor. */
 export const celdaNueva = z.object({ actividadId: identificador });
 
-/** Qué lista de actividades se pide (`GET /api/actividades?ver=`). */
-export const vistaDeActividades = z.enum(["activas", "archivadas"]).default("activas");
+/** Qué lista de actividades se pide (`GET /api/actividades?ver=`). "hechas": las únicas terminadas hace poco. */
+export const vistaDeActividades = z.enum(["activas", "hechas", "archivadas"]).default("activas");
+
+/** Días hacia atrás que mira la pestaña "Hechas". */
+export const DIAS_DE_HECHAS = 7;
 
 // Colmenas
 
@@ -198,6 +209,7 @@ export const cambiosDeColmena = z
     descripcion: nuevaColmena.shape.descripcion.unwrap(),
     entregaEl: dia.nullable(),
     archivada: z.boolean(),
+    fundadoraId: identificador,
   })
   .partial();
 

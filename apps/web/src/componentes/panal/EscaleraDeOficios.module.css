@@ -1,0 +1,37 @@
+/* En pantallas anchas no crece más: los peldaños quedan del tamaño de una celda grande. */
+.escalera {
+  inline-size: 100%;
+  max-inline-size: 760px;
+  block-size: auto;
+  margin-inline: auto;
+}
+
+.peldano {
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.peldano[data-estado="lleno"] {
+  fill: var(--miel);
+  stroke: var(--tinta);
+}
+
+.peldano[data-estado="actual"] {
+  fill: var(--miel-profunda);
+  stroke: var(--tinta);
+  stroke-width: 3.5;
+}
+
+.peldano[data-estado="pendiente"] {
+  fill: var(--blanco);
+  stroke: var(--lino-borde);
+  stroke-dasharray: 4 3;
+}
+
+.numeroDePeldano {
+  fill: var(--tinta);
+  font-family: var(--fuente-titulos);
+  font-size: 13px;
+  font-weight: 600;
+  text-anchor: middle;
+}

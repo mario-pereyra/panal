@@ -133,7 +133,7 @@ Toda ruta nueva se prueba con:
 3. **Servicio.** Permisos y reglas en `src/servicios/`; los cálculos del juego, en el motor con su prueba.
 4. **Ruta.** En `src/rutas/<recurso>.js`, con `exigirSesion`, `leerCuerpo` o `validar`, y la respuesta pasada por `formatos.js`.
 5. **Pruebas** de la sección 8.
-6. **Cliente.** El endpoint en `apps/web/src/api/panalApi.js`, con las etiquetas que invalida.
+6. **Cliente.** El endpoint en `apps/web/src/store/api.js`, con las etiquetas que invalida y, si una pantalla la lee, su selector de datos al final del archivo.
 7. **Documento.** La tabla de rutas de [`05-datos-y-api.md` §7](../proyecto/05-datos-y-api.md#7-api).
 
 ## 10. Desplegar

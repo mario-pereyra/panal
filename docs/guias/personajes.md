@@ -25,7 +25,7 @@ Una abeja joven, curiosa y de buen humor. **Acompaña, señala y celebra; no man
 | La regla que elige el estado | `estadoDeZum()` en [`packages/motor/src/zum.js`](../../packages/motor/src/zum.js) |
 | Las frases de "Hoy" | `fraseDeZum()` en `apps/web/src/feature/hoy/textos.js` |
 | Las ilustraciones y cómo se generan | [`06-assets.md` §5](../proyecto/06-assets.md#5-inventario), `assets-fuente/listos/zum/` |
-| La pieza de React | `apps/web/src/componentes/Zum.jsx` |
+| La pieza de React | `apps/web/src/componentes/panal/Zum.jsx` |
 
 ## 3. Los seis estados
 
@@ -77,7 +77,7 @@ La estrategia completa de mensajes está en [`estrategia-gamificacion.md`](../pr
 
 ## 6. Las abejas del enjambre
 
-Cada persona de una colmena es una abeja con **color y su inicial**. El color sale de su orden de llegada a la colmena (`color` de 0 a 5 en la API → `--abeja-1` a `--abeja-6`, con `colorDeAbeja()` de `componentes/textos.js`). Se ve en:
+Cada persona de una colmena es una abeja con **color y su inicial**. El color sale de su orden de llegada a la colmena (`color` de 0 a 5 en la API → `--abeja-1` a `--abeja-6`, con `colorDeAbeja()` de `nucleo/panal/abejas.js`). Se ve en:
 
 - La rejilla y la colmena grande: cada celda llena lleva el color de quien la llenó.
 - Los avatares y la lista del enjambre de P08 y P09.

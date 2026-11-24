@@ -1,7 +1,7 @@
 import { METAS_DIARIAS } from "@panal/contratos";
 import { CLASES_DE_REGLA, ESTADOS_DE_ZUM } from "@panal/motor";
 import { describe, expect, test } from "vite-plus/test";
-import { DESCRIPCIONES_DE_ZUM } from "../componentes/textos.js";
+import { DESCRIPCIONES_DE_ZUM } from "../componentes/panal/textos.js";
 import { CLASES } from "../feature/actividad/textos.js";
 import { TAMANOS_DE_PANAL } from "../feature/miVuelo/textos.js";
 import { TAMANOS } from "../feature/primerVuelo/textos.js";

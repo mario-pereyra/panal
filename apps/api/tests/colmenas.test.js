@@ -166,21 +166,46 @@ describe("fundar y ver colmenas", () => {
 });
 
 describe("editar y archivar", () => {
-  test("cualquier integrante edita; solo la fundadora archiva", async () => {
+  test("solo la fundadora edita, archiva y recupera", async () => {
     const { fundadora, otras, colmenaId } = await enjambre(1);
-    const editada = await otras[0].patch(`/api/colmenas/${colmenaId}`, {
+    for (const cambio of [{ nombre: "Otra" }, { archivada: true }]) {
+      expect((await otras[0].patch(`/api/colmenas/${colmenaId}`, cambio)).estado).toBe(403);
+    }
+    const editada = await fundadora.patch(`/api/colmenas/${colmenaId}`, {
       nombre: "Proyecto final II",
       entregaEl: null,
     });
-    expect(editada.estado).toBe(200);
     expect(editada.datos.colmena).toMatchObject({ nombre: "Proyecto final II", entregaEl: null });
 
-    const sinPermiso = await otras[0].patch(`/api/colmenas/${colmenaId}`, { archivada: true });
-    expect(sinPermiso.estado).toBe(403);
     const archivada = await fundadora.patch(`/api/colmenas/${colmenaId}`, { archivada: true });
     expect(archivada.datos.colmena.archivadaEn).toBe(new Date(entorno.reloj.ahora).toISOString());
+    // Archivada, ya no se edita: solo se recupera.
+    expect((await fundadora.patch(`/api/colmenas/${colmenaId}`, { nombre: "X" })).estado).toBe(403);
     const recuperada = await fundadora.patch(`/api/colmenas/${colmenaId}`, { archivada: false });
     expect(recuperada.datos.colmena.archivadaEn).toBeNull();
+  });
+
+  test("la fundadora pasa la fundación a otra abeja y entonces puede salir", async () => {
+    const { fundadora, otras, colmenaId } = await enjambre(2);
+    const ajena = await entorno.nuevaAbeja();
+    const aAjena = await fundadora.patch(`/api/colmenas/${colmenaId}`, {
+      fundadoraId: ajena.perfil.id,
+    });
+    expect(aAjena.estado).toBe(400);
+    // Nadie se nombra fundadora a sí misma.
+    expect(
+      (await otras[0].patch(`/api/colmenas/${colmenaId}`, { fundadoraId: otras[0].perfil.id }))
+        .estado,
+    ).toBe(403);
+
+    const pasada = await fundadora.patch(`/api/colmenas/${colmenaId}`, {
+      fundadoraId: otras[0].perfil.id,
+    });
+    expect(pasada.datos.colmena.fundadoraId).toBe(otras[0].perfil.id);
+    expect(
+      (await fundadora.delete(`/api/colmenas/${colmenaId}/integrantes/${fundadora.perfil.id}`))
+        .estado,
+    ).toBe(204);
   });
 
   test("datos inválidos, sin sesión y sin permiso", async () => {
@@ -349,6 +374,8 @@ describe("el cierre de una colmena", () => {
     expect(primera.datos.celebraciones).toContainEqual(
       expect.objectContaining({ tipo: "cuadro", colmenaId, cuadro: 1, gotas: 30 }),
     );
+    // El bono del cuadro ya cuenta en las gotas de hoy de quien lo cerró.
+    expect(primera.datos.bonosDeHoy).toBe(30);
     for (const id of ids.slice(1, 4)) await llenar(fundadora, id);
     const ultima = await llenar(otras[0], ids[4]);
     expect(ultima.datos.celebraciones[0]).toMatchObject({

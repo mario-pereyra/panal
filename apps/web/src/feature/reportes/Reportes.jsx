@@ -1,52 +1,67 @@
 import { useId } from "react";
-import { EstadoVacio, ErrorAlCargar, Silueta } from "../../componentes/Estados.jsx";
-import { Opciones } from "../../componentes/Formulario.jsx";
-import {
-  BarraDeAvance,
-  Columnas,
-  Tarros,
-  TiraDeCeldas,
-  VerComoTabla,
-} from "../../componentes/Graficas.jsx";
-import { puntosDeHexagono } from "../../componentes/hexagono.js";
-import { Pagina } from "../../componentes/Pagina.jsx";
-import { PanalDeConstancia } from "../../componentes/PanalDeConstancia.jsx";
-import { cuenta, diaConNombre, fechaCorta } from "../../componentes/textos.js";
-import { Zum } from "../../componentes/Zum.jsx";
-import { PERIODOS } from "./reportesSelector.js";
+import { BarraDeAvance } from "../../componentes/ui/BarraDeAvance.jsx";
+import { ErrorAlCargar, Silueta } from "../../componentes/ui/Estados.jsx";
+import { EstadoVacio } from "../../componentes/panal/EstadoVacio.jsx";
+import { Opciones } from "../../componentes/ui/Formulario.jsx";
+import { Pagina } from "../../componentes/ui/Pagina.jsx";
+import { PanalDeConstancia } from "../../componentes/panal/PanalDeConstancia.jsx";
+import { RACHA_DE_VUELO } from "../../nucleo/textos.js";
+import { Zum } from "../../componentes/panal/Zum.jsx";
+import { Columnas, Tarros, TiraDeCeldas, VerComoTabla } from "./Graficas.jsx";
 import estilos from "./Reportes.module.css";
 import {
+  CARGANDO_TUS_REPORTES,
+  CELDAS_DEL_PERIODO,
+  CELDAS_POR_DIA,
+  COLUMNAS_DE_REPARTO,
+  COLUMNAS_POR_DIA,
+  columnasDeRondas,
+  cumplimiento,
+  enDias,
+  ERROR_AL_CARGAR,
+  FRASE_DE_COLMENAS,
+  FRASE_DE_RECURRENTES,
+  FRASE_DE_ZUM,
   fraseDeCeldasPorDia,
   fraseDeColmena,
   fraseDeConstancia,
   fraseDeReparto,
   fraseDeRondas,
-  cumplimiento,
+  MEJOR_RACHA,
+  PANAL_DE_CONSTANCIA,
+  PERIODO,
+  PERIODOS,
+  REPORTES,
   SIN_HISTORIAL,
+  SIN_RONDAS,
+  TABLA_DE_CELDAS_POR_DIA,
+  TABLA_DE_CONSTANCIA,
+  TABLA_DE_REPARTO,
+  TABLA_DE_RONDAS,
+  TUS_COLMENAS,
+  TUS_RECURRENTES,
+  UNICAS_Y_RECURRENTES,
 } from "./textos.js";
 import { useReportes } from "./useReportes.js";
-
-const NIVELES = ["Sin celdas", "Al menos una", "La mitad o más", "Panal cerrado"];
-const MUESTRA = puntosDeHexagono(7.5);
 
 /** P10. Reportes: el progreso en gráficas hechas de celdas. */
 export function Reportes() {
   const reportes = useReportes();
 
   if (reportes.cargando)
-    return <Silueta etiqueta="Cargando tus reportes" bloques={[120, 280, 280]} />;
+    return <Silueta etiqueta={CARGANDO_TUS_REPORTES} bloques={[120, 280, 280]} />;
 
-  if (reportes.fallo && !reportes.celdasPorDia) {
+  if (reportes.fallo) {
     return (
-      <Pagina titulo="Reportes">
-        <ErrorAlCargar titulo="No pudimos traer tus reportes" alReintentar={reportes.reintentar} />
+      <Pagina titulo={REPORTES}>
+        <ErrorAlCargar titulo={ERROR_AL_CARGAR} alReintentar={reportes.reintentar} />
       </Pagina>
     );
   }
 
   if (reportes.sinHistorial) {
     return (
-      <Pagina titulo="Reportes">
+      <Pagina titulo={REPORTES}>
         <section className={estilos.vacio}>
           <EstadoVacio frase={SIN_HISTORIAL} />
         </section>
@@ -54,66 +69,48 @@ export function Reportes() {
     );
   }
 
-  const { celdasPorDia, racha, periodo } = reportes;
+  const { celdasPorDia, constancia, racha, periodo, reparto } = reportes;
 
   return (
-    <Pagina titulo="Reportes">
+    <Pagina titulo={REPORTES}>
       <dl className={estilos.cifras}>
         <div>
-          <dt>Celdas {periodo === "semana" ? "de la semana" : "del periodo"}</dt>
+          <dt>{CELDAS_DEL_PERIODO[periodo]}</dt>
           <dd>{celdasPorDia?.total ?? "–"}</dd>
         </div>
         <div>
-          <dt>Racha de vuelo</dt>
-          <dd>{cuenta(racha?.actual ?? 0, "día", "días")}</dd>
+          <dt>{RACHA_DE_VUELO}</dt>
+          <dd>{enDias(racha.actual)}</dd>
         </div>
         <div>
-          <dt>Mejor racha</dt>
-          <dd>{cuenta(racha?.mejor ?? 0, "día", "días")}</dd>
+          <dt>{MEJOR_RACHA}</dt>
+          <dd>{enDias(racha.mejor)}</dd>
         </div>
       </dl>
 
       <div className={estilos.rejilla}>
-        <Grafica titulo="Panal de constancia" frase={fraseDeConstancia(reportes.constancia)} ancha>
+        <Grafica titulo={PANAL_DE_CONSTANCIA} frase={fraseDeConstancia(constancia)} ancha>
           <div className={estilos.constancia}>
             <PanalDeConstancia
-              semanas={reportes.constancia}
-              descripcion={fraseDeConstancia(reportes.constancia)}
+              semanas={constancia.semanas}
+              descripcion={fraseDeConstancia(constancia)}
             />
-            <ul className={estilos.leyenda} role="list" aria-label="Leyenda">
-              {NIVELES.map((nombre, nivel) => (
-                <li key={nombre}>
-                  <svg
-                    className={estilos.muestra}
-                    data-nivel={nivel}
-                    viewBox="-8 -9 16 18"
-                    aria-hidden="true"
-                  >
-                    <polygon points={MUESTRA} />
-                  </svg>
-                  {nombre}
-                </li>
-              ))}
-            </ul>
           </div>
           <VerComoTabla
-            titulo="Celdas llenas por día en las últimas semanas"
-            columnas={["Día", "Celdas llenas"]}
-            filas={reportes.constancia
-              .flat()
-              .filter((dia) => !dia.futuro)
-              .map((dia) => [diaConNombre(dia.dia), dia.llenas])}
+            titulo={TABLA_DE_CONSTANCIA}
+            columnas={COLUMNAS_POR_DIA}
+            filas={reportes.tablaDeConstancia}
           />
         </Grafica>
 
         <Grafica
-          titulo="Celdas por día"
+          titulo={CELDAS_POR_DIA}
           frase={celdasPorDia ? fraseDeCeldasPorDia(celdasPorDia, periodo) : ""}
           ocupada={reportes.actualizando}
           ancha
           extra={
             <Opciones
-              leyenda="Periodo"
+              leyenda={PERIODO}
               leyendaVisible={false}
               nombre="periodo"
               opciones={PERIODOS}
@@ -126,27 +123,21 @@ export function Reportes() {
             <>
               <Columnas
                 dias={celdasPorDia.semana}
-                meta={reportes.persona?.metaDiaria ?? 5}
+                meta={reportes.persona.metaDiaria}
                 descripcion={fraseDeCeldasPorDia(celdasPorDia, periodo)}
               />
               <VerComoTabla
-                titulo="Celdas llenas por día"
-                columnas={["Día", "Celdas llenas"]}
-                filas={celdasPorDia.dias.map((dia) => [
-                  periodo === "semana" ? diaConNombre(dia.dia) : fechaCorta(dia.dia),
-                  dia.llenas,
-                ])}
+                titulo={TABLA_DE_CELDAS_POR_DIA}
+                columnas={COLUMNAS_POR_DIA}
+                filas={reportes.tablaDeCeldasPorDia}
               />
             </>
           )}
         </Grafica>
 
-        <Grafica
-          titulo="Tus recurrentes"
-          frase="Los últimos siete días: llena si la cumpliste, punteada si no tocaba."
-        >
+        <Grafica titulo={TUS_RECURRENTES} frase={FRASE_DE_RECURRENTES}>
           {reportes.rondas.length === 0 ? (
-            <p className={estilos.nota}>{fraseDeRondas([])}</p>
+            <p className={estilos.nota}>{SIN_RONDAS}</p>
           ) : (
             <>
               <ul className={estilos.rondas} role="list">
@@ -160,35 +151,29 @@ export function Reportes() {
               </ul>
               <p className="solo-lectores">{fraseDeRondas(reportes.rondas)}</p>
               <VerComoTabla
-                titulo="Cumplimiento de tus recurrentes en los últimos siete días"
-                columnas={[
-                  "Celda",
-                  ...reportes.rondas[0].dias.map((dia) => diaConNombre(dia.dia)),
-                  "Cumplimiento",
-                ]}
-                filas={reportes.rondas.map((ronda) => [
-                  ronda.titulo,
-                  ...ronda.dias.map((dia) =>
-                    dia.llena ? "Llena" : dia.tocaba ? "Pendiente" : "No tocaba",
-                  ),
-                  cumplimiento(ronda),
-                ])}
+                titulo={TABLA_DE_RONDAS}
+                columnas={columnasDeRondas(reportes.tablaDeRondas.dias)}
+                filas={reportes.tablaDeRondas.filas}
               />
             </>
           )}
         </Grafica>
 
-        <Grafica titulo="Únicas y recurrentes" frase={fraseDeReparto(reportes.reparto)}>
-          <Tarros tarros={reportes.reparto} descripcion={fraseDeReparto(reportes.reparto)} />
-          <VerComoTabla
-            titulo="Celdas llenas por tipo"
-            columnas={["Tipo", "Celdas llenas"]}
-            filas={reportes.reparto.map((tarro) => [tarro.nombre, tarro.cantidad])}
-          />
+        <Grafica titulo={UNICAS_Y_RECURRENTES} frase={reparto ? fraseDeReparto(reparto) : ""}>
+          {reparto && (
+            <>
+              <Tarros tarros={reparto} descripcion={fraseDeReparto(reparto)} />
+              <VerComoTabla
+                titulo={TABLA_DE_REPARTO}
+                columnas={COLUMNAS_DE_REPARTO}
+                filas={reparto.map((tarro) => [tarro.nombre, tarro.cantidad])}
+              />
+            </>
+          )}
         </Grafica>
 
         {reportes.colmenas.length > 0 && (
-          <Grafica titulo="Tus colmenas" frase="Lo que aportó cada abeja en este periodo." ancha>
+          <Grafica titulo={TUS_COLMENAS} frase={FRASE_DE_COLMENAS} ancha>
             <div className={estilos.colmenas}>
               {reportes.colmenas.map((colmena) => (
                 <section
@@ -199,22 +184,22 @@ export function Reportes() {
                   <h3 id={`aporte-${colmena.id}`} className={estilos.nombreDeColmena}>
                     {colmena.nombre}
                   </h3>
-                  <p className="solo-lectores">{fraseDeColmena(colmena)}</p>
                   {colmena.total === 0 ? (
                     <p className={estilos.nota}>{fraseDeColmena(colmena)}</p>
                   ) : (
-                    <ul className={estilos.aportes} role="list" aria-hidden="true">
-                      {colmena.aportes.map((abeja) => (
-                        <li key={abeja.id} style={{ "--color-abeja": abeja.color }}>
-                          <span className={estilos.avatar}>
-                            {abeja.nombre.charAt(0).toUpperCase()}
-                          </span>
-                          <span className={estilos.nombre}>{abeja.nombre}</span>
-                          <BarraDeAvance avance={abeja.parte} />
-                          <span className={estilos.cantidad}>{abeja.celdas}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <>
+                      <p className="solo-lectores">{fraseDeColmena(colmena)}</p>
+                      <ul className={estilos.aportes} role="list" aria-hidden="true">
+                        {colmena.aportes.map((abeja) => (
+                          <li key={abeja.id} style={{ "--color-abeja": abeja.color }}>
+                            <span className={estilos.avatar}>{abeja.inicial}</span>
+                            <span className={estilos.nombre}>{abeja.nombre}</span>
+                            <BarraDeAvance avance={abeja.parte} color={abeja.color} />
+                            <span className={estilos.cantidad}>{abeja.celdas}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
                   )}
                 </section>
               ))}
@@ -225,13 +210,12 @@ export function Reportes() {
 
       <aside className={estilos.zum}>
         <Zum estado="animando" tamanos="72px" className={estilos.retrato} />
-        <p>Mirar atrás también es avanzar: aquí se ve cada gota que juntaste.</p>
+        <p>{FRASE_DE_ZUM}</p>
       </aside>
     </Pagina>
   );
 }
 
-/** Una gráfica en su tarjeta: título, la frase que la resume y su tabla. */
 function Grafica({ titulo, frase, extra, ancha = false, ocupada = false, children }) {
   const id = useId();
   return (

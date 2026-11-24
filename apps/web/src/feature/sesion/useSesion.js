@@ -1,60 +1,57 @@
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router";
-import { leerError } from "../../api/errores.js";
+import { useEffect, useState } from "react";
 import {
-  panalApi,
   useCrearCuentaMutation,
   useEntrarMutation,
-  useObtenerYoQuery,
-  useSalirMutation,
-} from "../../api/panalApi.js";
-import { selectInvitacionPendiente } from "./sesionSelector.js";
-
-/**
- * Quién tiene la sesión. `sinSesion` es verdadero solo cuando el servidor dijo
- * que no hay sesión (401); un fallo de red es `sinConexion`.
- */
-export function useYo() {
-  const consulta = useObtenerYoQuery();
-  const error = leerError(consulta.error);
-  return {
-    yo: consulta.data,
-    // Solo la primera respuesta. Sin sesión no hay datos, y al volver a la
-    // pestaña la consulta se repite: con `isLoading` solo, la guardia cambiaba
-    // el formulario por la silueta y se perdía lo escrito.
-    cargando: consulta.isLoading && !consulta.error,
-    sinSesion: consulta.error?.status === 401,
-    sinConexion: !consulta.data && error?.codigo === "sin_conexion",
-    reintentar: consulta.refetch,
-  };
-}
+  useVerInvitacionQuery,
+} from "../../store/api.js";
+import { leerError, mensajeGeneral } from "../../store/errores.js";
+import { useConexion } from "../../nucleo/conexion/useConexion.js";
+import { useInvitacionPendiente } from "../../nucleo/cuenta/useCuenta.js";
+import { zonaDelDispositivo } from "../../lib/dispositivo.js";
+import { mensajeAlEntrar } from "./textos.js";
 
 /** Entrar al panal. Al responder bien, el perfil queda en caché y la ruta de acceso redirige sola. */
 export function useEntrar() {
   const [entrar, estado] = useEntrarMutation();
-  return { entrar, enviando: estado.isLoading, error: leerError(estado.error) };
-}
-
-/** Crear un panal nuevo. */
-export function useCrearCuenta() {
-  const [crearCuenta, estado] = useCrearCuentaMutation();
-  return { crearCuenta, enviando: estado.isLoading, error: leerError(estado.error) };
-}
-
-/** Cerrar la sesión: se borra todo el caché, para que nada de esta cuenta quede a la vista. */
-export function useSalir() {
-  const [salir, estado] = useSalirMutation();
-  const dispatch = useDispatch();
-  const navegar = useNavigate();
-  const cerrarSesion = async () => {
-    await salir();
-    dispatch(panalApi.util.resetApiState());
-    // Lo que el service worker guardó para ver sin red era de esta cuenta.
-    await globalThis.caches?.delete("panal-datos").catch(() => {});
-    navegar("/entrar", { replace: true });
+  const { enLinea } = useConexion();
+  const error = leerError(estado.error);
+  // Solo `demasiados_intentos` trae `reintentarEn`: los segundos hasta poder probar otra vez.
+  const espera = useCuentaAtras(error?.reintentarEn ?? 0);
+  return {
+    entrar,
+    enviando: estado.isLoading,
+    mensaje: mensajeAlEntrar(error, espera),
+    espera,
+    enLinea,
   };
-  return { cerrarSesion, saliendo: estado.isLoading };
 }
 
-/** La invitación abierta antes de entrar, si la hay. */
-export const useInvitacionPendiente = () => useSelector(selectInvitacionPendiente);
+/** Crear un panal nuevo, con la zona horaria de este dispositivo y la invitación pendiente, si la hay. */
+export function useCrearCuenta() {
+  const [crear, estado] = useCrearCuentaMutation();
+  const { enLinea } = useConexion();
+  const { invitacion } = useInvitacionPendiente();
+  const { data: vista } = useVerInvitacionQuery(invitacion, { skip: !invitacion });
+  const zonaHoraria = zonaDelDispositivo();
+  const error = leerError(estado.error);
+  return {
+    crearCuenta: (datos) => crear({ ...datos, zonaHoraria }),
+    enviando: estado.isLoading,
+    mensaje: mensajeGeneral(error),
+    correoEnUso: error?.codigo === "correo_en_uso",
+    enLinea,
+    invitacion: vista,
+  };
+}
+
+/** Segundos que faltan, contando hacia atrás desde `inicio` cada vez que cambia. */
+function useCuentaAtras(inicio) {
+  const [restantes, setRestantes] = useState(inicio);
+  useEffect(() => {
+    setRestantes(inicio);
+    if (inicio <= 0) return undefined;
+    const intervalo = setInterval(() => setRestantes((antes) => Math.max(0, antes - 1)), 1000);
+    return () => clearInterval(intervalo);
+  }, [inicio]);
+  return restantes;
+}

@@ -1,10 +1,11 @@
 import {
   actividad as esquemaDeActividad,
   cambiosDeActividad,
+  DIAS_DE_HECHAS,
   identificador,
   vistaDeActividades,
 } from "@panal/contratos";
-import { diaLogico } from "@panal/motor";
+import { diaLogico, sumarDias } from "@panal/motor";
 import { Hono } from "hono";
 import { actividadesVisibles, actividadPorId, guardarActividad } from "../datos/actividades.js";
 import { falla, leerCuerpo, validar } from "../errores.js";
@@ -32,6 +33,7 @@ export function rutasDeActividades({ base, reloj }) {
     const zona = persona.zona_horaria;
     const hoy = diaLogico(reloj(), zona);
     const filas = await actividadesVisibles(base, persona.id);
+    const desde = sumarDias(hoy, -DIAS_DE_HECHAS);
     const actividades = filas
       .filter((fila) => {
         const archivada = Boolean(fila.archivada_en || fila.colmena_archivada_en);
@@ -39,6 +41,7 @@ export function rutasDeActividades({ base, reloj }) {
         // Una única cumplida antes de hoy ya no está activa: terminó.
         const cumplida =
           fila.tipo === "unica" && fila.primera_llena_el && fila.primera_llena_el < hoy;
+        if (vista === "hechas") return !archivada && cumplida && fila.primera_llena_el >= desde;
         return !archivada && !cumplida;
       })
       .map((fila) => actividadDe(fila, zona));
@@ -54,7 +57,14 @@ export function rutasDeActividades({ base, reloj }) {
 
     const { fila, creada } = await base.transaccion(async (tx) => {
       const existente = await actividadPorId(tx, id);
-      if (existente) await exigirPermisoSobreActividad(tx, existente, persona.id);
+      if (existente) {
+        const hoy = diaLogico(ahora, persona.zona_horaria);
+        await exigirPermisoSobreActividad(tx, existente, {
+          personaId: persona.id,
+          hoy,
+          accion: "editar",
+        });
+      }
       await exigirColmenaDeDestino(tx, datos, persona.id);
       const antes = existente ? estadoDeFila(existente) : null;
       if (antes?.llena && (antes.tipo !== datos.tipo || antes.colmenaId !== datos.colmenaId)) {
@@ -105,7 +115,16 @@ export function rutasDeActividades({ base, reloj }) {
     const fila = await base.transaccion(async (tx) => {
       const existente = await actividadPorId(tx, id);
       if (!existente) throw falla("no_existe");
-      await exigirPermisoSobreActividad(tx, existente, persona.id);
+      // Archivar o recuperar pide su propio permiso; cualquier otro cambio, el de editar.
+      const quien = { personaId: persona.id, hoy: diaLogico(ahora, zona) };
+      const soloArchiva = cambios.archivada !== undefined && Object.keys(cambios).length === 1;
+      await exigirPermisoSobreActividad(tx, existente, {
+        ...quien,
+        accion: soloArchiva ? "archivar" : "editar",
+      });
+      if (!soloArchiva && cambios.archivada !== undefined) {
+        await exigirPermisoSobreActividad(tx, existente, { ...quien, accion: "archivar" });
+      }
       const actual = actividadDe(existente, zona);
       const cambiaDeColmena =
         cambios.colmenaId !== undefined && cambios.colmenaId !== existente.colmena_id;

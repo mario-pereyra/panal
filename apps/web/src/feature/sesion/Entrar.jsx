@@ -1,43 +1,40 @@
 import { credenciales } from "@panal/contratos";
-import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { Boton } from "../../componentes/Controles.jsx";
-import { Campo, CampoDeClave, ErrorDelFormulario } from "../../componentes/Formulario.jsx";
-import { useFormulario } from "../../componentes/useFormulario.js";
-import { useConexion } from "../conexion/useConexion.js";
+import { AvisoSinConexion, Boton } from "../../componentes/ui/Controles.jsx";
+import { Campo, CampoDeClave, ErrorDelFormulario } from "../../componentes/ui/Formulario.jsx";
+import { useFormulario } from "../../componentes/ui/useFormulario.js";
 import { Acceso } from "./Acceso.jsx";
 import estilos from "./Acceso.module.css";
-import { esperaEnTexto, PROMESA } from "./textos.js";
+import { ENTRAR_AL_PANAL } from "../../nucleo/textos.js";
+import {
+  CLAVE,
+  CORREO,
+  CREA_EL_TUYO,
+  ENTRANDO,
+  ENTRAR,
+  NO_TIENES_PANAL,
+  PROMESA,
+  SIN_CONEXION_AL_ENTRAR,
+} from "./textos.js";
 import { useEntrar } from "./useSesion.js";
-import { leerError, mensajeGeneral } from "../../api/errores.js";
+import { leerError } from "../../store/errores.js";
 
 /** P01. Entrar al panal. */
 export function Entrar() {
-  const { entrar, enviando, error } = useEntrar();
-  const { enLinea } = useConexion();
+  const { entrar, enviando, mensaje, espera, enLinea } = useEntrar();
   const formulario = useFormulario(credenciales, { correo: "", clave: "" });
-  const espera = useCuentaAtras(
-    error?.codigo === "demasiados_intentos" ? (error.reintentarEn ?? 300) : 0,
-  );
 
   const enviar = formulario.alEnviar(async (datos) => {
     const resultado = await entrar(datos);
     if (resultado.error) formulario.mostrarErroresDelServidor(leerError(resultado.error).campos);
   });
 
-  const mensaje =
-    error?.codigo === "demasiados_intentos"
-      ? espera > 0
-        ? `Demasiados intentos. Podrás volver a probar en ${esperaEnTexto(espera)}.`
-        : null
-      : mensajeGeneral(error);
-
   return (
-    <Acceso titulo="Entrar al panal" zum="esperando" lema={<p>{PROMESA}</p>}>
+    <Acceso titulo={ENTRAR_AL_PANAL} zum="esperando" lema={<p>{PROMESA}</p>}>
       <form ref={formulario.formulario} className={estilos.campos} onSubmit={enviar} noValidate>
         <ErrorDelFormulario>{mensaje}</ErrorDelFormulario>
         <Campo
-          etiqueta="Correo"
+          etiqueta={CORREO}
           type="email"
           autoComplete="username"
           inputMode="email"
@@ -47,7 +44,7 @@ export function Entrar() {
           {...formulario.campo("correo")}
         />
         <CampoDeClave
-          etiqueta="Contraseña"
+          etiqueta={CLAVE}
           autoComplete="current-password"
           required
           {...formulario.campo("clave")}
@@ -57,25 +54,13 @@ export function Entrar() {
           className={estilos.enviar}
           disabled={enviando || espera > 0 || !enLinea}
         >
-          {enviando ? "Entrando…" : "Entrar"}
+          {enviando ? ENTRANDO : ENTRAR}
         </Boton>
-        {!enLinea && <p className={estilos.aviso}>Sin conexión. Para entrar hace falta señal.</p>}
+        {!enLinea && <AvisoSinConexion recuadro>{SIN_CONEXION_AL_ENTRAR}</AvisoSinConexion>}
       </form>
       <p className={estilos.pie}>
-        ¿No tienes panal? <Link to="/crear">Crea el tuyo</Link>
+        {NO_TIENES_PANAL} <Link to="/crear">{CREA_EL_TUYO}</Link>
       </p>
     </Acceso>
   );
-}
-
-/** Segundos que faltan, contando hacia atrás desde `inicio` cada vez que cambia. */
-function useCuentaAtras(inicio) {
-  const [restantes, setRestantes] = useState(inicio);
-  useEffect(() => {
-    setRestantes(inicio);
-    if (inicio <= 0) return undefined;
-    const intervalo = setInterval(() => setRestantes((antes) => Math.max(0, antes - 1)), 1000);
-    return () => clearInterval(intervalo);
-  }, [inicio]);
-  return restantes;
 }

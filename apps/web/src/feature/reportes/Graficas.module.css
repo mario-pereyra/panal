@@ -1,0 +1,137 @@
+.columnas {
+  inline-size: 100%;
+  block-size: 180px;
+}
+
+.celdaDeColumna,
+.barra {
+  fill: var(--miel-clara);
+  stroke: var(--tinta);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.celdaDeColumna[data-cerrada],
+.barra[data-cerrada] {
+  fill: var(--miel);
+}
+
+.lineaDeMeta {
+  stroke: var(--tinta-suave);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 4;
+}
+
+.rotulo {
+  fill: var(--tinta-suave);
+  font-size: 11px;
+  font-weight: 800;
+  text-anchor: middle;
+}
+
+/* Un día de la semana que todavía no llega: se nombra, pero apagado. */
+.rotulo[data-futuro] {
+  opacity: 0.45;
+}
+
+.tira {
+  max-inline-size: 100%;
+  block-size: auto;
+  flex: none;
+}
+
+.celdaDeTira {
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.celdaDeTira[data-estado="llena"] {
+  fill: var(--miel);
+  stroke: var(--tinta);
+}
+
+.celdaDeTira[data-estado="pendiente"] {
+  fill: var(--blanco);
+  stroke: var(--tinta);
+}
+
+.celdaDeTira[data-estado="libre"] {
+  fill: none;
+  stroke: var(--lino-borde);
+  stroke-dasharray: 3 3;
+}
+
+.tarros {
+  inline-size: 100%;
+  max-inline-size: 320px;
+  block-size: auto;
+  margin-inline: auto;
+}
+
+.tarro {
+  fill: none;
+  stroke: var(--tinta);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.mielDeTarro {
+  fill: var(--miel);
+}
+
+.tapa {
+  fill: var(--ala);
+  stroke: var(--tinta);
+  stroke-width: 3;
+}
+
+.cifraDeTarro {
+  fill: var(--tinta);
+  font-family: var(--fuente-titulos);
+  font-size: 22px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mielDeTarro {
+    transition:
+      y 0.5s var(--suave),
+      height 0.5s var(--suave);
+  }
+}
+
+.desplazable {
+  max-inline-size: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.comoTabla summary {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--toque);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.comoTabla table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.comoTabla th,
+.comoTabla td {
+  padding: 6px 10px;
+  border-block-end: 1px solid var(--lino);
+  text-align: start;
+  white-space: nowrap;
+}
+
+.comoTabla thead th {
+  color: var(--tinta-suave);
+  font-size: 0.8125rem;
+}

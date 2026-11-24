@@ -1,0 +1,81 @@
+/*
+ * El aviso aparece abajo, centrado: en teléfono, sobre la barra de navegación.
+ * Su posición es fija con o sin la API de popover.
+ */
+
+.aviso {
+  position: fixed;
+  inset: auto 0 calc(96px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: center;
+  gap: 4px 8px;
+  inline-size: min(100% - 32px, 480px);
+  block-size: auto;
+  margin: 0 auto;
+  padding: 8px 8px 8px 20px;
+  border: var(--borde);
+  border-radius: var(--radio-recuadro);
+  background: var(--tinta);
+  color: var(--blanco);
+  box-shadow: var(--sombra-velada);
+  overflow: visible;
+}
+
+.aviso[data-tono="error"] {
+  border-color: var(--coral-oscuro);
+  background: var(--coral-claro);
+  color: var(--tinta);
+}
+
+.texto {
+  flex: 1 1 auto;
+  padding-block: 8px;
+  font-weight: 800;
+}
+
+.accion {
+  flex: none;
+  min-block-size: var(--toque);
+  padding: 6px 16px;
+  border: 2px solid currentColor;
+  border-radius: var(--radio-control);
+  background: none;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.aviso[data-tono="exito"] .accion {
+  color: var(--miel);
+}
+
+.cerrar {
+  composes: botonDeIcono from "../../componentes/ui/Controles.module.css";
+}
+
+.cerrar svg {
+  inline-size: 20px;
+  block-size: 20px;
+}
+
+.aviso :focus-visible {
+  outline-color: currentColor;
+}
+
+@media (min-width: 700px) {
+  .aviso {
+    inset-block-end: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .aviso {
+    animation: subir 0.28s var(--resorte);
+  }
+}
+
+@keyframes subir {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+  }
+}

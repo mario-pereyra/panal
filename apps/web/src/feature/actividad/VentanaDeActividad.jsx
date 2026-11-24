@@ -1,6 +1,6 @@
-import { actividad as esquemaDeActividad } from "@panal/contratos";
-import { useEffect, useRef, useState } from "react";
-import { Boton } from "../../componentes/Controles.jsx";
+import { MAXIMO_DE_VECES_POR_SEMANA, ULTIMO_DIA_DEL_MES } from "@panal/contratos";
+import { useId, useState } from "react";
+import { AvisoSinConexion, Boton } from "../../componentes/ui/Controles.jsx";
 import {
   Campo,
   Contador,
@@ -9,35 +9,54 @@ import {
   Interruptor,
   Opciones,
   Selector,
-} from "../../componentes/Formulario.jsx";
-import { useFormulario } from "../../componentes/useFormulario.js";
-import { useCerrarVentana, Ventana } from "../../componentes/Ventana.jsx";
-import { vistaPreviaDeGotas } from "./actividadSelector.js";
+} from "../../componentes/ui/Formulario.jsx";
+import { useCerrarVentana, Ventana } from "../../componentes/ui/Ventana.jsx";
+import { PRIORIDAD_ALTA } from "../../componentes/panal/textos.js";
 import {
+  ARCHIVAR,
+  ASIGNAR_A,
   AYUDA_DE_ALTA,
+  AYUDA_DE_FECHA,
+  BUSCANDO,
+  CADA_CUANTO,
+  CANCELAR,
   CLASES,
+  COLMENA,
+  DESCARTAR,
+  DIA_DEL_MES,
   DIAS,
+  FECHA,
+  GUARDANDO,
+  GUARDAR,
+  LEYENDA_DE_DIAS,
   LIMITE_DE_ALTA,
+  NO_EXISTE,
   NOTA_DE_COLMENA,
+  PREGUNTA_DE_DESCARTE,
+  QUE_VAS_A_HACER,
   reglaEnPalabras,
+  SEGUIR_EDITANDO,
+  SIN_COLMENA,
+  SIN_CONEXION,
   textoDeVistaPrevia,
-  TIPOS,
+  TIPO,
+  TITULO_AL_EDITAR,
+  VECES_POR_SEMANA,
 } from "./textos.js";
-import { aActividad, useActividad } from "./useActividad.js";
+import { useActividad, useFormularioDeActividad } from "./useActividad.js";
 import estilos from "./VentanaDeActividad.module.css";
-import { mensajeGeneral } from "../../api/errores.js";
+import { mensajeGeneral } from "../../store/errores.js";
+import { CELDA_LIBRE, NUEVA_ACTIVIDAD } from "../../nucleo/textos.js";
 
 /** P06. Nueva actividad o editar una: una ventana sobre la pantalla desde la que se llegó. */
 export function VentanaDeActividad() {
   const actividad = useActividad();
-  const titulo = actividad.editando ? "Editar actividad" : "Nueva actividad";
+  const titulo = actividad.editando ? TITULO_AL_EDITAR : NUEVA_ACTIVIDAD;
 
   if (actividad.buscando || actividad.noExiste) {
     return (
       <Ventana titulo={titulo} alCerrar={actividad.salir} cerrarAlTocarFuera>
-        <p className={estilos.aviso}>
-          {actividad.buscando ? "Buscando la celda…" : "Esta celda no existe o ya no es tuya."}
-        </p>
+        <p className={estilos.aviso}>{actividad.buscando ? BUSCANDO : NO_EXISTE}</p>
       </Ventana>
     );
   }
@@ -46,27 +65,13 @@ export function VentanaDeActividad() {
 }
 
 function Formulario({ actividad, titulo }) {
-  const formulario = useFormulario(esquemaDeActividad, actividad.inicial, {
-    convertir: aActividad,
-  });
-  const { valores } = formulario;
+  const formulario = useFormularioDeActividad(actividad);
   const [confirmando, setConfirmando] = useState(false);
-  const conCambios = !formulario.sinCambios || actividad.hayBorrador;
-
-  // Lo escrito se guarda como borrador mientras se escribe.
-  const { recordar } = actividad;
-  const primeraVez = useRef(true);
-  useEffect(() => {
-    if (primeraVez.current) {
-      primeraVez.current = false;
-      return;
-    }
-    recordar(valores);
-  }, [valores, recordar]);
+  const idDelFormulario = useId();
 
   // Escape, Atrás o tocar fuera con cambios: se pregunta antes de descartar.
   const antesDeCerrar = (evento) => {
-    if (!conCambios || confirmando) return;
+    if (!formulario.conCambios || confirmando) return;
     evento.preventDefault();
     setConfirmando(true);
   };
@@ -80,25 +85,22 @@ function Formulario({ actividad, titulo }) {
       pie={
         <Pie
           actividad={actividad}
-          conCambios={conCambios}
+          idDelFormulario={idDelFormulario}
+          conCambios={formulario.conCambios}
           confirmando={confirmando}
           setConfirmando={setConfirmando}
         />
       }
     >
-      <Campos actividad={actividad} formulario={formulario} />
+      <Campos actividad={actividad} formulario={formulario} id={idDelFormulario} />
     </Ventana>
   );
 }
 
 /** Los campos. Viven dentro de la ventana para poder cerrarla al guardar. */
-function Campos({ actividad, formulario }) {
+function Campos({ actividad, formulario, id }) {
   const cerrar = useCerrarVentana();
-  const { valores, cambiar, errores } = formulario;
-  const colmena = actividad.colmenas.find((una) => una.id === valores.colmenaId) ?? null;
-  const enColmena = Boolean(valores.colmenaId);
-  const unica = valores.tipo === "unica" || enColmena;
-  const regla = unica ? null : aActividad(valores).regla;
+  const { valores, cambiar, errores, colmena } = formulario;
 
   const enviar = formulario.alEnviar(async (datos) => {
     const resultado = await actividad.guardar(datos, valores);
@@ -108,7 +110,7 @@ function Campos({ actividad, formulario }) {
 
   return (
     <form
-      id="formulario-de-actividad"
+      id={id}
       ref={formulario.formulario}
       className={estilos.formulario}
       onSubmit={enviar}
@@ -117,7 +119,7 @@ function Campos({ actividad, formulario }) {
       <ErrorDelFormulario>{mensajeGeneral(actividad.error)}</ErrorDelFormulario>
 
       <Campo
-        etiqueta="¿Qué vas a hacer?"
+        etiqueta={QUE_VAS_A_HACER}
         autoComplete="off"
         enterKeyHint="done"
         required
@@ -125,32 +127,30 @@ function Campos({ actividad, formulario }) {
         {...formulario.campo("titulo")}
       />
 
-      {enColmena ? (
+      {formulario.enColmena ? (
         <p className={estilos.nota}>{NOTA_DE_COLMENA}</p>
       ) : (
         <Opciones
-          leyenda="Tipo"
+          leyenda={TIPO}
           nombre="tipo"
-          opciones={
-            actividad.editando ? TIPOS.filter((tipo) => tipo.valor === valores.tipo) : TIPOS
-          }
+          opciones={formulario.tipos}
           valor={valores.tipo}
           alCambiar={(tipo) => cambiar({ tipo })}
           error={errores.tipo}
         />
       )}
 
-      {unica ? (
+      {formulario.unica ? (
         <>
           <Campo
-            etiqueta="Fecha (opcional)"
+            etiqueta={FECHA}
             type="date"
             min={actividad.hoy}
-            ayuda="Si tiene fecha, aparece en Hoy desde ya y vence ese día."
+            ayuda={AYUDA_DE_FECHA}
             {...formulario.campo("vence")}
           />
           <Interruptor
-            etiqueta="Prioridad alta"
+            etiqueta={PRIORIDAD_ALTA}
             descripcion={actividad.puedeMarcarAlta ? AYUDA_DE_ALTA : LIMITE_DE_ALTA}
             encendido={valores.alta}
             disabled={!actividad.puedeMarcarAlta && !valores.alta}
@@ -160,7 +160,7 @@ function Campos({ actividad, formulario }) {
       ) : (
         <div className={estilos.repeticion}>
           <Opciones
-            leyenda="¿Cada cuánto?"
+            leyenda={CADA_CUANTO}
             nombre="clase"
             opciones={CLASES}
             valor={valores.clase}
@@ -168,7 +168,7 @@ function Campos({ actividad, formulario }) {
           />
           {valores.clase === "dias" && (
             <Fichas
-              leyenda="Días de la semana"
+              leyenda={LEYENDA_DE_DIAS}
               nombre="regla.dias"
               opciones={DIAS}
               valores={valores.dias}
@@ -178,24 +178,24 @@ function Campos({ actividad, formulario }) {
           )}
           {valores.clase === "veces" && (
             <Contador
-              etiqueta="Veces por semana"
+              etiqueta={VECES_POR_SEMANA}
               valor={valores.veces}
               minimo={1}
-              maximo={6}
+              maximo={MAXIMO_DE_VECES_POR_SEMANA}
               alCambiar={(veces) => cambiar({ veces })}
             />
           )}
           {valores.clase === "mes" && (
             <Contador
-              etiqueta="Día del mes"
+              etiqueta={DIA_DEL_MES}
               valor={valores.diaDelMes}
               minimo={1}
-              maximo={31}
+              maximo={ULTIMO_DIA_DEL_MES}
               alCambiar={(diaDelMes) => cambiar({ diaDelMes })}
             />
           )}
           <p className={estilos.regla} aria-live="polite">
-            {reglaEnPalabras(regla)}
+            {reglaEnPalabras(formulario.regla)}
           </p>
         </div>
       )}
@@ -203,26 +203,24 @@ function Campos({ actividad, formulario }) {
       {actividad.colmenas.length > 0 && (
         <div className={estilos.colmena}>
           <Selector
-            etiqueta="Colmena (opcional)"
+            etiqueta={COLMENA}
             name="colmenaId"
             value={valores.colmenaId}
-            onChange={(evento) =>
-              cambiar({ colmenaId: evento.target.value, asignadaA: "", tipo: "unica" })
-            }
+            onChange={(evento) => formulario.elegirColmena(evento.target.value)}
             opciones={[
-              { valor: "", etiqueta: "Ninguna: es personal" },
+              { valor: "", etiqueta: SIN_COLMENA },
               ...actividad.colmenas.map((una) => ({ valor: una.id, etiqueta: una.nombre })),
             ]}
             error={errores.colmenaId}
           />
           {colmena && (
             <Selector
-              etiqueta="Asignar a"
+              etiqueta={ASIGNAR_A}
               name="asignadaA"
               value={valores.asignadaA}
               onChange={(evento) => cambiar({ asignadaA: evento.target.value })}
               opciones={[
-                { valor: "", etiqueta: "Libre: la llena quien llegue primero" },
+                { valor: "", etiqueta: CELDA_LIBRE },
                 ...colmena.integrantes.map((abeja) => ({
                   valor: abeja.id,
                   etiqueta: abeja.nombre,
@@ -234,18 +232,15 @@ function Campos({ actividad, formulario }) {
         </div>
       )}
 
-      <p className={estilos.vistaPrevia}>
-        {textoDeVistaPrevia(
-          vistaPreviaDeGotas({ tipo: unica ? "unica" : "recurrente", alta: valores.alta }),
-        )}
-      </p>
+      <p className={estilos.vistaPrevia}>{textoDeVistaPrevia(formulario.gotas)}</p>
     </form>
   );
 }
 
-/** Los botones del pie. Con cambios sin guardar, "Cancelar" pregunta antes de descartar. */
-function Pie({ actividad, conCambios, confirmando, setConfirmando }) {
+/** Con cambios sin guardar, "Cancelar" pregunta antes de descartar. */
+function Pie({ actividad, idDelFormulario, conCambios, confirmando, setConfirmando }) {
   const cerrar = useCerrarVentana();
+  const idDelAviso = useId();
 
   const descartar = () => {
     actividad.olvidar();
@@ -256,31 +251,26 @@ function Pie({ actividad, conCambios, confirmando, setConfirmando }) {
     <div className={estilos.pie}>
       {/* El mensaje reserva su sitio: al aparecer no mueve los botones bajo el puntero. */}
       <p
-        id="aviso-de-descarte"
+        id={idDelAviso}
         className={estilos.descarte}
         data-visible={confirmando ? "" : undefined}
         role="status"
       >
-        {confirmando ? "Tienes cambios sin guardar. ¿Los descartas?" : ""}
+        {confirmando ? PREGUNTA_DE_DESCARTE : ""}
       </p>
       <div className={estilos.botones}>
         {confirmando ? (
           <>
-            <Boton
-              tono="peligro"
-              onClick={descartar}
-              aria-describedby="aviso-de-descarte"
-              autoFocus
-            >
-              Descartar
+            <Boton tono="peligro" onClick={descartar} aria-describedby={idDelAviso} autoFocus>
+              {DESCARTAR}
             </Boton>
             <Boton tono="claro" onClick={() => setConfirmando(false)}>
-              Seguir editando
+              {SEGUIR_EDITANDO}
             </Boton>
           </>
         ) : (
           <>
-            {actividad.editando && !actividad.archivada && (
+            {actividad.editando && !actividad.archivada && actividad.puedeArchivar && (
               <Boton
                 tono="peligro"
                 disabled={!actividad.enLinea || actividad.guardando}
@@ -288,26 +278,24 @@ function Pie({ actividad, conCambios, confirmando, setConfirmando }) {
                   if (await actividad.archivar()) cerrar();
                 }}
               >
-                Archivar
+                {ARCHIVAR}
               </Boton>
             )}
             <Boton tono="sutil" onClick={() => (conCambios ? setConfirmando(true) : cerrar())}>
-              Cancelar
+              {CANCELAR}
             </Boton>
             <Boton
               type="submit"
-              form="formulario-de-actividad"
+              form={idDelFormulario}
               disabled={!actividad.enLinea || actividad.guardando}
             >
-              {actividad.guardando ? "Guardando…" : "Guardar"}
+              {actividad.guardando ? GUARDANDO : GUARDAR}
             </Boton>
           </>
         )}
       </div>
       {!actividad.enLinea && (
-        <p className={estilos.nota}>
-          Sin conexión: lo escrito queda guardado aquí hasta que vuelva la señal.
-        </p>
+        <AvisoSinConexion className={estilos.nota}>{SIN_CONEXION}</AvisoSinConexion>
       )}
     </div>
   );

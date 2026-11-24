@@ -1,0 +1,91 @@
+.silueta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--separacion);
+  opacity: 0;
+  animation: asomar 0.2s ease-out 0.2s forwards;
+}
+
+.bloque {
+  border: var(--borde);
+  border-color: var(--lino-borde);
+  border-radius: var(--radio-tarjeta);
+  background: var(--lino-claro);
+}
+
+@keyframes asomar {
+  to {
+    opacity: 1;
+  }
+}
+
+.error {
+  composes: tarjeta from "./superficie.module.css";
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 22px 24px;
+  color: var(--tinta-suave);
+}
+
+.tituloDeError {
+  color: var(--tinta);
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+.franja {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-block-size: 52px;
+  padding: 6px 8px 6px 18px;
+  border: var(--borde);
+  border-radius: var(--radio-recuadro);
+  background: var(--cera);
+}
+
+.franja[data-tono="ala"] {
+  background: var(--ala);
+}
+
+.franja > svg {
+  flex: none;
+  inline-size: 22px;
+  block-size: 22px;
+}
+
+.textoDeFranja {
+  flex: 1 1 auto;
+  padding-block: 6px;
+  font-size: 0.9375rem;
+}
+
+.accionDeFranja {
+  flex: none;
+  min-block-size: var(--toque);
+  padding: 0 18px;
+  border: var(--borde);
+  border-radius: var(--radio-control);
+  background: var(--tinta);
+  color: var(--miel);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.cerrarFranja {
+  composes: botonDeIcono from "./Controles.module.css";
+}
+
+.cerrarFranja svg {
+  inline-size: 20px;
+  block-size: 20px;
+}
+
+@media (hover: hover) {
+  .cerrarFranja:hover {
+    background: var(--velo);
+  }
+}

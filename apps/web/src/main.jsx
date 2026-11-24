@@ -8,7 +8,7 @@ import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router";
 import { App } from "./app/App.jsx";
-import { store } from "./app/store.js";
+import { store } from "./store/index.js";
 
 createRoot(document.getElementById("raiz")).render(
   <StrictMode>

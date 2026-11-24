@@ -1,0 +1,21 @@
+.barra {
+  display: block;
+  block-size: 14px;
+  border: 2px solid var(--tinta);
+  border-radius: var(--radio-control);
+  background: var(--cera-clara);
+  overflow: hidden;
+}
+
+.barra > span {
+  display: block;
+  block-size: 100%;
+  border-radius: var(--radio-control);
+  background: var(--miel);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .barra > span {
+    transition: inline-size 0.5s var(--suave);
+  }
+}

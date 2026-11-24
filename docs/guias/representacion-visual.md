@@ -69,4 +69,4 @@ Reglas:
 
 ## 5. Iconos
 
-`componentes/iconos.jsx`: SVG de 24 unidades, trazo de tinta de 2,5, extremos y uniones redondos, color `currentColor`. Un icono solo nunca es un botón sin nombre: el botón lleva `aria-label` o texto visible, y el icono va con `aria-hidden`.
+`componentes/ui/iconos.jsx` (genéricos) y `componentes/panal/iconos.jsx` (marca, gota, tarro y navegación): SVG de 24 unidades, trazo de tinta de 2,5, extremos y uniones redondos, color `currentColor`. Un icono solo nunca es un botón sin nombre: el botón lleva `aria-label` o texto visible, y el icono va con `aria-hidden`.

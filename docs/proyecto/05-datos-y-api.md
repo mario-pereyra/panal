@@ -205,26 +205,27 @@ Vive en `packages/motor`, sin dependencias, y lo usan el servidor (como autorida
 
 ## 6. El store de Redux
 
-Sigue la estructura del ejemplo de clase: `app/store.js` y una carpeta por funcionalidad con su slice, sus selectores y su hook.
+Sigue la estructura del ejemplo de clase: un store y una carpeta por funcionalidad con su slice, sus selectores y su hook. El store está en `src/store/index.js`; las funcionalidades que comparten varias pantallas, en `src/nucleo/`, y las de una sola, en `src/feature/`.
 
 ```
 store
 ├── api            RTK Query: caché de todo lo que viene del servidor (el perfil incluido)
-├── sesion         invitación pendiente
-├── hoy            día en que se cerró la franja de la racha
-├── celdas         filtros de la lista (la pestaña va en la dirección)
-├── actividad      borradores del formulario de actividad
-├── colmenas       pestaña del detalle de una colmena
-├── reportes       periodo elegido
-├── miVuelo        sello abierto y preferencia de movimiento
-├── primerVuelo    paso actual del recorrido inicial
-├── celebraciones  cola de logros por mostrar
-├── avisos         cola de avisos
-├── conexion       con o sin red, se puede instalar
-└── reloj          la hora actual, para que los selectores no la lean por su cuenta
+├── cuenta         invitación pendiente                                   nucleo/
+├── reloj          la hora actual, para que los selectores no la lean      nucleo/
+├── avisos         cola de avisos                                          nucleo/
+├── conexion       con o sin red, se puede instalar                        nucleo/
+├── celebraciones  cola de logros por mostrar                              nucleo/
+├── preferencias   reducir animaciones                                     nucleo/
+├── hoy            día en que se cerró la franja de la racha               feature/
+├── celdas         filtros de la lista (la pestaña va en la dirección)     feature/
+├── actividad      borradores del formulario de actividad                  feature/
+├── colmenas       pestaña del detalle de una colmena                      feature/
+├── reportes       periodo elegido                                         feature/
+├── miVuelo        sello abierto                                           feature/
+└── primerVuelo    paso actual del recorrido inicial                       feature/
 ```
 
-Hay un slice por funcionalidad en lugar de un `interfaz` y un `borradores` comunes: cada pantalla es dueña de su estado, como en el ejemplo de clase. Los efectos (guardar en el navegador, encolar logros, avisar de errores) viven en `app/escuchas.js`. Detalle en [`../guias/frontend.md`](../guias/frontend.md).
+Hay un slice por funcionalidad en lugar de un `interfaz` y un `borradores` comunes: cada pantalla es dueña de su estado, como en el ejemplo de clase. Cada efecto vive junto a lo que lo provoca: encolar logros y avisar de errores, en el hook que llena la celda; guardar en el navegador, en el `recuerdo` que declara cada slice. Detalle en [`../guias/frontend.md`](../guias/frontend.md).
 
 **Qué va en cada lado.**
 
@@ -278,9 +279,9 @@ REST con JSON, bajo `/api`. La sesión viaja en una cookie; no hay cabeceras de 
 | Método y ruta | Uso | Respuesta |
 | :--- | :--- | :--- |
 | `GET /api/panal` | Todo lo necesario para "Hoy" en una sola llamada: actividades activas, celdas llenas de las últimas cinco semanas, los tramos de ajustes y resumen | 200 |
-| `GET /api/actividades?ver=` | `activas` (por defecto) o `archivadas`. Las pestañas de "Celdas" se arman en el navegador | 200 |
-| `PUT /api/actividades/:id` | Crear o reemplazar. El identificador lo pone el navegador | 200 o 201 |
-| `PATCH /api/actividades/:id` | Editar, posponer, archivar o recuperar | 200 |
+| `GET /api/actividades?ver=` | `activas` (por defecto), `hechas` (las únicas terminadas en los últimos siete días) o `archivadas`. Las pestañas de "Celdas" se arman en el navegador. Cada actividad trae `primeraLlenaEl` y, si es de una colmena, su `fundadoraId`: con eso el navegador calcula los permisos | 200 |
+| `PUT /api/actividades/:id` | Crear o reemplazar. El identificador lo pone el navegador. La ventana de edición también guarda con `PUT` | 200 o 201 |
+| `PATCH /api/actividades/:id` | Posponer, archivar o recuperar | 200 |
 | `PUT /api/celdas/:id` | Llenar una celda. Cuerpo: la actividad. El servidor calcula el día | 200 con las gotas y las celebraciones |
 | `DELETE /api/celdas/:id` | Deshacer | 204 |
 
@@ -291,7 +292,7 @@ REST con JSON, bajo `/api`. La sesión viaja en una cookie; no hay cabeceras de 
 | `GET /api/colmenas` | Mis colmenas, con su avance | 200 |
 | `POST /api/colmenas` | Fundar | 201 |
 | `GET /api/colmenas/:id` | Detalle: enjambre, celdas y avance | 200, o 403 si no soy integrante |
-| `PATCH /api/colmenas/:id` | Editar o archivar | 200 |
+| `PATCH /api/colmenas/:id` | Editar, archivar, recuperar o pasar la fundación (`fundadoraId`) | 200 |
 | `GET /api/colmenas/:id/invitacion` | El enlace vigente, o `null` | 200 |
 | `POST /api/colmenas/:id/invitacion` | Crear el enlace, o anular el actual y crear otro | 201 con el código |
 | `GET /api/invitaciones/:codigo` | Ver a qué colmena invita | 200, o 410 si venció |
@@ -313,15 +314,17 @@ REST con JSON, bajo `/api`. La sesión viaja en una cookie; no hay cabeceras de 
 
 ## 8. Reglas de permisos
 
-Se comprueban en el servidor, en una sola capa, antes de tocar la base.
+Las de actividades y colmenas viven en `packages/contratos/src/permisos.js` (`permisosSobreActividad` y `permisosSobreColmena`). El servidor las usa para negar, antes de tocar la base; el navegador, para no ofrecer lo que el servidor negaría.
 
 | Recurso | Quién puede verlo | Quién puede cambiarlo |
 | :--- | :--- | :--- |
-| Actividad personal | Quien la creó | Quien la creó |
-| Actividad de una colmena | Integrantes | Integrantes |
+| Actividad personal | Quien la creó | Quien la creó. Cambia de tipo mientras no tenga días llenos |
+| Actividad de una colmena | Integrantes | Editar: quien la creó, su persona asignada y la fundadora. Archivar: lo mismo; una vez llena, solo la fundadora |
+| Única terminada (llena antes de hoy) | Quien la ve en "Hechas" | Nadie: es historia. Solo se deshace la celda |
+| Actividad de una colmena archivada | Integrantes | Nadie, hasta que la colmena se recupere |
 | Llenar una celda de colmena | | Su persona asignada, o cualquier integrante si está libre |
 | Deshacer una celda | | Solo quien la llenó |
-| Colmena | Integrantes | Editar: integrantes. Archivar y quitar integrantes: la fundadora |
+| Colmena | Integrantes | La fundadora: editar, archivar, recuperar, quitar integrantes y pasar la fundación. Quien no lo es, solo sale; la fundadora sale si se queda sin enjambre |
 | Invitación | Cualquiera con el enlace: ve el nombre de la colmena y de quien invita | Crear y anular: integrantes |
 | Perfil | La propia persona. Los integrantes de una misma colmena se ven el nombre y el color, nunca el correo | La propia persona |
 

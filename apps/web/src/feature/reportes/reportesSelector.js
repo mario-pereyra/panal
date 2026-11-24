@@ -1,23 +1,15 @@
 import { lunesDe, sumarDias } from "@panal/motor";
 import { createSelector } from "@reduxjs/toolkit";
-import { panalApi } from "../../api/panalApi.js";
-import { colorDeAbeja } from "../../componentes/textos.js";
-import { selectPanal } from "../hoy/hoySelector.js";
+import { selectPanal, selectReporte as selectReporteDelRango } from "../../store/api.js";
+import { pintarAbeja } from "../../nucleo/panal/abejas.js";
+import { selectConstancia } from "../../nucleo/panal/panalSelector.js";
+import { diaConNombre, fechaCorta } from "../../lib/formato.js";
+import { cumplimiento, ESTADO_DEL_DIA, TIPOS } from "./textos.js";
 
-/**
- * Selectores de Reportes (P10). El servidor cuenta; aquí solo se da forma
- * a lo que muestran las gráficas.
- */
-
-export const PERIODOS = [
-  { valor: "semana", etiqueta: "Esta semana" },
-  { valor: "mes", etiqueta: "30 días" },
-  { valor: "trimestre", etiqueta: "90 días" },
-];
+/** El servidor cuenta; aquí solo se da forma a lo que muestran las gráficas. */
 
 export const selectPeriodo = (estado) => estado.reportes.periodo;
 
-/** Las fechas del periodo elegido, contadas desde hoy. */
 export const selectRangoDelPeriodo = createSelector(
   [selectPanal, selectPeriodo],
   (panal, periodo) => {
@@ -29,10 +21,11 @@ export const selectRangoDelPeriodo = createSelector(
   },
 );
 
-const selectReporte = (estado) => {
-  const rango = selectRangoDelPeriodo(estado);
-  return rango ? panalApi.endpoints.obtenerReporte.select(rango)(estado).data : undefined;
-};
+const selectReporte = (estado) => selectReporteDelRango(estado, selectRangoDelPeriodo(estado));
+
+export const selectTablaDeConstancia = createSelector([selectConstancia], (constancia) =>
+  (constancia?.dias ?? []).map((dia) => [diaConNombre(dia.dia), dia.llenas]),
+);
 
 /**
  * Celdas por día, sin los días anteriores a la cuenta: con menos de una
@@ -57,18 +50,44 @@ export const selectCeldasPorDia = createSelector(
   },
 );
 
-export const selectCumplimientoPorRonda = createSelector(
-  [selectReporte],
-  (reporte) => reporte?.rondas ?? [],
+export const selectTablaDeCeldasPorDia = createSelector(
+  [selectCeldasPorDia, selectPeriodo],
+  (porDia, periodo) =>
+    (porDia?.dias ?? []).map((dia) => [
+      periodo === "semana" ? diaConNombre(dia.dia) : fechaCorta(dia.dia),
+      dia.llenas,
+    ]),
 );
+
+export const selectCumplimientoPorRonda = createSelector([selectReporte], (reporte) =>
+  (reporte?.rondas ?? []).map((ronda) => ({
+    ...ronda,
+    tocabaAlgunDia: ronda.dias.some((dia) => dia.tocaba),
+  })),
+);
+
+const estadoDelDia = (dia) => {
+  if (dia.llena) return ESTADO_DEL_DIA.llena;
+  return dia.tocaba ? ESTADO_DEL_DIA.pendiente : ESTADO_DEL_DIA.noTocaba;
+};
+
+/** Todas las rondas traen la misma tira de siete días: la primera da las columnas. */
+export const selectTablaDeRondas = createSelector([selectCumplimientoPorRonda], (rondas) => ({
+  dias: (rondas[0]?.dias ?? []).map((dia) => diaConNombre(dia.dia)),
+  filas: rondas.map((ronda) => [
+    ronda.titulo,
+    ...ronda.dias.map(estadoDelDia),
+    cumplimiento(ronda),
+  ]),
+}));
 
 export const selectRepartoPorTipo = createSelector([selectReporte], (reporte) =>
   reporte
     ? [
-        { nombre: "Únicas", cantidad: reporte.reparto.unicas },
-        { nombre: "Recurrentes", cantidad: reporte.reparto.recurrentes },
+        { nombre: TIPOS.unicas, cantidad: reporte.reparto.unicas },
+        { nombre: TIPOS.recurrentes, cantidad: reporte.reparto.recurrentes },
       ]
-    : [],
+    : null,
 );
 
 export const selectAportePorColmena = createSelector([selectReporte], (reporte) =>
@@ -78,15 +97,13 @@ export const selectAportePorColmena = createSelector([selectReporte], (reporte) 
       ...colmena,
       total,
       aportes: colmena.aportes.map((abeja) => ({
-        ...abeja,
-        color: colorDeAbeja(abeja.color),
+        ...pintarAbeja(abeja),
         parte: total > 0 ? abeja.celdas / total : 0,
       })),
     };
   }),
 );
 
-/** Si la persona todavía no llenó ninguna celda: Reportes muestra su estado vacío. */
 export const selectSinHistorial = createSelector(
   [selectPanal, selectCeldasPorDia],
   (panal, porDia) =>

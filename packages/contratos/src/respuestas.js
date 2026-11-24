@@ -30,12 +30,13 @@
  * @property {Regla | null} regla
  * @property {string | null} vence
  * @property {string | null} colmenaId
- * @property {{ id: string, nombre: string } | null} colmena
+ * @property {{ id: string, nombre: string, fundadoraId: string, archivada: boolean } | null} colmena
  * @property {string | null} asignadaA
  * @property {string} creadaPor
  * @property {string} creadaEl Día lógico de creación.
  * @property {string} creadaEn Instante de creación.
  * @property {string | null} archivadaEl
+ * @property {string | null} primeraLlenaEl Día de su primera celda llena, de quien sea.
  *
  * @typedef {object} CeldaLlena
  * @property {string} id Lo crea el navegador.
@@ -78,8 +79,9 @@
  * @typedef {object} CeldaGuardada `PUT /api/celdas/:id`
  * @property {CeldaLlena} celda
  * @property {Celebracion[]} celebraciones
+ * @property {number} bonosDeHoy Las gotas de cuotas y cuadros ganadas hoy, con esta celda incluida.
  *
- * @typedef {object} ListaDeActividades `GET /api/actividades?ver=activas|archivadas`
+ * @typedef {object} ListaDeActividades `GET /api/actividades?ver=activas|hechas|archivadas`
  * @property {string} hoy
  * @property {Actividad[]} actividades Todas las de la persona en esa vista, personales y de sus colmenas.
  *

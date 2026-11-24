@@ -1,10 +1,11 @@
 import { lazy, Suspense } from "react";
-import { Route, Routes, useLocation } from "react-router";
-import { LimiteDeError } from "../componentes/Estados.jsx";
-import { useVigilarConexion } from "../feature/conexion/useConexion.js";
+import { Route, Routes } from "react-router";
+import { LimiteDeError } from "../componentes/ui/Estados.jsx";
+import { useFondo } from "../componentes/ui/useFondo.js";
+import { useVigilarConexion } from "../nucleo/conexion/useConexion.js";
 import { NoEncontrada } from "../feature/errores/Errores.jsx";
 import { Hoy } from "../feature/hoy/Hoy.jsx";
-import { useAplicarMovimiento } from "../feature/miVuelo/useMiVuelo.js";
+import { useAplicarMovimiento } from "../nucleo/preferencias/usePreferencias.js";
 import { Arranque, ConSesion, SinSesion, SoloConSesion } from "../feature/sesion/Guardias.jsx";
 import { Estructura } from "./Estructura.jsx";
 
@@ -12,10 +13,7 @@ import { Estructura } from "./Estructura.jsx";
  * Una pantalla que se descarga la primera vez que se visita. Hoy, la puerta de
  * entrada, va en el archivo principal; el resto, aparte. Los formularios traen
  * Zod consigo. El service worker guarda todas al instalarse, así que también
- * abren sin red.
- *
- * @param {() => Promise<Record<string, import("react").ComponentType>>} cargar
- * @param {string} nombre La exportación del módulo.
+ * abren sin red. `nombre` es la exportación del módulo.
  */
 const perezosa = (cargar, nombre) =>
   lazy(() => cargar().then((modulo) => ({ default: modulo[nombre] })));
@@ -27,7 +25,7 @@ const Celdas = perezosa(() => import("../feature/celdas/Celdas.jsx"), "Celdas");
 const Colmenas = perezosa(() => import("../feature/colmenas/Colmenas.jsx"), "Colmenas");
 const Colmena = perezosa(() => import("../feature/colmenas/Colmena.jsx"), "Colmena");
 const Invitar = perezosa(() => import("../feature/colmenas/Invitar.jsx"), "Invitar");
-const Unirme = perezosa(() => import("../feature/colmenas/Unirme.jsx"), "Unirme");
+const Unirme = perezosa(() => import("../feature/unirme/Unirme.jsx"), "Unirme");
 const Reportes = perezosa(() => import("../feature/reportes/Reportes.jsx"), "Reportes");
 const MiVuelo = perezosa(() => import("../feature/miVuelo/MiVuelo.jsx"), "MiVuelo");
 const VentanaDeActividad = perezosa(
@@ -36,23 +34,27 @@ const VentanaDeActividad = perezosa(
 );
 
 /**
- * Las rutas de Panal (docs/proyecto/03-pantallas.md, sección 2).
- *
  * Las ventanas con ruta propia (P06 y P09) se dibujan sobre la pantalla desde
  * la que se abrieron: esa ubicación viaja en `state.fondo`. El primer
  * `Routes` dibuja el fondo; el segundo, la ventana. Con un enlace directo no
- * hay fondo y debajo queda la pantalla madre (Celdas o la colmena).
+ * hay fondo y debajo queda la pantalla madre.
  */
+const VENTANAS = [
+  { ruta: "celdas/nueva", madre: <Celdas />, ventana: <VentanaDeActividad /> },
+  { ruta: "celdas/:id", madre: <Celdas />, ventana: <VentanaDeActividad /> },
+  { ruta: "colmenas/:id/invitar", madre: <Colmena />, ventana: <Invitar /> },
+];
+
+/** Las rutas de Panal (docs/proyecto/03-pantallas.md, sección 2). */
 export function App() {
   useVigilarConexion();
   useAplicarMovimiento();
-  const ubicacion = useLocation();
-  const fondo = ubicacion.state?.fondo;
+  const { fondo } = useFondo();
 
   return (
     <LimiteDeError>
       <Suspense fallback={<Arranque />}>
-        <Routes location={fondo ?? ubicacion}>
+        <Routes location={fondo}>
           <Route element={<SinSesion />}>
             <Route path="entrar" element={<Entrar />} />
             <Route path="crear" element={<CrearPanal />} />
@@ -63,11 +65,11 @@ export function App() {
             <Route element={<Estructura />}>
               <Route index element={<Hoy />} />
               <Route path="celdas" element={<Celdas />} />
-              <Route path="celdas/nueva" element={<Celdas />} />
-              <Route path="celdas/:id" element={<Celdas />} />
               <Route path="colmenas" element={<Colmenas />} />
               <Route path="colmenas/:id" element={<Colmena />} />
-              <Route path="colmenas/:id/invitar" element={<Colmena />} />
+              {VENTANAS.map(({ ruta, madre }) => (
+                <Route key={ruta} path={ruta} element={madre} />
+              ))}
               <Route path="reportes" element={<Reportes />} />
               <Route path="mi-vuelo" element={<MiVuelo />} />
             </Route>
@@ -80,9 +82,9 @@ export function App() {
       <Suspense fallback={null}>
         <Routes>
           <Route element={<SoloConSesion />}>
-            <Route path="celdas/nueva" element={<VentanaDeActividad />} />
-            <Route path="celdas/:id" element={<VentanaDeActividad />} />
-            <Route path="colmenas/:id/invitar" element={<Invitar />} />
+            {VENTANAS.map(({ ruta, ventana }) => (
+              <Route key={ruta} path={ruta} element={ventana} />
+            ))}
           </Route>
           <Route path="*" element={null} />
         </Routes>

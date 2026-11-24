@@ -1,7 +1,13 @@
-/* Colmenas (P07), Colmena (P08), Invitar (P09), Fundar y Unirme (P13). */
-
 .nota {
   color: var(--tinta-suave);
+}
+
+/* Una, dos o tres columnas, según quepan tarjetas de al menos 340 px. */
+.rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  align-items: start;
+  gap: var(--separacion);
 }
 
 .tituloDeSeccion {
@@ -9,32 +15,10 @@
   font-size: 1.25rem;
 }
 
-.subtitulo {
-  font-size: 1rem;
-}
-
-.botones {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.formulario {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
 .vacia {
+  composes: tarjeta from "../../componentes/ui/superficie.module.css";
   padding: 24px;
-  border: var(--borde);
-  border-radius: var(--radio-tarjeta);
-  background: var(--blanco);
-  box-shadow: var(--sombra);
 }
-
-/* Tarjeta de colmena */
 
 .cuadro {
   font-weight: 800;
@@ -56,8 +40,6 @@
   font-size: 0.875rem;
 }
 
-/* El colmenar */
-
 .colmenar {
   display: flex;
   flex-direction: column;
@@ -76,9 +58,9 @@
   align-items: center;
   gap: 6px;
   inline-size: 112px;
-  min-block-size: 44px;
+  min-block-size: var(--toque);
   padding: 10px 6px;
-  border-radius: 20px;
+  border-radius: var(--radio-recuadro);
   font-weight: 800;
   font-size: 0.875rem;
   text-align: center;
@@ -102,276 +84,24 @@
   stroke-linejoin: round;
 }
 
-/* Detalle de una colmena */
+.archivadas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 
-.volver {
+.archivada {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-block-size: 44px;
-  font-weight: 800;
+  min-block-size: var(--toque);
+  padding-inline: 16px;
+  border: var(--borde);
+  border-radius: var(--radio-control);
+  color: inherit;
+  font-weight: 700;
   text-decoration: none;
 }
 
-.volver svg {
-  inline-size: 20px;
-  block-size: 20px;
-}
-
-.masAcciones {
-  display: grid;
-  place-items: center;
-  inline-size: 48px;
-  block-size: 48px;
-  padding: 0;
-  border: var(--borde);
-  border-radius: 50%;
-  background: var(--blanco);
-  color: inherit;
-  cursor: pointer;
-}
-
-.masAcciones svg {
-  inline-size: 22px;
-  block-size: 22px;
-}
-
-@media (hover: hover) {
-  .masAcciones:hover {
-    background: var(--cera);
-  }
-}
-
-.detalle {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 20px;
-}
-
-@media (min-width: 1080px) {
-  .detalle {
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  }
-
-  .panelCeldas {
-    grid-column: 1 / -1;
-  }
-}
-
-.panelColmena,
-.panelEnjambre,
-.panelCeldas {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  min-inline-size: 0;
-  padding: 20px;
-  border: var(--borde);
-  border-radius: var(--radio-tarjeta);
-  background: var(--blanco);
-  box-shadow: var(--sombra);
-}
-
-.cabezaDePanel {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.porcentaje {
-  font-family: var(--fuente-titulos);
-  font-weight: 600;
-  font-size: 1.75rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.cerrada {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border-radius: 18px;
-  background: var(--cera);
-  font-weight: 800;
-}
-
-/* El enjambre */
-
-.enjambre {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.abeja {
-  display: grid;
-  grid-template-columns: 40px minmax(0, 1fr);
-  grid-template-areas:
-    "avatar nombre"
-    "avatar aporte";
-  align-items: center;
-  column-gap: 12px;
-}
-
-.avatar {
-  display: grid;
-  grid-area: avatar;
-  place-items: center;
-  inline-size: 40px;
-  block-size: 40px;
-  border: var(--borde);
-  border-radius: 50%;
-  font-family: var(--fuente-titulos);
-  font-weight: 600;
-  font-size: 1.0625rem;
-}
-
-.nombre {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  grid-area: nombre;
-  font-weight: 800;
-}
-
-.rol {
-  padding: 1px 10px;
-  border-radius: var(--radio-control);
-  background: var(--tinta);
-  color: var(--miel);
-  font-size: 0.75rem;
-}
-
-.aporte {
-  grid-area: aporte;
-  color: var(--tinta-suave);
-  font-size: 0.875rem;
-}
-
-.invitar {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 14px;
-  border: 2px dashed var(--lino-borde);
-  border-radius: 18px;
-}
-
-/* Celdas de la colmena */
-
-.filas {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.filas > li + li {
-  padding-block-start: 4px;
-  border-block-start: 1px solid var(--lino);
-}
-
-.menu {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* Invitar */
-
-.invitacion {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.zumChica {
-  --tamano-zum: 96px;
-  align-self: center;
-}
-
-.enlace input {
-  inline-size: 100%;
-  min-block-size: 48px;
-  padding: 0 16px;
-  border: var(--borde);
-  border-radius: 16px;
+.archivada:hover {
   background: var(--cera-clara);
-  color: inherit;
-  font: inherit;
-  font-size: 0.9375rem;
-}
-
-.iconoDeBoton {
-  inline-size: 20px;
-  block-size: 20px;
-}
-
-.vence {
-  color: var(--tinta-suave);
-  font-size: 0.9375rem;
-}
-
-.enlaceDeTexto {
-  min-block-size: 44px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--tinta);
-  font: inherit;
-  font-weight: 800;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-
-.enlaceDeTexto:disabled {
-  color: var(--tinta-suave);
-  cursor: default;
-}
-
-/* Unirme */
-
-.unirme {
-  display: grid;
-  place-items: center;
-  min-block-size: 100dvh;
-  padding: 24px max(16px, env(safe-area-inset-left, 0px));
-  background: var(--miel);
-}
-
-.tarjetaDeUnirme {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  inline-size: 100%;
-  max-inline-size: 30rem;
-  padding: 32px 24px;
-  border: var(--borde);
-  border-radius: var(--radio-principal);
-  background: var(--blanco);
-  box-shadow: var(--sombra);
-  text-align: center;
-}
-
-.tarjetaDeUnirme .botones {
-  justify-content: center;
-}
-
-.zumMediana {
-  --tamano-zum: 160px;
-}
-
-.tituloDeUnirme {
-  font-weight: 600;
-  font-size: 1.75rem;
-}
-
-@media (max-width: 699px) {
-  .botones > * {
-    flex: 1 1 auto;
-  }
 }
