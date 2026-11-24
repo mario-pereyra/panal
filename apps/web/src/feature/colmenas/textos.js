@@ -199,7 +199,7 @@ export function textoDeCuadro(avance) {
   if (avance.cerrada)
     return `Cuadro ${CUADROS_POR_COLMENA} de ${CUADROS_POR_COLMENA}. Colmena cerrada.`;
   if (avance.total === 0) return "Sin celdas todavía.";
-  return `Cuadro ${avance.cuadro} de ${CUADROS_POR_COLMENA}. Faltan ${cuenta(avance.faltanParaElSiguiente, "celda", "celdas")} para el ${ordinalDeCuadro(avance.cuadro + 1)}.`;
+  return `Cuadro ${avance.cuadro} de ${CUADROS_POR_COLMENA}. ${avance.faltanParaElSiguiente === 1 ? "Falta" : "Faltan"} ${cuenta(avance.faltanParaElSiguiente, "celda", "celdas")} para el ${ordinalDeCuadro(avance.cuadro + 1)}.`;
 }
 
 export const rotuloDeCuadro = (numero) => `Cuadro ${numero}`;

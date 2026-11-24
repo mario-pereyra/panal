@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Link, useParams } from "react-router";
 import { Boton } from "../../componentes/ui/Controles.jsx";
 import { ErrorAlCargar, Silueta } from "../../componentes/ui/Estados.jsx";
@@ -278,6 +278,7 @@ function MenuDeColmena({ colmena, elegir, recuperar }) {
     elegir(siguiente);
   };
   const { permisos } = colmena;
+  const idDeLaNota = useId();
   return (
     <div className={estilos.menu}>
       {permisos.editar && !colmena.cerrada && (
@@ -299,10 +300,20 @@ function MenuDeColmena({ colmena, elegir, recuperar }) {
           {PASAR_LA_FUNDACION}
         </Boton>
       )}
-      <Boton tono="peligro" onClick={ir("salir")} disabled={!permisos.salir}>
+      {/* Con aria-disabled sigue en el orden del teclado y el lector anuncia por qué no se puede. */}
+      <Boton
+        tono="peligro"
+        onClick={permisos.salir ? ir("salir") : undefined}
+        aria-disabled={!permisos.salir || undefined}
+        aria-describedby={permisos.salir ? undefined : idDeLaNota}
+      >
         {SALIR_DE_LA_COLMENA}
       </Boton>
-      {!permisos.salir && <p className={estilos.nota}>{FUNDADORA_NO_SALE}</p>}
+      {!permisos.salir && (
+        <p id={idDeLaNota} className={estilos.nota}>
+          {FUNDADORA_NO_SALE}
+        </p>
+      )}
       {permisos.archivar && (
         <Boton tono="peligro" onClick={ir("archivar")}>
           {ARCHIVAR}

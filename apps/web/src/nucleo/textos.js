@@ -81,7 +81,7 @@ export const textoDeNivel = (oficio) => `Nivel ${oficio.nivel} · ${oficio.nombr
 
 /** "Faltan 60 gotas para Recolectora" */
 export const faltanGotasPara = (faltan, oficio) =>
-  `Faltan ${cuenta(faltan, "gota", "gotas")} para ${oficio}`;
+  `${faltan === 1 ? "Falta" : "Faltan"} ${cuenta(faltan, "gota", "gotas")} para ${oficio}`;
 
 /** "18 de 30 celdas llenas entre 4 abejas" */
 export const textoDeAvance = (avance, abejas) =>

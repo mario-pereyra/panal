@@ -54,19 +54,19 @@
 }
 
 @media (hover: hover) {
-  .tinta:not(:disabled):hover {
+  .tinta:not(:disabled, [aria-disabled="true"]):hover {
     background: var(--tinta-al-pasar);
   }
 
-  .claro:not(:disabled):hover {
+  .claro:not(:disabled, [aria-disabled="true"]):hover {
     background: var(--cera);
   }
 
-  .peligro:not(:disabled):hover {
+  .peligro:not(:disabled, [aria-disabled="true"]):hover {
     background: var(--coral-claro);
   }
 
-  .sutil:not(:disabled):hover {
+  .sutil:not(:disabled, [aria-disabled="true"]):hover {
     background: var(--lino);
   }
 }
@@ -78,7 +78,7 @@
       scale 0.2s var(--resorte);
   }
 
-  .boton:not(:disabled):active {
+  .boton:not(:disabled, [aria-disabled="true"]):active {
     scale: 0.96;
   }
 }
