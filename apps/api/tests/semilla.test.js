@@ -23,7 +23,7 @@ const contar = async (tabla) =>
   (await entorno.base.consulta(`select count(*)::int as n from ${tabla}`))[0].n;
 
 describe("semilla de demostración", () => {
-  test("Ana: seis semanas de historial, racha, nivel 4, dos reservas y tres celdas hoy", async () => {
+  test("Ana: seis semanas de historial, racha, nivel 5, dos reservas y tres celdas hoy", async () => {
     entorno.reloj.ahora = MARTES;
     const { sembrada } = await sembrar(entorno.base, { reloj: () => entorno.reloj.ahora });
     expect(sembrada).toBe(true);
@@ -35,9 +35,9 @@ describe("semilla de demostración", () => {
     expect(progreso.racha.actual).toBeGreaterThanOrEqual(12);
     expect(progreso.racha.actual).toBeLessThanOrEqual(14);
     expect(progreso.racha.reservas).toBe(2);
-    expect(progreso.oficio).toMatchObject({ nivel: 4, nombre: "Exploradora" });
-    expect(progreso.gotas.total).toBeGreaterThanOrEqual(450);
-    expect(progreso.gotas.total).toBeLessThan(700);
+    expect(progreso.oficio).toMatchObject({ nivel: 5, nombre: "Recolectora" });
+    expect(progreso.gotas.total).toBeGreaterThanOrEqual(700);
+    expect(progreso.gotas.total).toBeLessThan(1000);
 
     const panal = (await ana.get("/api/panal")).datos;
     const { hoy } = panal;
@@ -64,9 +64,11 @@ describe("semilla de demostración", () => {
       colmena: { nombre: "Proyecto final" },
     });
     const archivadas = (await ana.get("/api/actividades?ver=archivadas")).datos.actividades;
-    expect(archivadas).toEqual([
+    expect(archivadas.filter((actividad) => !actividad.colmena)).toEqual([
       expect.objectContaining({ tipo: "unica", archivadaEl: expect.any(String) }),
     ]);
+    // Las del viaje, archivado, también se ven ahí.
+    expect(archivadas.filter((actividad) => actividad.colmena?.archivada)).toHaveLength(6);
 
     // El historial empieza unas seis semanas atrás.
     const [{ primera }] = await entorno.base.consulta(
@@ -103,6 +105,15 @@ describe("semilla de demostración", () => {
 
     expect(feria.avance).toMatchObject({ porcentaje: 100, cerrada: true });
     expect(feria.cerradaEn).not.toBeNull();
+
+    // Las de Ana: una para quitar abejas y pasar la fundación, otra para recuperar.
+    const yo = (await ana.get("/api/yo")).datos;
+    const club = colmenas.find((colmena) => colmena.nombre === "Club de lectura");
+    expect(club).toMatchObject({ fundadoraId: yo.id, archivadaEn: null });
+    expect(club.integrantes).toHaveLength(4);
+    const viaje = colmenas.find((colmena) => colmena.nombre === "Viaje de promoción");
+    expect(viaje).toMatchObject({ fundadoraId: yo.id, archivadaEn: expect.any(String) });
+    expect(viaje.avance.cerrada).toBe(false);
 
     // "Hoy" muestra el proyecto, que tiene la celda más reciente.
     expect((await ana.get("/api/panal")).datos.colmena.nombre).toBe("Proyecto final");
@@ -144,7 +155,7 @@ describe("semilla de demostración", () => {
       expect({ racha: racha.actual, reservas: racha.reservas, nivel: oficio.nivel }).toEqual({
         racha: 14,
         reservas: 2,
-        nivel: 4,
+        nivel: 5,
       });
       expect(panal.celdasLlenas.filter((celda) => celda.dia === panal.hoy)).toHaveLength(3);
       // Hoy no está cerrado: quedan celdas para la demostración.

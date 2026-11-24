@@ -38,7 +38,7 @@ Solo hace falta [Vite+](https://viteplus.dev) (`vp`): instala y administra Node 
    vp run dev
    ```
 
-   Abre <http://localhost:5173> y entra con `ana@panal.test` y la contraseña `panal1234`. No hace falta base de datos ni archivo `.env`: sin `DATABASE_URL`, el servidor usa PGlite (PostgreSQL dentro de Node) en `apps/api/.datos/` y la primera vez carga una colmena de demostración con cuatro abejas (`ana`, `luis`, `sofia` y `diego`, todas `@panal.test`).
+   Abre <http://localhost:5173> y entra con `ana@panal.test` y la contraseña `panal1234`. No hace falta base de datos ni archivo `.env`: sin `DATABASE_URL`, el servidor usa PGlite (PostgreSQL dentro de Node) en `apps/api/.datos/` y la primera vez carga una demostración con siete abejas (`ana`, `luis`, `sofia`, `diego`, `valeria`, `tomas` y `camila`, todas `@panal.test`) y cuatro colmenas.
 
 ## Comandos
 

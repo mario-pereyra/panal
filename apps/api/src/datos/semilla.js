@@ -9,7 +9,7 @@ import { anotarAjustes } from "../servicios/ajustes.js";
 import { actualizarPersona, crearPersona } from "./personas.js";
 
 /**
- * Semilla de demostración: cuatro abejas, sus actividades, dos colmenas y unas
+ * Semilla de demostración: siete abejas, sus actividades, cuatro colmenas y unas
  * seis semanas de historial.
  *
  * Todas las fechas son relativas a hoy, para que el panal se vea vivo el día
@@ -22,11 +22,15 @@ import { actualizarPersona, crearPersona } from "./personas.js";
  *
  * - Una racha de 14 días con 2 reservas de miel. Antes, tres rachas cortas que
  *   se cortaron: por eso ya ganó el sello "Vuelta al panal".
- * - Nivel 4, Exploradora, entre 450 y 700 gotas.
- * - Hoy, 3 celdas llenas de 5.
+ * - Nivel 5, Recolectora, entre 700 y 1000 gotas.
+ * - Hoy, 3 celdas llenas. "Renovar el carnet universitario" está vencida y
+ *   "Preparar la exposición de Auditoría" es de prioridad alta.
  * - "Proyecto final" al 60 %: 18 de 30 celdas, en el cuadro 3, con entrega en 9 días.
  *   "Diseñar pantalla de reportes" está asignada a Ana y le toca hoy.
  * - "Feria de ciencias", cerrada al 100 %, en el colmenar.
+ * - "Club de lectura", fundada por Ana con Valeria, Tomás y Camila: 7 de 12
+ *   celdas y un enlace de invitación. Ahí se ven Quitar y Pasar la fundación.
+ * - "Viaje de promoción", fundada por Ana y archivada a medias: para Recuperar.
  */
 
 export const CLAVE_DE_DEMOSTRACION = "panal1234";
@@ -40,6 +44,9 @@ export const CORREOS_DE_DEMOSTRACION = {
   luis: "luis@panal.test",
   sofia: "sofia@panal.test",
   diego: "diego@panal.test",
+  valeria: "valeria@panal.test",
+  tomas: "tomas@panal.test",
+  camila: "camila@panal.test",
 };
 
 /**
@@ -162,6 +169,9 @@ export function planDeDemostracion(ahora) {
     luis: { nombre: "Luis", creadaEn: a(-41, 9), metaDiaria: 3 },
     sofia: { nombre: "Sofía", creadaEn: a(-35, 18), metaDiaria: 5 },
     diego: { nombre: "Diego", creadaEn: a(-40, 12), metaDiaria: 3 },
+    valeria: { nombre: "Valeria", creadaEn: a(-26, 19), metaDiaria: 3 },
+    tomas: { nombre: "Tomás", creadaEn: a(-24, 7), metaDiaria: 3 },
+    camila: { nombre: "Camila", creadaEn: a(-20, 16), metaDiaria: 3 },
   };
   for (const [clave, persona] of Object.entries(personas)) {
     Object.assign(persona, { id: randomUUID(), correo: CORREOS_DE_DEMOSTRACION[clave] });
@@ -185,6 +195,23 @@ export function planDeDemostracion(ahora) {
       entregaEl: dia(9),
       creadaEn: a(-30, 8),
     },
+    club: {
+      id: randomUUID(),
+      nombre: "Club de lectura",
+      descripcion: "Un libro por mes y una charla para comentarlo.",
+      fundadora: "ana",
+      entregaEl: dia(20),
+      creadaEn: a(-18, 20),
+    },
+    viaje: {
+      id: randomUUID(),
+      nombre: "Viaje de promoción",
+      descripcion: "Uyuni en las vacaciones, si juntamos el dinero.",
+      fundadora: "ana",
+      entregaEl: null,
+      creadaEn: a(-22, 21),
+      archivadaEn: a(-8, 20),
+    },
   };
   const integrantes = [
     ["feria", "luis", a(-40, 8)],
@@ -194,6 +221,13 @@ export function planDeDemostracion(ahora) {
     ["proyecto", "ana", a(-29, 19)],
     ["proyecto", "luis", a(-29, 20)],
     ["proyecto", "diego", a(-28, 11)],
+    ["club", "ana", a(-18, 20)],
+    ["club", "valeria", a(-18, 21)],
+    ["club", "tomas", a(-17, 8)],
+    ["club", "camila", a(-16, 18)],
+    ["viaje", "ana", a(-22, 21)],
+    ["viaje", "luis", a(-22, 22)],
+    ["viaje", "valeria", a(-21, 9)],
   ];
 
   /** @type {Array<{ clave?: string, id: string, creadaPor: string, colmenaId: string | null, asignadaA: string | null, titulo: string, tipo: "unica" | "recurrente", prioridadAlta: boolean, venceEl: string | null, regla: any, creadaEn: string, archivadaEn: string | null }>} */
@@ -273,6 +307,19 @@ export function planDeDemostracion(ahora) {
     titulo: "Entregar informe de avance",
     venceEl: hoy,
     creadaEn: a(-6, 9),
+  });
+  nuevaActividad({
+    ...deAna,
+    titulo: "Renovar el carnet universitario",
+    venceEl: dia(-3),
+    creadaEn: a(-9, 10),
+  });
+  nuevaActividad({
+    ...deAna,
+    titulo: "Preparar la exposición de Auditoría",
+    prioridadAlta: true,
+    venceEl: dia(2),
+    creadaEn: a(-2, 18),
   });
 
   // El historial de Ana, día por día. Cada día de racha llena una ronda: la del
@@ -388,6 +435,79 @@ export function planDeDemostracion(ahora) {
     }
   });
 
+  // Las rondas de quienes llegaron con el club de lectura.
+  const rondas = [
+    ["valeria", "Escribir en el diario", { clase: "diaria" }, -15],
+    ["tomas", "Correr 5 km", { clase: "dias", dias: [1, 3, 5] }, -14],
+    ["camila", "Estudiar francés", { clase: "veces", veces: 4 }, -14],
+  ];
+  for (const [quien, titulo, regla, desde] of rondas) {
+    const ronda = nuevaActividad({
+      creadaPor: id(quien),
+      titulo,
+      tipo: "recurrente",
+      regla,
+      creadaEn: a(desde - 1, 21),
+    });
+    for (let desplazamiento = desde; desplazamiento <= -1; desplazamiento += 1) {
+      const toca =
+        regla.clase === "veces" ? desplazamiento % 2 !== 0 : reglaToca(regla, dia(desplazamiento));
+      if (toca && desplazamiento !== -6) {
+        llenar(ronda, quien, desplazamiento, a(desplazamiento, 7 + (desplazamiento & 3), 20));
+      }
+    }
+  }
+
+  // Club de lectura: lo fundó Ana; 7 de 12 celdas llenas, la última antes que
+  // las del proyecto, para que Hoy siga mostrando el proyecto.
+  // Título, a quién está asignada, quién la llenó y cuándo, contado desde hoy.
+  /** @type {Array<[string, string | null, string | null, number | null]>} */
+  const DEL_CLUB = [
+    ["Elegir el primer libro", "ana", "ana", -17],
+    ["Leer los capítulos 1 a 3", null, "valeria", -15],
+    ["Resumir los capítulos 1 a 3", "tomas", "tomas", -13],
+    ["Leer los capítulos 4 a 6", null, "camila", -11],
+    ["Preparar preguntas para la charla", "valeria", "valeria", -9],
+    ["Reservar la sala de la biblioteca", "camila", "camila", -6],
+    ["Moderar la primera charla", "ana", "ana", -4],
+    ["Leer los capítulos 7 a 9", null, null, null],
+    ["Subir las notas de la charla", "tomas", null, null],
+    ["Escribir la reseña del libro", "ana", null, null],
+    ["Elegir el segundo libro", null, null, null],
+    ["Invitar a más abejas al club", "camila", null, null],
+  ];
+  DEL_CLUB.forEach(([titulo, asignada, quien, cuando], indice) => {
+    const actividad = nuevaActividad({
+      creadaPor: id("ana"),
+      colmenaId: colmenas.club.id,
+      asignadaA: id(asignada),
+      titulo,
+      venceEl: titulo === "Escribir la reseña del libro" ? dia(6) : null,
+      creadaEn: a(-18, 20, 10 + indice),
+    });
+    if (quien) llenar(actividad, quien, cuando, a(cuando, 18, indice));
+  });
+
+  // Viaje de promoción: Ana lo archivó a medias, para mostrar cómo se recupera.
+  const DEL_VIAJE = [
+    ["Cotizar los pasajes", "luis", "luis", -20],
+    ["Abrir la cuenta de ahorro", "ana", "ana", -19],
+    ["Vender rifas", "valeria", "valeria", -16],
+    ["Reservar el hotel", null, null, null],
+    ["Armar el itinerario", "ana", null, null],
+    ["Pedir permiso en la universidad", null, null, null],
+  ];
+  DEL_VIAJE.forEach(([titulo, asignada, quien, cuando], indice) => {
+    const actividad = nuevaActividad({
+      creadaPor: id("ana"),
+      colmenaId: colmenas.viaje.id,
+      asignadaA: id(asignada),
+      titulo,
+      creadaEn: a(-22, 21, 10 + indice),
+    });
+    if (quien) llenar(actividad, quien, cuando, a(cuando, 17, indice));
+  });
+
   const invitaciones = [
     {
       codigo: randomBytes(16).toString("base64url"),
@@ -395,6 +515,13 @@ export function planDeDemostracion(ahora) {
       creadaPor: id("sofia"),
       creadaEn: a(-1, 10),
       venceEn: a(6, 10),
+    },
+    {
+      codigo: randomBytes(16).toString("base64url"),
+      colmenaId: colmenas.club.id,
+      creadaPor: id("ana"),
+      creadaEn: a(-2, 19),
+      venceEn: a(5, 19),
     },
   ];
 
@@ -465,8 +592,10 @@ export async function sembrar(
     }
     for (const colmena of Object.values(plan.colmenas)) {
       await crearColmena(tx, { ...colmena, fundadoraId: plan.personas[colmena.fundadora].id });
-      if (colmena.cerradaEn)
-        await actualizarColmena(tx, colmena.id, { cerrada_en: colmena.cerradaEn });
+      await actualizarColmena(tx, colmena.id, {
+        cerrada_en: colmena.cerradaEn ?? null,
+        archivada_en: colmena.archivadaEn ?? null,
+      });
     }
     for (const [colmena, persona, unidaEn] of plan.integrantes) {
       await sumarIntegrante(tx, plan.colmenas[colmena].id, plan.personas[persona].id, unidaEn);
