@@ -74,19 +74,21 @@ La materia se dicta en JavaScript y el ejemplo del docente es `.jsx`. El día de
 El estado se organiza por funcionalidad, igual que el ejemplo del docente:
 
 ```
-src/app/store.js
-src/features/celdas/celdasSlice.js
-src/features/celdas/celdasSelectors.js
-src/features/celdas/useCeldas.js
-src/features/celdas/components/
+src/store/index.js
+src/feature/celdas/celdasSlice.js
+src/feature/celdas/celdasSelector.js
+src/feature/celdas/useCeldas.js
+src/feature/celdas/Celdas.jsx
 ```
+
+El store vive en `src/store/` y no en `src/app/store.js` como en clase: así todo Redux que no es de una pantalla (el store, RTK Query, la lectura de errores) queda en una carpeta con ese nombre. Ver `07-decisiones.md`.
 
 Hay dos clases de estado y cada una va donde corresponde:
 
 - **Estado de la aplicación**, en slices escritos a mano: sesión, ventanas abiertas, cola de celebraciones, borradores de formularios, preferencias y avisos. Es el Redux que se evalúa: reducers puros y selectores memorizados, como `selectEstadoDeZum` o `selectPanalDeHoy`, que derivan lo que se ve a partir de lo que se sabe.
 - **Datos del servidor**, con RTK Query: actividades, colmenas y reportes. RTK Query es parte de Redux Toolkit y guarda todo en el mismo store. Aporta lo que más cuesta hacer bien a mano: caché, recarga al volver a la pestaña y actualización optimista al marcar una celda.
 
-Los efectos, como lanzar la celebración cuando el servidor confirma que se cerró el panal, van en el *listener middleware* de Redux Toolkit. Así los reducers se mantienen puros.
+Los efectos, como lanzar la celebración cuando el servidor confirma que se cerró el panal, van junto a lo que los provoca: en el hook que llama a la mutación o en un thunk. Así los reducers se mantienen puros. Al principio iban en el *listener middleware* de Redux Toolkit; se dejó de usar porque escondía qué pasaba después de cada acción (ver `07-decisiones.md`).
 
 **Descartado.** TanStack Query: sacaría los datos del servidor fuera de Redux y debilitaría el requisito del enunciado. Zustand o Context: no cumplen el enunciado.
 

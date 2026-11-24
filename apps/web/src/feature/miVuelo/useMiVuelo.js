@@ -1,43 +1,35 @@
-import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { leerError } from "../../api/errores.js";
-import { useCambiarPerfilMutation, useObtenerProgresoQuery } from "../../api/panalApi.js";
-import { useAvisar } from "../avisos/useAvisos.js";
-import { useConexion } from "../conexion/useConexion.js";
-import { useSalir, useYo } from "../sesion/useSesion.js";
-import { abrirSello, cerrarSello, elegirMovimiento } from "./miVueloSlice.js";
+import { useCambiarPerfilMutation, useObtenerProgresoQuery } from "../../store/api.js";
+import { useAvisarResultado } from "../../nucleo/avisos/useAvisos.js";
+import { useConexion } from "../../nucleo/conexion/useConexion.js";
+import { useSalir, useYo } from "../../nucleo/cuenta/useCuenta.js";
+import { useMovimiento } from "../../nucleo/preferencias/usePreferencias.js";
+import { abrirSello, cerrarSello } from "./miVueloSlice.js";
+import { AJUSTE_GUARDADO, ajusteNoGuardado } from "./textos.js";
 import {
   selectAjustes,
   selectGotasYRacha,
-  selectMovimiento,
+  selectInvernada,
   selectOficioDeVuelo,
   selectSello,
   selectSellos,
 } from "./miVueloSelector.js";
 
-/** Todo lo que muestra y cambia Mi vuelo. */
 export function useMiVuelo() {
   const dispatch = useDispatch();
-  const avisar = useAvisar();
+  const avisarResultado = useAvisarResultado();
+  const movimiento = useMovimiento();
   const { yo } = useYo();
   const consulta = useObtenerProgresoQuery();
   const [cambiarPerfil, cambio] = useCambiarPerfilMutation();
   const conexion = useConexion();
   const { cerrarSesion, saliendo } = useSalir();
 
-  /** Guarda un ajuste al momento y confirma con un aviso. */
-  const guardarAjuste = async (cambios, confirmacion = "Ajuste guardado") => {
-    const resultado = await cambiarPerfil(cambios);
-    if (resultado.error) {
-      avisar({
-        texto: `No se guardó el ajuste. ${leerError(resultado.error).mensaje}`,
-        tono: "error",
-      });
-      return false;
-    }
-    avisar({ texto: confirmacion });
-    return true;
-  };
+  const guardarAjuste = async (cambios, confirmacion = AJUSTE_GUARDADO) =>
+    avisarResultado(await cambiarPerfil(cambios), {
+      exito: confirmacion,
+      error: (error) => ajusteNoGuardado(error.mensaje),
+    });
 
   return {
     yo,
@@ -51,24 +43,12 @@ export function useMiVuelo() {
     cerrarSello: () => dispatch(cerrarSello()),
     resumen: useSelector(selectGotasYRacha),
     ajustes: useSelector(selectAjustes),
+    invernada: useSelector(selectInvernada),
     guardarAjuste,
     guardando: cambio.isLoading,
-    movimiento: useSelector(selectMovimiento),
-    elegirMovimiento: (valor) => dispatch(elegirMovimiento(valor)),
+    ...movimiento,
     ...conexion,
     cerrarSesion,
     saliendo,
   };
-}
-
-/**
- * Aplica la preferencia de movimiento a toda la página. Se usa una vez, en la
- * raíz: `base.css` apaga animaciones y transiciones con `data-movimiento`.
- */
-export function useAplicarMovimiento() {
-  const movimiento = useSelector(selectMovimiento);
-  useEffect(() => {
-    if (movimiento === "reducido") document.documentElement.dataset.movimiento = "reducido";
-    else delete document.documentElement.dataset.movimiento;
-  }, [movimiento]);
 }

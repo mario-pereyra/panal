@@ -1,7 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { leer } from "../../app/almacen.js";
+import { recuerdo } from "../../lib/almacen.js";
 
-export const CLAVE_DE_FRANJA = "panal:franja-cerrada";
+/** Cerrada hoy, la franja de la racha no vuelve a aparecer al recargar. */
+export const recuerdoDeFranja = recuerdo(
+  "panal:franja-cerrada",
+  (estado) => estado.hoy.franjaCerradaEl,
+);
 
 /**
  * Lo que solo existe en la pantalla "Hoy": el día en que se cerró la franja de
@@ -9,7 +13,7 @@ export const CLAVE_DE_FRANJA = "panal:franja-cerrada";
  */
 const hoySlice = createSlice({
   name: "hoy",
-  initialState: () => ({ franjaCerradaEl: leer(CLAVE_DE_FRANJA) }),
+  initialState: () => ({ franjaCerradaEl: recuerdoDeFranja.leido() }),
   reducers: {
     cerrarFranja(estado, accion) {
       estado.franjaCerradaEl = accion.payload;

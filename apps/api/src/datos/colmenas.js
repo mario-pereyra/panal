@@ -182,7 +182,14 @@ export async function crearColmena(
 }
 
 /** Columnas que se pueden cambiar de una colmena. Los nombres son fijos: nunca vienen de la petición. */
-const COLUMNAS_EDITABLES = ["nombre", "descripcion", "entrega_el", "archivada_en", "cerrada_en"];
+const COLUMNAS_EDITABLES = [
+  "nombre",
+  "descripcion",
+  "entrega_el",
+  "archivada_en",
+  "cerrada_en",
+  "fundadora_id",
+];
 
 /**
  * @param {Consultor} db

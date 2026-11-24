@@ -1,13 +1,14 @@
 import { gotasDeCelda } from "@panal/motor";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { leerError } from "../../api/errores.js";
+import { zonaDelDispositivo } from "../../lib/dispositivo.js";
+import { leerError } from "../../store/errores.js";
 import {
   useCambiarPerfilMutation,
   useCompletarPrimerVueloMutation,
   useGuardarActividadMutation,
   useLlenarCeldaMutation,
-} from "../../api/panalApi.js";
+} from "../../store/api.js";
 import {
   actividadCreada,
   celdaLlenada,
@@ -21,8 +22,8 @@ import { selectPrimerVuelo } from "./primerVueloSelector.js";
 const GOTAS_DE_LA_PRIMERA = gotasDeCelda({ tipo: "recurrente" });
 
 /**
- * Los tres pasos del primer vuelo. Cada paso se guarda en el servidor antes de
- * seguir; si falla, se queda en el mismo paso con lo elegido.
+ * Cada paso del primer vuelo se guarda en el servidor antes de seguir; si
+ * falla, se queda en el mismo paso con lo elegido.
  */
 export function usePrimerVuelo() {
   const dispatch = useDispatch();
@@ -33,14 +34,14 @@ export function usePrimerVuelo() {
   const [llenarCelda, celda] = useLlenarCeldaMutation();
   const [completar, terminado] = useCompletarPrimerVueloMutation();
 
-  /** Paso 1: el tamaño del panal y la zona horaria de este dispositivo. */
   const confirmarMeta = async () => {
-    const zonaHoraria = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const resultado = await cambiarPerfil({ metaDiaria: recorrido.meta, zonaHoraria });
+    const resultado = await cambiarPerfil({
+      metaDiaria: recorrido.meta,
+      zonaHoraria: zonaDelDispositivo(),
+    });
     if (!resultado.error) dispatch(irAlPaso(2));
   };
 
-  /** Paso 2: la primera actividad, una recurrente diaria. */
   const crearPrimeraCelda = async ({ titulo }) => {
     const id = recorrido.actividadId ?? crypto.randomUUID();
     const resultado = await guardarActividad({
@@ -52,7 +53,6 @@ export function usePrimerVuelo() {
     if (!resultado.error) dispatch(actividadCreada({ id, titulo }));
   };
 
-  /** Paso 3: llenarla. */
   const llenarPrimeraCelda = async () => {
     if (recorrido.celdaId || celda.isLoading) return;
     const id = crypto.randomUUID();

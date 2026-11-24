@@ -12,10 +12,10 @@
   --tinta: #2a1b0a;
   --tinta-suave: #6b5a45;
   --tinta-sobre-miel: #5a3d00;
+  --tinta-al-pasar: #47300f;
 
   /* Color: miel y cera */
   --miel: #ffc421;
-  --miel-zum: #ffd23f;
   --miel-oscura: #e69a00;
   --miel-profunda: #d98200;
   --miel-clara: #ffe08a;
@@ -51,8 +51,24 @@
   --radio-principal: 32px;
   --radio-tarjeta: 28px;
   --radio-control: 999px;
+  --radio-grande: 24px;
+  --radio-amplio: 22px;
+  --radio-recuadro: 20px;
+  --radio-medio: 18px;
+  --radio-campo: 16px;
+  --radio-chico: 14px;
+  --radio-diminuto: 5px;
   --sombra: 0 6px 0 var(--tinta);
+  --sombra-alzada: 0 8px 0 var(--tinta);
   --sombra-chica: 0 4px 0 var(--tinta);
+  --sombra-hundida: 0 1px 0 var(--tinta);
+  --sombra-velada: 0 6px 0 color-mix(in srgb, var(--tinta) 35%, transparent);
+
+  /* Tinta transparente: lo que se pasa por encima y el fondo tras una ventana */
+  --velo: color-mix(in srgb, var(--tinta) 8%, transparent);
+  --velo-de-fondo: color-mix(in srgb, var(--tinta) 45%, transparent);
+
+  --opacidad-deshabilitado: 0.5;
 
   /* Espacio */
   --ancho-maximo: 1296px;
@@ -63,14 +79,9 @@
   --resorte: cubic-bezier(0.34, 1.56, 0.64, 1);
   --suave: cubic-bezier(0.2, 0.7, 0.2, 1);
 
-  /* Lado mínimo de lo que se toca: 24 px con ratón, 44 px con el dedo */
-  --toque: 24px;
-}
-
-@media (pointer: coarse) {
-  :root {
-    --toque: 44px;
-  }
+  /* Lado mínimo de lo que se toca; los campos de formulario son más altos */
+  --toque: 44px;
+  --toque-amplio: 48px;
 }
 
 /* Desde tableta: más aire alrededor */

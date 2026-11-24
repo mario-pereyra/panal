@@ -1,0 +1,46 @@
+.enjambre {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 20px;
+}
+
+.abeja {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9375rem;
+}
+
+.muestra {
+  flex: none;
+  inline-size: 16px;
+  block-size: 16px;
+  border: 2px solid var(--tinta);
+  border-radius: var(--radio-diminuto);
+}
+
+.nombre {
+  flex: 1 1 auto;
+  font-weight: 800;
+}
+
+.aporte {
+  color: var(--tinta-suave);
+  white-space: nowrap;
+}
+
+/* En una tarjeta angosta, una abeja por fila. */
+@container (inline-size < 300px) {
+  .enjambre {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.verTodas {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--toque);
+  font-weight: 800;
+  text-underline-offset: 3px;
+}

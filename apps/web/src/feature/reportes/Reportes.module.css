@@ -11,7 +11,7 @@
   gap: 2px;
   padding: 14px 18px;
   border: var(--borde);
-  border-radius: 20px;
+  border-radius: var(--radio-recuadro);
   background: var(--blanco);
   box-shadow: var(--sombra-chica);
 }
@@ -39,15 +39,12 @@
 }
 
 .grafica {
+  composes: tarjeta from "../../componentes/ui/superficie.module.css";
   display: flex;
   flex-direction: column;
   gap: 12px;
   min-inline-size: 0;
   padding: 20px;
-  border: var(--borde);
-  border-radius: var(--radio-tarjeta);
-  background: var(--blanco);
-  box-shadow: var(--sombra);
   container-type: inline-size;
 }
 
@@ -79,14 +76,9 @@
 }
 
 .vacio {
+  composes: tarjeta from "../../componentes/ui/superficie.module.css";
   padding: 24px;
-  border: var(--borde);
-  border-radius: var(--radio-tarjeta);
-  background: var(--blanco);
-  box-shadow: var(--sombra);
 }
-
-/* Constancia y su leyenda */
 
 .constancia {
   display: flex;
@@ -99,43 +91,6 @@
   flex: 1 1 260px;
   max-inline-size: 420px;
 }
-
-.leyenda {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 0.875rem;
-}
-
-.leyenda li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.muestra {
-  inline-size: 16px;
-  block-size: 18px;
-  flex: none;
-  fill: var(--lino);
-  stroke: var(--tinta);
-  stroke-width: 1.5;
-  stroke-linejoin: round;
-}
-
-.muestra[data-nivel="1"] {
-  fill: var(--cera);
-}
-
-.muestra[data-nivel="2"] {
-  fill: var(--miel);
-}
-
-.muestra[data-nivel="3"] {
-  fill: var(--miel-oscura);
-}
-
-/* Recurrentes */
 
 .rondas {
   display: flex;
@@ -174,8 +129,6 @@
   }
 }
 
-/* Colmenas */
-
 .colmenas {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
@@ -206,10 +159,6 @@
   gap: 10px;
 }
 
-.aportes li > span:nth-child(3) > span {
-  background: var(--color-abeja);
-}
-
 .avatar {
   display: grid;
   place-items: center;
@@ -232,8 +181,6 @@
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
-
-/* Zum al pie */
 
 .zum {
   display: flex;

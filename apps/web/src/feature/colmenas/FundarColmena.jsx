@@ -1,11 +1,20 @@
 import { cambiosDeColmena, nuevaColmena } from "@panal/contratos";
-import { Boton } from "../../componentes/Controles.jsx";
-import { AreaDeTexto, Campo, ErrorDelFormulario } from "../../componentes/Formulario.jsx";
-import { useFormulario } from "../../componentes/useFormulario.js";
-import { useCerrarVentana, Ventana } from "../../componentes/Ventana.jsx";
-import estilos from "./Colmenas.module.css";
+import { AvisoSinConexion, Boton } from "../../componentes/ui/Controles.jsx";
+import { AreaDeTexto, Campo, ErrorDelFormulario } from "../../componentes/ui/Formulario.jsx";
+import { useFormulario } from "../../componentes/ui/useFormulario.js";
+import { useCerrarVentana, Ventana } from "../../componentes/ui/Ventana.jsx";
+import estilos from "./FundarColmena.module.css";
+import {
+  CANCELAR,
+  DESCRIPCION,
+  FECHA_DE_ENTREGA,
+  FORMULARIO_DE_COLMENA,
+  GUARDANDO,
+  NOMBRE,
+  SIN_CONEXION_AL_FUNDAR,
+} from "./textos.js";
 import { useFormularioDeColmena } from "./useColmenas.js";
-import { mensajeGeneral } from "../../api/errores.js";
+import { mensajeGeneral } from "../../store/errores.js";
 
 /** De los campos a la forma del contrato: lo vacío viaja como nulo. */
 const aColmena = (valores) => ({
@@ -14,33 +23,19 @@ const aColmena = (valores) => ({
   entregaEl: valores.entregaEl || null,
 });
 
-/**
- * Fundar una colmena (ventana de P07) o editarla (desde P08).
- *
- * @param {object} props
- * @param {() => void} props.alCerrar
- * @param {object} [props.colmena] Si se edita.
- * @param {string} [props.hoy]
- */
-export function FundarColmena({ alCerrar, colmena, hoy }) {
+/** Fundar una colmena (ventana de P07) o editarla (desde P08), si llega `colmena`. */
+export function FundarColmena({ alCerrar, colmena }) {
+  const textos = colmena ? FORMULARIO_DE_COLMENA.editar : FORMULARIO_DE_COLMENA.fundar;
   return (
-    <Ventana
-      titulo={colmena ? "Editar colmena" : "Fundar una colmena"}
-      descripcion={
-        colmena
-          ? undefined
-          : "Un proyecto con su enjambre: cada celda llena suma para todas las abejas."
-      }
-      alCerrar={alCerrar}
-    >
-      <Campos colmena={colmena} hoy={hoy} />
+    <Ventana titulo={textos.titulo} descripcion={textos.descripcion} alCerrar={alCerrar}>
+      <Campos colmena={colmena} textoDeEnviar={textos.enviar} />
     </Ventana>
   );
 }
 
-function Campos({ colmena, hoy }) {
+function Campos({ colmena, textoDeEnviar }) {
   const cerrar = useCerrarVentana();
-  const { guardar, guardando, error, enLinea } = useFormularioDeColmena(colmena);
+  const { guardar, guardando, error, enLinea, hoy } = useFormularioDeColmena(colmena);
   const formulario = useFormulario(
     colmena ? cambiosDeColmena : nuevaColmena,
     {
@@ -61,28 +56,23 @@ function Campos({ colmena, hoy }) {
     <form ref={formulario.formulario} className={estilos.formulario} onSubmit={enviar} noValidate>
       <ErrorDelFormulario>{mensajeGeneral(error)}</ErrorDelFormulario>
       <Campo
-        etiqueta="Nombre"
+        etiqueta={NOMBRE}
         autoComplete="off"
         required
         autoFocus
         {...formulario.campo("nombre")}
       />
-      <AreaDeTexto etiqueta="Descripción (opcional)" {...formulario.campo("descripcion")} />
-      <Campo
-        etiqueta="Fecha de entrega (opcional)"
-        type="date"
-        min={hoy}
-        {...formulario.campo("entregaEl")}
-      />
+      <AreaDeTexto etiqueta={DESCRIPCION} {...formulario.campo("descripcion")} />
+      <Campo etiqueta={FECHA_DE_ENTREGA} type="date" min={hoy} {...formulario.campo("entregaEl")} />
       <div className={estilos.botones}>
         <Boton tono="sutil" onClick={cerrar}>
-          Cancelar
+          {CANCELAR}
         </Boton>
         <Boton type="submit" disabled={guardando || !enLinea}>
-          {guardando ? "Guardando…" : colmena ? "Guardar" : "Fundar"}
+          {guardando ? GUARDANDO : textoDeEnviar}
         </Boton>
       </div>
-      {!enLinea && <p className={estilos.nota}>Sin conexión: hace falta señal para guardar.</p>}
+      {!enLinea && <AvisoSinConexion>{SIN_CONEXION_AL_FUNDAR}</AvisoSinConexion>}
     </form>
   );
 }

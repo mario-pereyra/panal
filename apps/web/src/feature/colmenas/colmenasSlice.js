@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-/** Qué celdas de la colmena se están mirando en su detalle. */
 const colmenasSlice = createSlice({
   name: "colmenas",
   initialState: () => ({ pestanaDeColmena: "pendientes" }),

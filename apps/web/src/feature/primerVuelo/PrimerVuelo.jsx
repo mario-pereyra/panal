@@ -1,17 +1,41 @@
 import { soloTitulo } from "@panal/contratos";
 import { useEffect, useRef } from "react";
-import { Boton, Ficha } from "../../componentes/Controles.jsx";
-import { Campo, ErrorDelFormulario } from "../../componentes/Formulario.jsx";
-import { puntosDeHexagono } from "../../componentes/hexagono.js";
-import { IconoGota, IconoTarro } from "../../componentes/iconos.jsx";
-import { PanalDeHoy } from "../../componentes/PanalDeHoy.jsx";
-import { SelloDeCera } from "../../componentes/SelloDeCera.jsx";
-import { textoDeGotas } from "../../componentes/textos.js";
-import { useFormulario } from "../../componentes/useFormulario.js";
-import { Zum } from "../../componentes/Zum.jsx";
+import { Boton, Ficha } from "../../componentes/ui/Controles.jsx";
+import { Campo, ErrorDelFormulario } from "../../componentes/ui/Formulario.jsx";
+import { puntosDeHexagono } from "../../componentes/ui/hexagono.js";
+import { IconoGota, IconoTarro } from "../../componentes/panal/iconos.jsx";
+import { PanalDeHoy } from "../../componentes/panal/PanalDeHoy.jsx";
+import { Principal, TituloDePestana } from "../../componentes/ui/Pagina.jsx";
+import { SelloDeCera } from "../../componentes/panal/SelloDeCera.jsx";
+import { textoDeGotas } from "../../nucleo/textos.js";
+import { useFormulario } from "../../componentes/ui/useFormulario.js";
+import { Zum } from "../../componentes/panal/Zum.jsx";
 import estilos from "./PrimerVuelo.module.css";
-import { SUGERENCIAS, TAMANOS, TITULOS_DE_PASO } from "./textos.js";
+import {
+  ABRIENDO_TU_PANAL,
+  CREANDO,
+  CREAR_CELDA,
+  EJEMPLO_DE_ACTIVIDAD,
+  GUARDANDO,
+  IR_A_MI_PANAL,
+  O_ELIGE_UNA,
+  pasoDe,
+  PRIMERA_CELDA_LLENA,
+  QUE_VAS_A_HACER,
+  RESERVA_DE_REGALO,
+  SE_PUEDE_CAMBIAR,
+  SEGUIR,
+  SELLO_PRIMERA_CELDA,
+  SUGERENCIAS,
+  TAMANO_DEL_PANAL,
+  TAMANOS,
+  TITULOS_DE_PASO,
+  TOCALA_AL_CUMPLIRLA,
+  VOLVER,
+} from "./textos.js";
 import { usePrimerVuelo } from "./usePrimerVuelo.js";
+
+const ANCHO_DE_PASO = 32;
 
 /** P03. Primer vuelo: elegir la meta diaria y cumplir la primera actividad. */
 export function PrimerVuelo() {
@@ -26,24 +50,30 @@ export function PrimerVuelo() {
   }, [vuelo.paso]);
 
   return (
-    <main id="contenido" className={estilos.primerVuelo}>
-      <title>{`${TITULOS_DE_PASO[vuelo.paso - 1]} · Panal`}</title>
+    <Principal className={estilos.primerVuelo}>
+      <TituloDePestana>{TITULOS_DE_PASO[vuelo.paso - 1]}</TituloDePestana>
       <header className={estilos.cabeza}>
+        {/* Zum guía el recorrido y celebra la primera celda: aquí no rigen los estados del día del motor. */}
         <Zum
           className={estilos.zum}
           estado={vuelo.celdaId ? "celebrando" : "animando"}
           tamanos="120px"
         />
         <div className={estilos.pasos}>
-          <p className="solo-lectores">{`Paso ${vuelo.paso} de 3`}</p>
-          <svg width="96" height="28" viewBox="0 0 96 28" aria-hidden="true">
-            {[1, 2, 3].map((paso) => (
+          <p className="solo-lectores">{pasoDe(vuelo.paso, TITULOS_DE_PASO.length)}</p>
+          <svg
+            width={ANCHO_DE_PASO * TITULOS_DE_PASO.length}
+            height="28"
+            viewBox={`0 0 ${ANCHO_DE_PASO * TITULOS_DE_PASO.length} 28`}
+            aria-hidden="true"
+          >
+            {TITULOS_DE_PASO.map((_, indice) => (
               <polygon
-                key={paso}
+                key={indice}
                 className={estilos.paso}
-                data-hecho={paso <= vuelo.paso ? "" : undefined}
+                data-hecho={indice < vuelo.paso ? "" : undefined}
                 points={puntosDeHexagono(12)}
-                transform={`translate(${16 + (paso - 1) * 32} 14)`}
+                transform={`translate(${ANCHO_DE_PASO / 2 + indice * ANCHO_DE_PASO} 14)`}
               />
             ))}
           </svg>
@@ -58,7 +88,7 @@ export function PrimerVuelo() {
       {vuelo.paso === 1 && <ElegirTamano vuelo={vuelo} />}
       {vuelo.paso === 2 && <PrimeraCelda vuelo={vuelo} />}
       {vuelo.paso === 3 && <Llenarla vuelo={vuelo} />}
-    </main>
+    </Principal>
   );
 }
 
@@ -72,7 +102,7 @@ function ElegirTamano({ vuelo }) {
       }}
     >
       <fieldset className={estilos.tamanos}>
-        <legend className="solo-lectores">Tamaño del panal de cada día</legend>
+        <legend className="solo-lectores">{TAMANO_DEL_PANAL}</legend>
         {TAMANOS.map((tamano) => (
           <label key={tamano.meta} className={estilos.tamano}>
             <input
@@ -82,20 +112,15 @@ function ElegirTamano({ vuelo }) {
               checked={vuelo.meta === tamano.meta}
               onChange={() => vuelo.elegirMeta(tamano.meta)}
             />
-            <PanalDeHoy
-              className={estilos.miniatura}
-              llenas={0}
-              meta={tamano.meta}
-              descripcion=""
-            />
+            <PanalDeHoy className={estilos.miniatura} llenas={0} meta={tamano.meta} />
             <span className={estilos.nombreDeTamano}>{tamano.nombre}</span>
             <span className={estilos.detalleDeTamano}>{tamano.detalle}</span>
           </label>
         ))}
       </fieldset>
-      <p className={estilos.nota}>Puedes cambiarlo cuando quieras desde Mi vuelo.</p>
+      <p className={estilos.nota}>{SE_PUEDE_CAMBIAR}</p>
       <Boton type="submit" className={estilos.seguir} disabled={vuelo.guardando}>
-        {vuelo.guardando ? "Guardando…" : "Seguir"}
+        {vuelo.guardando ? GUARDANDO : SEGUIR}
       </Boton>
     </form>
   );
@@ -111,14 +136,14 @@ function PrimeraCelda({ vuelo }) {
       noValidate
     >
       <Campo
-        etiqueta="¿Qué vas a hacer cada día?"
-        placeholder="Por ejemplo, tomar agua"
+        etiqueta={QUE_VAS_A_HACER}
+        placeholder={EJEMPLO_DE_ACTIVIDAD}
         autoComplete="off"
         required
         {...formulario.campo("titulo")}
       />
       <div className={estilos.sugerencias}>
-        <p className={estilos.nota}>O elige una:</p>
+        <p className={estilos.nota}>{O_ELIGE_UNA}</p>
         <ul role="list">
           {SUGERENCIAS.map((sugerencia) => (
             <li key={sugerencia}>
@@ -135,10 +160,10 @@ function PrimeraCelda({ vuelo }) {
       </div>
       <div className={estilos.acciones}>
         <Boton tono="sutil" onClick={vuelo.volver}>
-          Volver
+          {VOLVER}
         </Boton>
         <Boton type="submit" disabled={vuelo.guardando}>
-          {vuelo.guardando ? "Creando…" : "Crear celda"}
+          {vuelo.guardando ? CREANDO : CREAR_CELDA}
         </Boton>
       </div>
     </form>
@@ -164,9 +189,7 @@ function Llenarla({ vuelo }) {
         <span className={estilos.tituloDeCelda}>{vuelo.titulo}</span>
       </label>
       <p id="ayuda-primera-celda" className={estilos.nota}>
-        {llena
-          ? "¡Primera celda llena!"
-          : "Tócala cuando la cumplas. Si ya lo hiciste hoy, también vale."}
+        {llena ? PRIMERA_CELDA_LLENA : TOCALA_AL_CUMPLIRLA}
       </p>
 
       {/* Lo ganado aparece al llenarla, y se anuncia. */}
@@ -176,10 +199,10 @@ function Llenarla({ vuelo }) {
             <Ficha icono={<IconoGota />}>{textoDeGotas(vuelo.gotas)}</Ficha>
             <div className={estilos.sello}>
               <SelloDeCera id="primera-celda" ganado tamano={64} />
-              <p>Sello de cera: Primera celda</p>
+              <p>{SELLO_PRIMERA_CELDA}</p>
             </div>
             <p className={estilos.regalo}>
-              <IconoTarro /> Te regalamos una reserva de miel: protege tu racha un día.
+              <IconoTarro /> {RESERVA_DE_REGALO}
             </p>
           </>
         )}
@@ -187,7 +210,7 @@ function Llenarla({ vuelo }) {
 
       {llena && (
         <Boton onClick={vuelo.irAMiPanal} disabled={vuelo.guardando} className={estilos.seguir}>
-          {vuelo.guardando ? "Abriendo tu panal…" : "Ir a mi panal"}
+          {vuelo.guardando ? ABRIENDO_TU_PANAL : IR_A_MI_PANAL}
         </Boton>
       )}
     </div>

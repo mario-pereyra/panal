@@ -1,0 +1,206 @@
+.fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-block-size: 58px;
+}
+
+/* El dibujo de una celda que no se llena desde esta lista. */
+.hexagono {
+  flex: none;
+  inline-size: var(--toque);
+  block-size: var(--toque);
+}
+
+.hexagono polygon {
+  fill: var(--cera-clara);
+  stroke: var(--lino-borde);
+  stroke-width: 2.5;
+  stroke-dasharray: 4 3;
+  stroke-linejoin: round;
+}
+
+.fila[data-llena] .hexagono polygon {
+  fill: var(--miel);
+  stroke: var(--tinta);
+  stroke-dasharray: none;
+}
+
+.textos {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+/* Todo el bloque de textos es la zona de toque del enlace. */
+.enlace {
+  color: inherit;
+  text-decoration: none;
+}
+
+.enlace::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
+
+.enlace:hover {
+  text-decoration: underline;
+}
+
+.titulo {
+  font-weight: 800;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.detalle {
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  color: var(--tinta-suave);
+}
+
+.etiqueta {
+  display: inline-block;
+  margin-inline-start: 8px;
+  padding: 1px 8px;
+  border-radius: var(--radio-control);
+  background: var(--cera);
+  color: var(--tinta);
+  font-weight: 800;
+  font-size: 0.75rem;
+}
+
+.gotas {
+  flex: none;
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  font-size: 1.0625rem;
+  color: var(--tinta-suave);
+}
+
+/* Las gotas de una celda llena ya son tuyas: pasan a tinta. */
+.fila[data-llena] .gotas {
+  color: var(--tinta);
+}
+
+/* Lista de filas separadas por una línea, como en Celdas y en una colmena. */
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lista > li + li {
+  padding-block-start: 4px;
+  border-block-start: 1px solid var(--lino);
+}
+
+/* La casilla. La etiqueta es la zona que se toca: 44 px, aunque el hexágono sea más pequeño. */
+.casilla {
+  position: relative;
+  display: block;
+  flex: none;
+  inline-size: var(--toque);
+  block-size: var(--toque);
+  color: var(--tinta);
+  cursor: pointer;
+}
+
+/* La casilla real cubre toda la zona, invisible pero presente y enfocable. */
+.control {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.dibujo {
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: var(--radio-chico);
+  /* Los toques son para la casilla, no para el dibujo. */
+  pointer-events: none;
+}
+
+.celda {
+  fill: var(--blanco);
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.marca {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* La marca se dibuja de principio a fin: mide 1 gracias a pathLength. */
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.control:checked + .dibujo .celda {
+  fill: var(--miel);
+}
+
+.control:checked + .dibujo .marca {
+  stroke-dashoffset: 0;
+}
+
+.control:disabled,
+.control:disabled + .dibujo {
+  cursor: not-allowed;
+  opacity: var(--opacidad-deshabilitado);
+}
+
+.control:focus-visible + .dibujo {
+  outline: 3px solid var(--tinta);
+  outline-offset: 1px;
+}
+
+@media (hover: hover) {
+  .control:not(:checked):hover + .dibujo .celda {
+    fill: var(--cera);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .celda {
+    transition: fill 0.18s var(--suave);
+  }
+
+  .marca {
+    transition: stroke-dashoffset 0.28s var(--suave);
+  }
+
+  .dibujo {
+    transition: scale 0.25s var(--resorte);
+  }
+
+  .control:active + .dibujo {
+    scale: 0.88;
+  }
+}
+
+/* Con colores forzados por el sistema, la celda llena se distingue igual. */
+@media (forced-colors: active) {
+  .celda {
+    fill: Canvas;
+  }
+
+  .control:checked + .dibujo .celda {
+    fill: Highlight;
+  }
+
+  .control:checked + .dibujo .marca {
+    stroke: HighlightText;
+  }
+}

@@ -38,3 +38,6 @@ export const ERRORES = {
 
 /** Prioridades altas activas que puede tener una persona a la vez. */
 export const MAXIMO_DE_PRIORIDAD_ALTA = 3;
+
+/** La meta de una cuenta nueva; la base de datos usa el mismo valor por defecto. */
+export const META_POR_DEFECTO = 5;

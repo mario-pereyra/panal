@@ -1,7 +1,11 @@
 import { Navigate, Outlet, useLocation } from "react-router";
-import { Silueta } from "../../componentes/Estados.jsx";
-import { SinConexion } from "../errores/Errores.jsx";
-import { useInvitacionPendiente, useYo } from "./useSesion.js";
+import { PantallaConZum } from "../../componentes/panal/PantallaConZum.jsx";
+import { Boton } from "../../componentes/ui/Controles.jsx";
+import { Silueta } from "../../componentes/ui/Estados.jsx";
+import { REINTENTAR } from "../../componentes/ui/textos.js";
+import estilos from "./Guardias.module.css";
+import { ABRIENDO_TU_PANAL, SIN_CONEXION_AL_ABRIR } from "./textos.js";
+import { useInvitacionPendiente, useYo } from "../../nucleo/cuenta/useCuenta.js";
 
 /**
  * Las tres zonas de Panal (docs/proyecto/03-pantallas.md, sección 1): acceso,
@@ -12,8 +16,8 @@ import { useInvitacionPendiente, useYo } from "./useSesion.js";
 /** La silueta de pantalla completa mientras se comprueba la sesión o llega una pantalla. */
 export function Arranque() {
   return (
-    <main className="arranque">
-      <Silueta etiqueta="Abriendo tu panal" bloques={[52, 340, 320]} />
+    <main className={estilos.arranque}>
+      <Silueta etiqueta={ABRIENDO_TU_PANAL} bloques={[52, 340, 320]} />
     </main>
   );
 }
@@ -24,7 +28,17 @@ export function ConSesion() {
   const ubicacion = useLocation();
 
   if (cargando) return <Arranque />;
-  if (sinConexion) return <SinConexion alReintentar={reintentar} />;
+  if (sinConexion) {
+    return (
+      <PantallaConZum
+        titulo={SIN_CONEXION_AL_ABRIR.titulo}
+        texto={SIN_CONEXION_AL_ABRIR.texto}
+        zum="descansando"
+      >
+        <Boton onClick={reintentar}>{REINTENTAR}</Boton>
+      </PantallaConZum>
+    );
+  }
   if (!yo) return <Navigate to="/entrar" replace state={{ desde: ubicacion }} />;
 
   const enPrimerVuelo = ubicacion.pathname === "/primer-vuelo";
@@ -36,17 +50,15 @@ export function ConSesion() {
 /** Entrar y crear: con sesión, sigue a la invitación pendiente o a donde iba. */
 export function SinSesion() {
   const { yo, cargando } = useYo();
-  const invitacion = useInvitacionPendiente();
+  const { invitacion } = useInvitacionPendiente();
   const ubicacion = useLocation();
 
   if (cargando) return <Arranque />;
   if (yo) {
     const desde = ubicacion.state?.desde;
-    const destino = invitacion
-      ? `/unirme/${invitacion}`
-      : desde
-        ? `${desde.pathname}${desde.search ?? ""}`
-        : "/";
+    let destino = "/";
+    if (invitacion) destino = `/unirme/${invitacion}`;
+    else if (desde) destino = `${desde.pathname}${desde.search}`;
     return <Navigate to={destino} replace />;
   }
   return <Outlet />;

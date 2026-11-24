@@ -1,19 +1,14 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, test, vi } from "vite-plus/test";
-import { precargaDe, publicosEnlazados } from "./complemento.js";
+import { MENSAJE_ACTUALIZAR } from "./acuerdos.js";
+import { fuenteDelServiceWorker, precargaDe } from "./complemento.js";
 
-/**
- * El service worker se prueba sin navegador: se evalúa `sw.js` con un `self`,
- * un `caches` y un `fetch` de mentira, y se le despachan eventos. Así un cambio
- * de estrategia se comprueba en milisegundos, sin compilar ni abrir DevTools.
- */
+// El service worker se prueba sin navegador: se evalúa el `sw.js` que publica el
+// complemento con un `self`, un `caches` y un `fetch` de mentira, y se le
+// despachan eventos. Un cambio de estrategia se comprueba sin compilar ni abrir DevTools.
 
 const ORIGEN = "https://panal.test";
-const FUENTE = readFileSync(new URL("./sw.js", import.meta.url), "utf8");
 
-/** Un `CacheStorage` en memoria: lo justo que usa `sw.js`. */
 function cachesEnMemoria() {
-  /** @type {Map<string, Map<string, Response>>} */
   const almacenes = new Map();
   const clave = (peticion) =>
     typeof peticion === "string" ? new URL(peticion, ORIGEN).href : peticion.url;
@@ -22,7 +17,6 @@ function cachesEnMemoria() {
     return almacenes.get(nombre);
   };
   return {
-    almacenes,
     open: async (nombre) => ({
       addAll: async (rutas) => {
         for (const ruta of rutas)
@@ -44,14 +38,14 @@ function cachesEnMemoria() {
   };
 }
 
-/**
- * Carga `sw.js` como lo haría el navegador y devuelve cómo despacharle eventos.
- * @param {{ red?: (peticion: { url: string }) => Promise<Response> }} [opciones]
- */
-function cargarServiceWorker({ red = async () => new Response("de la red") } = {}) {
+function cargarServiceWorker({
+  red = async () => new Response("de la red"),
+  version = "v2",
+  precarga = ["/", "/assets/app-abc.js"],
+  caches = cachesEnMemoria(),
+} = {}) {
   const oyentes = {};
   const self = {
-    __PANAL__: { version: "v2", precarga: ["/", "/assets/app-abc.js"] },
     location: { origin: ORIGEN },
     addEventListener: (tipo, oyente) => {
       oyentes[tipo] = oyente;
@@ -59,12 +53,11 @@ function cargarServiceWorker({ red = async () => new Response("de la red") } = {
     skipWaiting: vi.fn(),
     clients: { claim: vi.fn(async () => {}) },
   };
-  const caches = cachesEnMemoria();
   const fetch = vi.fn(red);
+  const fuente = fuenteDelServiceWorker({ version, precarga });
   // oxlint-disable-next-line no-new-func -- evaluar el archivo tal como se publica es la prueba
-  new Function("self", "caches", "fetch", FUENTE)(self, caches, fetch);
+  new Function("self", "caches", "fetch", fuente)(self, caches, fetch);
 
-  /** Despacha un evento y espera lo que el service worker prometió, si prometió algo. */
   const despachar = async (tipo, datos = {}) => {
     let promesa;
     oyentes[tipo]({
@@ -74,44 +67,49 @@ function cargarServiceWorker({ red = async () => new Response("de la red") } = {
     });
     return promesa;
   };
-  /** Una petición GET del mismo origen, como las que pasan por el evento `fetch`. */
   const pedir = (ruta, { method = "GET", mode = "cors" } = {}) =>
     despachar("fetch", { request: { url: new URL(ruta, ORIGEN).href, method, mode } });
 
   return { self, caches, fetch, despachar, pedir };
 }
 
-describe("service worker", () => {
-  test("al instalarse guarda la aplicación en el caché de su versión", async () => {
-    const { caches, despachar } = cargarServiceWorker();
-    await despachar("install");
-    expect([...caches.almacenes.get("panal-app-v2").keys()]).toEqual([
-      `${ORIGEN}/`,
-      `${ORIGEN}/assets/app-abc.js`,
-    ]);
-  });
+function redCortable(respuesta) {
+  const red = { hay: true };
+  red.pedir = async () => {
+    if (!red.hay) throw new TypeError("sin red");
+    return respuesta();
+  };
+  return red;
+}
 
-  test("al activarse borra las versiones viejas, conserva los datos y toma la página", async () => {
-    const { caches, despachar, self } = cargarServiceWorker();
-    for (const nombre of ["panal-app-v1", "panal-app-v2", "panal-datos"]) await caches.open(nombre);
-    await caches.open("panal-app-v1").then((cache) => cache.addAll(["/viejo.js"]));
-    await despachar("activate");
-    expect(await caches.keys()).not.toContain("panal-app-v1");
-    expect(self.clients.claim).toHaveBeenCalled();
+describe("service worker", () => {
+  test("una versión nueva borra los archivos de la vieja, conserva los datos y toma la página", async () => {
+    const red = redCortable(() => Response.json({ hoy: "2026-11-17" }));
+    const vieja = cargarServiceWorker({
+      red: red.pedir,
+      version: "v1",
+      precarga: ["/", "/assets/app-viejo.js"],
+    });
+    await vieja.despachar("install");
+    await vieja.pedir("/api/panal");
+
+    const nueva = cargarServiceWorker({ red: red.pedir, caches: vieja.caches });
+    await nueva.despachar("install");
+    await nueva.despachar("activate");
+    red.hay = false;
+
+    await expect(nueva.pedir("/assets/app-viejo.js")).rejects.toThrow("sin red");
+    expect(await (await nueva.pedir("/api/panal")).json()).toEqual({ hoy: "2026-11-17" });
+    expect(nueva.self.clients.claim).toHaveBeenCalled();
   });
 
   test("los datos van primero a la red y, sin señal, sale lo último guardado", async () => {
-    let conRed = true;
-    const sw = cargarServiceWorker({
-      red: async () => {
-        if (!conRed) throw new TypeError("Failed to fetch");
-        return Response.json({ hoy: "2026-11-17" });
-      },
-    });
+    const red = redCortable(() => Response.json({ hoy: "2026-11-17" }));
+    const sw = cargarServiceWorker({ red: red.pedir });
     expect(await (await sw.pedir("/api/panal")).json()).toEqual({ hoy: "2026-11-17" });
-    conRed = false;
+    red.hay = false;
     expect(await (await sw.pedir("/api/panal")).json()).toEqual({ hoy: "2026-11-17" });
-    await expect(sw.pedir("/api/colmenas")).rejects.toThrow("Failed to fetch");
+    await expect(sw.pedir("/api/colmenas")).rejects.toThrow("sin red");
   });
 
   test("sin red, cualquier dirección de la aplicación abre la página guardada", async () => {
@@ -121,7 +119,7 @@ describe("service worker", () => {
     expect(await pagina.text()).toBe("guardado /");
   });
 
-  test("los archivos con huella salen del caché sin tocar la red", async () => {
+  test("lo instalado sale del caché sin tocar la red", async () => {
     const sw = cargarServiceWorker();
     await sw.despachar("install");
     expect(await (await sw.pedir("/assets/app-abc.js")).text()).toBe("guardado /assets/app-abc.js");
@@ -142,7 +140,7 @@ describe("service worker", () => {
     const sw = cargarServiceWorker();
     await sw.despachar("message", { data: "otra cosa" });
     expect(sw.self.skipWaiting).not.toHaveBeenCalled();
-    await sw.despachar("message", { data: "actualizar" });
+    await sw.despachar("message", { data: MENSAJE_ACTUALIZAR });
     expect(sw.self.skipWaiting).toHaveBeenCalled();
   });
 });
@@ -152,6 +150,7 @@ describe("complemento que publica sw.js", () => {
     "assets/index-abc.js": { type: "chunk" },
     "assets/index-abc.css": { type: "asset" },
     "assets/nunito-latin-wght-normal-x.woff2": { type: "asset" },
+    "assets/nunito-latin-ext-wght-normal-x.woff2": { type: "asset" },
     "assets/nunito-cyrillic-wght-normal-x.woff2": { type: "asset" },
     "assets/zum-feliz-360.webp": { type: "asset" },
     "index.html": {
@@ -162,14 +161,7 @@ describe("complemento que publica sw.js", () => {
     },
   };
 
-  test("los públicos salen de los enlaces del HTML, sin repetir lo compilado", () => {
-    expect(publicosEnlazados(paquete["index.html"].source, paquete)).toEqual([
-      "favicon.svg",
-      "manifest.webmanifest",
-    ]);
-  });
-
-  test("precarga la página, el código, los estilos y solo las fuentes latinas", () => {
+  test("precarga la página, el código, los estilos, las fuentes latinas y lo que enlaza el HTML", () => {
     expect(precargaDe(paquete).precarga).toEqual([
       "/",
       "/assets/index-abc.js",

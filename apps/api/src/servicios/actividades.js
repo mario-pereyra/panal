@@ -1,4 +1,4 @@
-import { identificador, MAXIMO_DE_PRIORIDAD_ALTA } from "@panal/contratos";
+import { identificador, MAXIMO_DE_PRIORIDAD_ALTA, permisosSobreActividad } from "@panal/contratos";
 import { duenaDe, ocupaCupoDeAlta } from "@panal/motor";
 import { altasPendientes } from "../datos/actividades.js";
 import { colmenaPorId, esIntegrante } from "../datos/colmenas.js";
@@ -17,17 +17,33 @@ export function esIdentificador(valor) {
 }
 
 /**
- * Una actividad personal la ve y la cambia quien la creó; una de colmena,
- * cualquiera que siga en la colmena.
+ * Ver `permisosSobreActividad` en contratos. Fuera de la colmena no se ve; en una
+ * colmena archivada, nada cambia.
  * @param {Consultor} db
  * @param {FilaDeActividad} actividad
- * @param {string} personaId
+ * @param {{ personaId: string, hoy: string, accion: "editar" | "archivar" }} quien
  */
-export async function exigirPermisoSobreActividad(db, actividad, personaId) {
-  const permitido = actividad.colmena_id
-    ? await esIntegrante(db, actividad.colmena_id, personaId)
-    : actividad.creada_por === personaId;
-  if (!permitido) throw falla("sin_permiso");
+export async function exigirPermisoSobreActividad(db, actividad, { personaId, hoy, accion }) {
+  if (actividad.colmena_id) {
+    if (!(await esIntegrante(db, actividad.colmena_id, personaId))) throw falla("sin_permiso");
+    if (actividad.colmena_archivada_en) throw falla("colmena_cerrada");
+  }
+  const permisos = permisosSobreActividad(
+    {
+      tipo: actividad.tipo,
+      creadaPor: actividad.creada_por,
+      asignadaA: actividad.asignada_a,
+      primeraLlenaEl: actividad.primera_llena_el,
+    },
+    {
+      personaId,
+      hoy,
+      colmena: actividad.colmena_id
+        ? { fundadoraId: actividad.colmena_fundadora_id, archivada: false }
+        : null,
+    },
+  );
+  if (!permisos[accion]) throw falla("sin_permiso");
 }
 
 /**

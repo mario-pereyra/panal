@@ -1,37 +1,35 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useParams } from "react-router";
-import { Boton } from "../../componentes/Controles.jsx";
-import { ErrorDelFormulario } from "../../componentes/Formulario.jsx";
-import { IconoCompartir, IconoCopiar } from "../../componentes/iconos.jsx";
-import { fechaCorta } from "../../componentes/textos.js";
-import { useFondo } from "../../componentes/useFondo.js";
-import { Ventana } from "../../componentes/Ventana.jsx";
-import { Zum } from "../../componentes/Zum.jsx";
-import estilos from "./Colmenas.module.css";
+import { Boton } from "../../componentes/ui/Controles.jsx";
+import { ErrorDelFormulario } from "../../componentes/ui/Formulario.jsx";
+import { IconoCompartir, IconoCopiar } from "../../componentes/ui/iconos.jsx";
+import { useFondo } from "../../componentes/ui/useFondo.js";
+import { Ventana } from "../../componentes/ui/Ventana.jsx";
+import { Zum } from "../../componentes/panal/Zum.jsx";
+import { Abeja, Enjambre } from "./Enjambre.jsx";
+import estilos from "./Invitar.module.css";
+import {
+  ANULAR_Y_CREAR_OTRO,
+  COMPARTIR,
+  COPIADO,
+  COPIAR,
+  CREANDO_EL_ENLACE,
+  desdeEl,
+  ENLACE_DE_INVITACION,
+  INVITAR_AL_ENJAMBRE,
+  quienAbraElEnlace,
+  tituloAlCompartir,
+  YA_EN_EL_ENJAMBRE,
+} from "./textos.js";
 import { useInvitacion } from "./useColmenas.js";
 
 /** P09. Invitar al enjambre: el enlace para unirse, sobre la colmena. */
 export function Invitar() {
   const { id } = useParams();
   const { salir: salirDeLaVentana } = useFondo();
-  const { invitacion, vencimiento, cargando, sinEnlace, error, colmena, crear, creando } =
-    useInvitacion(id);
-  const [copiado, setCopiado] = useState(false);
-
-  // La primera vez no hay enlace: se crea al abrir la ventana.
-  const pedido = useRef(false);
-  useEffect(() => {
-    if (sinEnlace && !pedido.current) {
-      pedido.current = true;
-      crear();
-    }
-  }, [sinEnlace, crear]);
-
-  useEffect(() => {
-    if (!copiado) return undefined;
-    const temporizador = setTimeout(() => setCopiado(false), 2000);
-    return () => clearTimeout(temporizador);
-  }, [copiado]);
+  const { invitacion, vencimiento, cargando, error, colmena, crear, creando } = useInvitacion(id);
+  const campo = useRef(/** @type {HTMLInputElement | null} */ (null));
+  const [copiado, setCopiado] = useState("");
 
   const salir = () => salirDeLaVentana(`/colmenas/${id}`);
 
@@ -41,22 +39,23 @@ export function Invitar() {
   const copiar = async () => {
     try {
       await navigator.clipboard.writeText(enlace);
-      setCopiado(true);
+      setCopiado(enlace);
     } catch {
       // Sin permiso para el portapapeles, el enlace queda seleccionado para copiarlo a mano.
-      document.getElementById("enlace-de-invitacion")?.select();
+      campo.current?.select();
     }
   };
 
   const compartir = () =>
-    navigator
-      .share({ title: `Únete a ${colmena?.nombre ?? "mi colmena"} en Panal`, url: enlace })
-      .catch(() => {});
+    navigator.share({ title: tituloAlCompartir(colmena?.nombre), url: enlace }).catch((motivo) => {
+      // Cerrar la hoja de compartir sin elegir rechaza con AbortError: no es un fallo.
+      if (motivo.name !== "AbortError") copiar();
+    });
 
   return (
     <Ventana
-      titulo="Invitar al enjambre"
-      descripcion={colmena ? `Quien abra este enlace podrá unirse a ${colmena.nombre}.` : undefined}
+      titulo={INVITAR_AL_ENJAMBRE}
+      descripcion={colmena ? quienAbraElEnlace(colmena.nombre) : undefined}
       alCerrar={salir}
       cerrarAlTocarFuera
     >
@@ -65,30 +64,28 @@ export function Invitar() {
         <ErrorDelFormulario>{error?.mensaje}</ErrorDelFormulario>
         {cargando || creando || !invitacion ? (
           <p className={estilos.nota} role="status">
-            Creando el enlace…
+            {CREANDO_EL_ENLACE}
           </p>
         ) : (
           <>
-            <div className={estilos.enlace}>
-              <label htmlFor="enlace-de-invitacion" className="solo-lectores">
-                Enlace de invitación
-              </label>
+            <label className={estilos.enlace}>
+              <span className="solo-lectores">{ENLACE_DE_INVITACION}</span>
               <input
-                id="enlace-de-invitacion"
+                ref={campo}
                 value={enlace}
                 readOnly
                 onFocus={(evento) => evento.target.select()}
               />
-            </div>
+            </label>
             <div className={estilos.botones}>
               <Boton onClick={copiar} aria-live="polite">
                 <IconoCopiar className={estilos.iconoDeBoton} />
-                {copiado ? "Copiado" : "Copiar"}
+                {copiado === enlace ? COPIADO : COPIAR}
               </Boton>
               {puedeCompartir && (
                 <Boton tono="claro" onClick={compartir}>
                   <IconoCompartir className={estilos.iconoDeBoton} />
-                  Compartir
+                  {COMPARTIR}
                 </Boton>
               )}
             </div>
@@ -100,7 +97,7 @@ export function Invitar() {
                 onClick={crear}
                 disabled={creando}
               >
-                Anular y crear otro
+                {ANULAR_Y_CREAR_OTRO}
               </button>
             </p>
           </>
@@ -108,25 +105,17 @@ export function Invitar() {
         {colmena && (
           <section aria-labelledby="ya-en-el-enjambre">
             <h3 id="ya-en-el-enjambre" className={estilos.subtitulo}>
-              Ya en el enjambre
+              {YA_EN_EL_ENJAMBRE}
             </h3>
-            <ul className={estilos.enjambre} role="list">
+            <Enjambre>
               {colmena.enjambre.map((abeja) => (
-                <li key={abeja.id} className={estilos.abeja}>
-                  <span
-                    className={estilos.avatar}
-                    style={{ background: abeja.color }}
-                    aria-hidden="true"
-                  >
-                    {abeja.inicial}
-                  </span>
-                  <span className={estilos.nombre}>{abeja.nombre}</span>
-                  <span className={estilos.aporte}>
-                    {abeja.unidaEl && `desde el ${fechaCorta(abeja.unidaEl)}`}
-                  </span>
-                </li>
+                <Abeja
+                  key={abeja.id}
+                  abeja={abeja}
+                  detalle={abeja.unidaEl && desdeEl(abeja.unidaEl)}
+                />
               ))}
-            </ul>
+            </Enjambre>
           </section>
         )}
       </div>

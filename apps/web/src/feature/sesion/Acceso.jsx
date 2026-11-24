@@ -1,7 +1,10 @@
 import { Link } from "react-router";
-import { LogoPanal } from "../../componentes/iconos.jsx";
-import { Zum } from "../../componentes/Zum.jsx";
+import { LogoPanal } from "../../componentes/panal/iconos.jsx";
+import { Zum } from "../../componentes/panal/Zum.jsx";
+import { Principal, TituloDePestana } from "../../componentes/ui/Pagina.jsx";
+import { PANAL } from "../../nucleo/textos.js";
 import estilos from "./Acceso.module.css";
+import { SALTAR_AL_FORMULARIO } from "./textos.js";
 
 /**
  * La estructura de las pantallas de acceso: a un lado, en miel, Zum y una
@@ -9,23 +12,18 @@ import estilos from "./Acceso.module.css";
  * arriba.
  *
  * Mientras no estén las escenas E01 y E02, Zum aparece en uno de sus estados.
- *
- * @param {object} props
- * @param {string} props.titulo
- * @param {"esperando" | "animando" | "feliz"} props.zum
- * @param {import("react").ReactNode} props.lema Lo que va bajo Zum.
  */
 export function Acceso({ titulo, zum, lema, children }) {
   return (
     <div className={estilos.acceso}>
-      <title>{`${titulo} · Panal`}</title>
+      <TituloDePestana>{titulo}</TituloDePestana>
       <a className="saltar" href="#contenido">
-        Saltar al formulario
+        {SALTAR_AL_FORMULARIO}
       </a>
       <aside className={estilos.miel}>
-        <Link to="/entrar" className={estilos.marca} aria-label="Panal">
+        <Link to="/entrar" className={estilos.marca}>
           <LogoPanal />
-          <span aria-hidden="true">Panal</span>
+          <span>{PANAL}</span>
         </Link>
         <Zum
           className={estilos.zum}
@@ -36,12 +34,12 @@ export function Acceso({ titulo, zum, lema, children }) {
         />
         <div className={estilos.lema}>{lema}</div>
       </aside>
-      <main id="contenido" className={estilos.papel} tabIndex={-1}>
+      <Principal className={estilos.papel}>
         <div className={estilos.formulario}>
           <h1 className={estilos.titulo}>{titulo}</h1>
           {children}
         </div>
-      </main>
+      </Principal>
     </div>
   );
 }

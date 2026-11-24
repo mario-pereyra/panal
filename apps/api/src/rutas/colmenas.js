@@ -1,5 +1,5 @@
 import { randomBytes, randomUUID } from "node:crypto";
-import { cambiosDeColmena, nuevaColmena } from "@panal/contratos";
+import { cambiosDeColmena, nuevaColmena, permisosSobreColmena } from "@panal/contratos";
 import { diaLogico } from "@panal/motor";
 import { Hono } from "hono";
 import { liberarPendientes } from "../datos/actividades.js";
@@ -34,6 +34,21 @@ export function rutasDeColmenas({ base, reloj }) {
   /** @param {import("../datos/colmenas.js").FilaDeColmena} fila */
   const completa = async (fila, db = base) => (await colmenasCompletas(db, [fila]))[0];
 
+  /**
+   * Ver `permisosSobreColmena` en contratos.
+   * @param {import("../datos/base.js").Consultor} db
+   * @param {import("../datos/colmenas.js").FilaDeColmena} colmena
+   * @param {string} personaId
+   */
+  const permisosDe = async (db, colmena, personaId) => {
+    const integrantes = await integrantesDe(db, [colmena.id]);
+    const permisos = permisosSobreColmena(
+      { fundadoraId: colmena.fundadora_id, archivada: Boolean(colmena.archivada_en) },
+      { personaId, abejas: integrantes.length },
+    );
+    return { permisos, integrantes };
+  };
+
   rutas.get("/colmenas", exigirSesion, async (c) => {
     const filas = await colmenasDePersona(base, personaDe(c).id);
     return c.json({ colmenas: await colmenasCompletas(base, filas) });
@@ -59,16 +74,28 @@ export function rutasDeColmenas({ base, reloj }) {
     return c.json(await detalleDeColmena(base, colmena, { zona, hoy: diaLogico(reloj(), zona) }));
   });
 
-  // Editar: cualquier integrante. Archivar o recuperar: solo la fundadora.
+  // Editar, archivar, recuperar o pasar la fundación: solo la fundadora.
   rutas.patch("/colmenas/:id", exigirSesion, async (c) => {
     const persona = personaDe(c);
     const colmena = await colmenaDeIntegrante(base, c.req.param("id"), persona.id);
     const cambios = await leerCuerpo(c, cambiosDeColmena);
-    if (cambios.archivada !== undefined && colmena.fundadora_id !== persona.id) {
-      throw falla("sin_permiso");
+    const { permisos, integrantes } = await permisosDe(base, colmena, persona.id);
+    const { archivada, fundadoraId, ...datos } = cambios;
+    const permitido =
+      (Object.keys(datos).length === 0 || permisos.editar) &&
+      (archivada === undefined ||
+        archivada === Boolean(colmena.archivada_en) ||
+        (archivada ? permisos.archivar : permisos.recuperar)) &&
+      (fundadoraId === undefined || fundadoraId === colmena.fundadora_id || permisos.traspasar);
+    if (!permitido) throw falla("sin_permiso");
+    if (fundadoraId && !integrantes.some((integrante) => integrante.id === fundadoraId)) {
+      throw falla("datos_invalidos", {
+        campos: { fundadoraId: "Esa abeja no está en la colmena." },
+      });
     }
     /** @type {Record<string, unknown>} */
     const columnas = {};
+    if (fundadoraId !== undefined) columnas.fundadora_id = fundadoraId;
     if (cambios.nombre !== undefined) columnas.nombre = cambios.nombre;
     if (cambios.descripcion !== undefined) columnas.descripcion = cambios.descripcion;
     if (cambios.entregaEl !== undefined) columnas.entrega_el = cambios.entregaEl;
@@ -114,14 +141,15 @@ export function rutasDeColmenas({ base, reloj }) {
     const persona = personaDe(c);
     const colmena = await colmenaDeIntegrante(base, c.req.param("id"), persona.id);
     const quien = c.req.param("personaId");
-    const esFundadora = colmena.fundadora_id === persona.id;
-    if (quien !== persona.id && !esFundadora) throw falla("sin_permiso");
 
     await base.transaccion(async (tx) => {
-      const integrantes = await integrantesDe(tx, [colmena.id]);
+      const { permisos, integrantes } = await permisosDe(tx, colmena, persona.id);
+      if (quien === persona.id) {
+        if (!permisos.salir) throw falla("fundadora_no_sale");
+      } else if (!permisos.quitar) {
+        throw falla("sin_permiso");
+      }
       if (!integrantes.some((integrante) => integrante.id === quien)) throw falla("no_existe");
-      if (quien === colmena.fundadora_id && integrantes.length > 1)
-        throw falla("fundadora_no_sale");
       await sacarIntegrante(tx, colmena.id, quien, iso(reloj()));
       await liberarPendientes(tx, colmena.id, quien);
     });

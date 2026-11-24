@@ -1,22 +1,16 @@
 import { useDispatch, useSelector } from "react-redux";
-import { useObtenerPanalQuery } from "../../api/panalApi.js";
-import { useAlternarCelda } from "../../componentes/useAlternarCelda.js";
+import { selectPanal, useObtenerPanalQuery } from "../../store/api.js";
+import { useAlternarCelda } from "../../nucleo/panal/useCelda.js";
 import {
   selectCeldasDeHoy,
   selectConstancia,
   selectEstadoDeZum,
-  selectFranjaDeHoy,
-  selectPanal,
   selectPanalDeHoy,
   selectRacha,
-  selectResumenColmenaActiva,
-} from "./hoySelector.js";
+} from "../../nucleo/panal/panalSelector.js";
+import { selectFranjaDeHoy, selectResumenColmenaActiva } from "./hoySelector.js";
 import { cerrarFranja } from "./hoySlice.js";
 
-/**
- * Todo lo que necesita la pantalla "Hoy": los datos ya calculados y la acción
- * de llenar o vaciar una celda.
- */
 export function useHoy() {
   const consulta = useObtenerPanalQuery();
   const alternarCelda = useAlternarCelda();

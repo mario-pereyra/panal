@@ -22,16 +22,17 @@ La fuente de verdad es [`apps/web/src/estilos/tokens.css`](../../apps/web/src/es
 
 | Grupo | Variables | Para qué |
 | :--- | :--- | :--- |
-| Base | `--papel`, `--blanco`, `--tinta`, `--tinta-suave`, `--tinta-sobre-miel` | Fondo de la página, tarjetas, texto principal y secundario, texto sobre miel |
-| Miel y cera | `--miel`, `--miel-zum`, `--miel-oscura`, `--miel-profunda`, `--miel-clara`, `--cera`, `--cera-clara` | Lo lleno, lo destacado y sus fondos suaves |
+| Base | `--papel`, `--blanco`, `--tinta`, `--tinta-suave`, `--tinta-sobre-miel`, `--tinta-al-pasar` | Fondo de la página, tarjetas, texto principal y secundario, texto sobre miel, botón de tinta bajo el puntero |
+| Miel y cera | `--miel`, `--miel-oscura`, `--miel-profunda`, `--miel-clara`, `--cera`, `--cera-clara` | Lo lleno, lo destacado y sus fondos suaves |
 | Apoyo | `--ala`, `--hoja`, `--lino`, `--lino-claro`, `--lino-borde` | Avisos informativos, lo positivo, lo vacío y los bordes suaves |
 | Coral | `--coral`, `--coral-oscuro`, `--coral-claro` | Vencido, errores y acciones que borran. El texto va en `--coral-oscuro` sobre `--coral-claro` (5,6:1) |
 | Enjambre | `--abeja-1` a `--abeja-6` | El color de cada integrante de una colmena, por orden de llegada |
 | Tipografía | `--fuente-titulos`, `--fuente-texto` | Fredoka y Nunito |
-| Forma | `--grosor`, `--borde`, `--radio-principal`, `--radio-tarjeta`, `--radio-control`, `--sombra`, `--sombra-chica` | Bordes, esquinas y la sombra dura |
+| Forma | `--grosor`, `--borde`, `--radio-principal`, `--radio-tarjeta`, `--radio-control` y los radios de `--radio-grande` (24 px) a `--radio-diminuto` (5 px); `--sombra`, `--sombra-alzada`, `--sombra-chica`, `--sombra-hundida`, `--sombra-velada` | Bordes, esquinas y la sombra dura |
+| Velos | `--velo`, `--velo-de-fondo`, `--opacidad-deshabilitado` | Tinta transparente al pasar el puntero y tras una ventana; lo deshabilitado |
 | Espacio | `--ancho-maximo`, `--margen-pagina`, `--separacion` | Ancho de lectura y márgenes, que crecen desde 700 px |
 | Movimiento | `--resorte`, `--suave` | Curvas de las animaciones |
-| Toque | `--toque` | 24 px con ratón, 44 px con el dedo |
+| Toque | `--toque`, `--toque-amplio` | 44 px, el lado mínimo de lo que se toca; 48 px, campos y botones de formulario |
 
 **Qué significa cada color en la interfaz.**
 
@@ -61,29 +62,34 @@ Nunito va en 700 por defecto (no 400): con la tinta marrón y el papel cálido, 
 - **Borde de tinta** de 2,5 px (`--borde`) en tarjetas, botones, casillas y campos.
 - **Sombra dura** hacia abajo y sin desenfoque (`--sombra`, `--sombra-chica`): la profundidad se lee como papel recortado, no como vidrio.
 - **Esquinas**: 28 px en tarjetas, píldora completa en controles (`--radio-control`).
-- **El hexágono** es la forma de todo lo que cuenta: celdas, casillas, sellos, gráficas. Se dibuja con `puntosDeHexagono(radio, orientacion)` de `componentes/hexagono.js`, nunca con coordenadas a mano.
+- **El hexágono** es la forma de todo lo que cuenta: celdas, casillas, sellos, gráficas. Se dibuja con `puntosDeHexagono(radio, orientacion)` de `componentes/ui/hexagono.js`, nunca con coordenadas a mano.
 - **Sin degradados, sin brillos, sin desenfoques.**
 
 ## 5. Piezas
 
-Todas viven en `apps/web/src/componentes/`. Antes de crear algo, buscar aquí.
+Viven en `apps/web/src/componentes/`: en `ui/` las genéricas, que no saben nada de Panal; en `panal/` las del dominio (celdas, colmenas, Zum). Las de `ui/` no importan nada de `panal/`. Antes de crear algo, buscar aquí.
 
 | Pieza | Archivo | Cuándo |
 | :--- | :--- | :--- |
-| `Boton` | `Controles.jsx` | Toda acción. `a` lo vuelve enlace; tonos `tinta`, `miel`, `claro`, `sutil`, `peligro`; tamaños `normal` y `chico` |
-| `Ficha` | `Controles.jsx` | Cifra corta con icono: racha, reservas, gotas |
-| `Tarjeta` | `Tarjeta.jsx` | Contenedor con título, cifra y nota; con `a`, toda la tarjeta lleva a su destino |
-| `Pagina`, `Rejilla` | `Pagina.jsx` | Título de pantalla con acciones; rejilla de tarjetas de una a tres columnas |
-| `Ventana` | `Ventana.jsx` | Toda ventana modal (ver [`frontend.md` §5](frontend.md#5-rutas-y-ventanas)) |
-| Campos | `Formulario.jsx` | `Campo`, `CampoDeClave`, `AreaDeTexto`, `Selector`, `Interruptor`, `Opciones`, `Fichas`, `Contador`, `ErrorDelFormulario` |
-| `CasillaHexagonal` | `CasillaHexagonal.jsx` | La casilla para llenar una celda: un `checkbox` real con aspecto de hexágono |
-| `FilaDeCelda` | `FilaDeCelda.jsx` | Una actividad en una lista: casilla, título, detalle, gotas, etiquetas y menú |
-| Estados | `Estados.jsx` | `Silueta`, `EstadoVacio`, `PanalVacio`, `ErrorAlCargar`, `FranjaDeEstado` (con `alCerrar` o con un botón de `accion`, como "Actualizar") |
-| Gráficas | `Graficas.jsx`, `PanalDeHoy.jsx`, `PanalDeConstancia.jsx`, `RejillaDeColmena.jsx` | Ver [`representacion-visual.md`](representacion-visual.md) |
-| `SelloDeCera` | `SelloDeCera.jsx` | Las 17 insignias, dibujadas en SVG |
-| `Zum` | `Zum.jsx` | La mascota en uno de sus seis estados (ver [`personajes.md`](personajes.md)) |
-| Iconos | `iconos.jsx` | Trazo de tinta de 2,5 px, extremos redondos, en `currentColor` |
-| Textos comunes | `textos.js` | Fechas, plurales, reglas y detalles de actividad |
+| `Boton` | `ui/Controles.jsx` | Toda acción. `a` lo vuelve enlace y `ventana` abre una ventana con ruta sobre la pantalla actual; tonos `tinta`, `miel`, `claro`, `sutil`, `peligro`; tamaños `normal` y `chico` |
+| `EnlaceAVentana` | `ui/Controles.jsx` | Un enlace que no es botón y abre una ventana con ruta |
+| `Ficha` | `ui/Controles.jsx` | Cifra corta con icono: racha, reservas, gotas |
+| `AvisoSinConexion` | `ui/Controles.jsx` | La frase que explica qué espera a la señal; `recuadro` la destaca en las pantallas de acceso |
+| `Tarjeta` | `ui/Tarjeta.jsx` | Contenedor con título, cifra y nota; con `a`, toda la tarjeta lleva a su destino |
+| `Pagina`, `Principal`, `TituloDePestana` | `ui/Pagina.jsx` | Título de pantalla con acciones; el `main` al que salta "Saltar al contenido"; el título de la pestaña |
+| `Ventana` | `ui/Ventana.jsx` | Toda ventana modal (ver [`frontend.md` §5](frontend.md#5-rutas-y-ventanas)) |
+| Campos | `ui/Formulario.jsx` | `Campo`, `CampoDeClave`, `AreaDeTexto`, `Selector`, `Interruptor`, `Opciones`, `Fichas`, `Contador`, `ErrorDelFormulario` |
+| Estados | `ui/Estados.jsx` | `Silueta`, `ErrorAlCargar`, `FranjaDeEstado` (con `alCerrar` o con un botón de `accion`, como "Actualizar"), `LimiteDeError` |
+| `BarraDeAvance` | `ui/BarraDeAvance.jsx` | Avance hacia una meta, decorativo |
+| Iconos genéricos | `ui/iconos.jsx` | Trazo de tinta de 2,5 px, extremos redondos, en `currentColor` |
+| Superficies | `ui/superficie.module.css` | `tarjeta` y `botones`, para usar con `composes` |
+| `FilaDeCelda` | `panal/FilaDeCelda.jsx` | Una actividad en una lista: casilla hexagonal (un `checkbox` real), título, detalle, gotas, etiquetas y menú |
+| `EstadoVacio` | `panal/EstadoVacio.jsx` | Lo que se ve cuando no hay nada: un panal vacío, una frase y la acción que lo resuelve |
+| Gráficas | `panal/PanalDeHoy.jsx`, `panal/PanalDeConstancia.jsx`, `panal/RejillaDeColmena.jsx`, `panal/EscaleraDeOficios.jsx` | Ver [`representacion-visual.md`](representacion-visual.md). Las que usa una sola pantalla viven en ella (`feature/reportes/Graficas.jsx`, `feature/colmenas/Graficas.jsx`) |
+| `SelloDeCera` | `panal/SelloDeCera.jsx` | Las 17 insignias, dibujadas en SVG |
+| `Zum` | `panal/Zum.jsx` | La mascota en uno de sus seis estados (ver [`personajes.md`](personajes.md)) |
+| Marca e iconos de Panal | `panal/iconos.jsx` | Logo, gota, tarro y los de la navegación, con `lleno` para la sección actual |
+| Textos | `lib/formato.js`, `nucleo/textos.js` | Fechas, plurales y porcentajes; reglas, rachas, reservas, niveles y detalles de actividad |
 
 **Reglas de composición.**
 
@@ -106,7 +112,7 @@ Todo movimiento es opcional: va dentro de `@media (prefers-reduced-motion: no-pr
 
 ## 7. Cómo crece el sistema
 
-1. ¿Ya existe? Buscar en `componentes/` y en `tokens.css`.
+1. ¿Ya existe? Buscar en `componentes/ui/`, `componentes/panal/` y en `tokens.css`.
 2. ¿Es un valor nuevo? Primero una variable en `tokens.css`, con un comentario que diga para qué.
-3. ¿Lo usan dos pantallas o más? Va a `componentes/`, con JSDoc de sus propiedades. Si lo usa una sola, se queda en su funcionalidad.
+3. ¿Lo usan dos pantallas o más? Va a `componentes/ui/` si es genérico o a `componentes/panal/` si es del dominio. Si lo usa una sola, se queda en su funcionalidad.
 4. ¿Cambia una regla de esta guía? Se actualiza esta guía en el mismo cambio.

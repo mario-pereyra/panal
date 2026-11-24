@@ -1,0 +1,9 @@
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.botones {
+  composes: botones from "../../componentes/ui/superficie.module.css";
+}

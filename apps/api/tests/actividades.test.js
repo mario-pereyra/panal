@@ -47,6 +47,7 @@ describe("crear y reemplazar con PUT", () => {
       creadaEl: "2026-11-17",
       creadaEn: new Date(ahora).toISOString(),
       archivadaEl: null,
+      primeraLlenaEl: null,
     });
   });
 
@@ -195,6 +196,26 @@ describe("actividades de colmena", () => {
     expect(inexistente.datos.error.campos).toHaveProperty("colmenaId");
   });
 
+  test("la cambian quien la creó, a quien está asignada y la fundadora; llena, solo la fundadora la archiva", async () => {
+    const { fundadora, otra, colmenaId } = await colmenaConDos();
+    const libre = await crearActividad(fundadora, { titulo: "Libre", colmenaId });
+    expect((await otra.patch(`/api/actividades/${libre}`, { titulo: "Mía" })).estado).toBe(403);
+
+    const suya = await crearActividad(fundadora, {
+      titulo: "Suya",
+      colmenaId,
+      asignadaA: otra.perfil.id,
+    });
+    expect((await otra.patch(`/api/actividades/${suya}`, { titulo: "Suya, editada" })).estado).toBe(
+      200,
+    );
+    await otra.put(`/api/celdas/${nuevoId()}`, { actividadId: suya });
+    expect((await otra.patch(`/api/actividades/${suya}`, { archivada: true })).estado).toBe(403);
+    expect((await fundadora.patch(`/api/actividades/${suya}`, { archivada: true })).estado).toBe(
+      200,
+    );
+  });
+
   test("una colmena archivada no recibe actividades nuevas", async () => {
     const { fundadora, colmenaId } = await colmenaConDos();
     await fundadora.patch(`/api/colmenas/${colmenaId}`, { archivada: true });
@@ -245,6 +266,23 @@ describe("prioridad alta", () => {
 });
 
 describe("editar, archivar y listar", () => {
+  test('una única terminada pasa a "hechas" por siete días y ya no se edita', async () => {
+    const abeja = await entorno.nuevaAbeja();
+    const id = await crearActividad(abeja, { titulo: "Entregar el informe" });
+    await abeja.put(`/api/celdas/${nuevoId()}`, { actividadId: id });
+    const ids = async (ver) =>
+      (await abeja.get(`/api/actividades?ver=${ver}`)).datos.actividades.map((a) => a.id);
+    expect(await ids("hechas")).toEqual([]);
+
+    entorno.avanzar(DIA_MS);
+    expect(await ids("hechas")).toEqual([id]);
+    expect(await ids("activas")).not.toContain(id);
+    expect((await abeja.patch(`/api/actividades/${id}`, { titulo: "Otro" })).estado).toBe(403);
+
+    entorno.avanzar(7 * DIA_MS);
+    expect(await ids("hechas")).toEqual([]);
+  });
+
   test("PATCH edita, pospone, archiva y recupera", async () => {
     const abeja = await entorno.nuevaAbeja();
     const id = await crearActividad(abeja, { titulo: "Informe", vence: "2026-11-18" });

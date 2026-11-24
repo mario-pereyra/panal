@@ -12,6 +12,7 @@
  * @property {string | null} colmena_id
  * @property {string | null} colmena_nombre
  * @property {Date | null} colmena_archivada_en
+ * @property {string | null} colmena_fundadora_id
  * @property {string | null} asignada_a
  * @property {string} creada_por
  * @property {Date} creada_en
@@ -31,6 +32,7 @@ function seleccion({ columnas = "", uniones = "" } = {}) {
   return `
     select a.id, a.titulo, a.tipo, a.prioridad_alta, a.vence_el, a.colmena_id,
            c.nombre as colmena_nombre, c.archivada_en as colmena_archivada_en,
+           c.fundadora_id as colmena_fundadora_id,
            a.asignada_a, a.creada_por, a.creada_en, a.archivada_en,
            r.clase, r.dias, r.veces, r.dia_mes,
            (select min(cl.dia) from celdas_llenas cl where cl.actividad_id = a.id) as primera_llena_el

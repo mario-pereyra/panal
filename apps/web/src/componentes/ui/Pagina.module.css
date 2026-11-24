@@ -1,0 +1,53 @@
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--separacion);
+}
+
+.encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding-block: 4px 8px;
+}
+
+.titulos {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-inline-size: 0;
+}
+
+.titulo {
+  font-weight: 700;
+  font-size: clamp(2rem, 1.6rem + 1.6vw, 2.75rem);
+}
+
+.nota {
+  color: var(--tinta-suave);
+  font-size: 1.0625rem;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* En teléfono, las acciones del encabezado ocupan el ancho. */
+@media (max-width: 699px) {
+  .acciones {
+    inline-size: 100%;
+  }
+
+  .acciones > * {
+    flex: 1 1 auto;
+  }
+}
+
+.principal:focus {
+  outline: none;
+}

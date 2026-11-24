@@ -178,11 +178,11 @@ En cada pantalla, **Datos** nombra los selectores de Redux que la alimentan y **
 **Contenido.**
 
 1. Título "Celdas" y el botón "Nueva actividad".
-2. Pestañas con su cantidad: "Hoy", "Próximas", "Recurrentes", "Archivadas". Son enlaces: la pestaña va en la dirección.
+2. Pestañas con su cantidad: "Hoy", "Próximas", "Recurrentes", "Hechas", "Archivadas". Son enlaces: la pestaña va en la dirección.
 3. Filtros en fichas: colmena y prioridad.
-4. Lista. Cada fila: casilla hexagonal, título, detalle (tipo, regla o fecha, colmena), gotas y un menú con "Editar", "Posponer" y "Archivar". En "Próximas", las filas se agrupan por día. En "Recurrentes", cada fila muestra su cuota de la semana con celdas pequeñas ("2 de 3 esta semana").
+4. Lista. Cada fila: casilla hexagonal, título, detalle (tipo, regla o fecha, colmena), gotas y un menú con "Editar", "Posponer" y "Archivar". El título abre la celda para editarla, como en Hoy y en Colmena; el título y el menú solo aparecen si la persona puede cambiarla (ver la sección 8 de `05-datos-y-api.md`). En "Próximas", las filas se agrupan por día. En "Recurrentes", cada fila muestra su cuota de la semana con celdas pequeñas ("2 de 3 esta semana"). En "Hechas", lo que la persona llenó los últimos siete días, por día y con la casilla llena: tocarla deshace la celda.
 
-**Estados.** Cada pestaña tiene su vacío: "No hay nada en el horizonte. Buen momento para planear la semana." (Próximas), "Todavía no tienes celdas recurrentes. Son las que se repiten." (Recurrentes), "Aquí guardas lo que ya no necesitas ver." (Archivadas). Filtros sin resultados: "Ninguna celda coincide" y "Quitar filtros".
+**Estados.** Cada pestaña tiene su vacío: "No hay nada en el horizonte. Buen momento para planear la semana." (Próximas), "Todavía no tienes celdas recurrentes. Son las que se repiten." (Recurrentes), "Lo que llenes queda aquí siete días, por si necesitas deshacerlo." (Hechas), "Aquí guardas lo que ya no necesitas ver." (Archivadas). Filtros sin resultados: "Ninguna celda coincide" y "Quitar filtros".
 
 **Teléfono.** Las pestañas se deslizan en horizontal; el menú de cada fila se abre como hoja inferior.
 
@@ -200,7 +200,7 @@ En cada pantalla, **Datos** nombra los selectores de Redux que la alimentan y **
 4. Si es recurrente: cuatro opciones ("Todos los días", "Ciertos días", "Veces por semana", "Día del mes") y, según la elegida, siete fichas con los días, un contador de 1 a 6 o un selector de día. Debajo, la regla en palabras.
 5. Colmena (opcional) y, si se elige una, "Asignar a" con el enjambre y la opción "Libre".
 6. Vista previa: "Esta celda vale +25 gotas de miel".
-7. Botones "Guardar" y "Cancelar". Al editar, además, "Archivar".
+7. Botones "Guardar" y "Cancelar". Al editar, además, "Archivar" si la persona puede archivarla. Se abre desde el título de una celda en Hoy, Celdas o Colmena; si la celda no es de quien la abre, dice "Esta celda no existe o ya no es tuya."
 
 **Estados.** Título vacío (el botón no envía y el campo lo indica), límite de prioridad alta alcanzado (el interruptor se desactiva con explicación), guardando, error al guardar (la ventana sigue abierta con lo escrito), cierre con cambios sin guardar (pide confirmación).
 
@@ -217,6 +217,7 @@ En cada pantalla, **Datos** nombra los selectores de Redux que la alimentan y **
 1. Título "Colmenas" y el botón "Fundar una colmena".
 2. Una tarjeta por colmena activa: nombre, colmena en miniatura (la rejilla en pequeño), porcentaje, cuadro actual, avatares del enjambre y fecha de entrega ("Faltan 9 días").
 3. "El colmenar": las colmenas cerradas, como tarros con su nombre.
+4. "Archivadas": las archivadas sin llenar, como enlaces. Quien la fundó la recupera desde su menú.
 
 "Fundar una colmena" abre una ventana con nombre, descripción y fecha de entrega.
 
@@ -232,9 +233,9 @@ En cada pantalla, **Datos** nombra los selectores de Redux que la alimentan y **
 
 1. Encabezado: nombre, fecha de entrega, porcentaje grande, y los botones "Invitar al enjambre" y "Nueva celda".
 2. **La colmena.** La rejilla grande, una celda por actividad, en cinco filas rotuladas con su cuadro. Las llenas, con el color y la inicial de quien las llenó. Debajo: "Cuadro 3 de 5. Faltan 6 celdas para el cuarto". Al lado, la ilustración de la colmena en la etapa que corresponde.
-3. **El enjambre.** Una fila por integrante: color, nombre, celdas aportadas y celdas asignadas pendientes.
-4. **Celdas de la colmena.** Lista con pestañas "Pendientes", "Mías", "Libres" y "Llenas". Cada fila muestra a quién está asignada.
-5. Menú de la colmena: "Editar", "Salir de la colmena" y, para la fundadora, "Archivar".
+3. **El enjambre.** Una fila por integrante: color, nombre, celdas aportadas y celdas asignadas pendientes. La fundadora ve "Quitar" junto a cada otra abeja, con confirmación.
+4. **Celdas de la colmena.** Lista con pestañas "Pendientes", "Mías", "Libres" y "Llenas". Cada fila muestra a quién está asignada; su título abre la celda si la persona puede editarla.
+5. Menú de la colmena: "Salir de la colmena" y, para la fundadora, "Editar", "Pasar la fundación", "Archivar" o, si está archivada, "Recuperar". La fundadora no sale mientras haya otras abejas: primero pasa la fundación.
 
 **Estados.** Colmena sin celdas ("Esta colmena está vacía. Crea su primera celda."), enjambre de una sola persona (invita a sumar gente), colmena cerrada (solo lectura, con su sello), sin permiso.
 
@@ -337,7 +338,7 @@ Las pantallas se arman con un conjunto pequeño de piezas. Todas son componentes
 | :--- | :--- | :--- |
 | `Zum` | La mascota en uno de sus estados y tamaños | P01 a P04, P09, P11 a P14 |
 | `Hexagono` | La celda: vacía, llena, sellada, con inicial o punteada | Todas las gráficas |
-| `CasillaHexagonal` | La casilla para llenar una celda; es un control accesible | P03, P04, P05, P08 |
+| `FilaDeCelda` | La fila de una actividad con su casilla hexagonal para llenarla; la casilla es un control accesible | P03, P04, P05, P08 |
 | `PanalDeHoy` | El panal de 3, 5 o 7 celdas | P03, P04, P12 |
 | `RejillaDeColmena` | Una celda por actividad, en cinco filas | P04, P07, P08 |
 | `PanalDeConstancia` | El mapa de cinco semanas | P04, P10 |

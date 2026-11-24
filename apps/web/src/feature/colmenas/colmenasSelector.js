@@ -1,53 +1,27 @@
-import { diaLogico, gotasDeCelda } from "@panal/motor";
+import { permisosSobreColmena } from "@panal/contratos";
+import { CUADROS_POR_COLMENA, diaLogico, gotasDeCelda, umbralDeCuadro } from "@panal/motor";
 import { createSelector } from "@reduxjs/toolkit";
-import { panalApi } from "../../api/panalApi.js";
-import { colorDeAbeja, fechaCorta } from "../../componentes/textos.js";
-import { selectYo } from "../sesion/sesionSelector.js";
+import { selectDetalleDeColmena, selectListaDeColmenas, selectYo } from "../../store/api.js";
+import { COLOR_DE_QUIEN_SALIO, pintarAbeja, pintarColmena } from "../../nucleo/panal/abejas.js";
+import { permisosDe } from "../../nucleo/panal/filas.js";
+import { detalleDeCelda } from "./textos.js";
 
-/**
- * Selectores de Colmenas (P07), Colmena (P08) e Invitar (P09).
- */
-
-const selectListaDeColmenas = (estado) =>
-  panalApi.endpoints.obtenerColmenas.select()(estado).data?.colmenas;
-const selectDetalle = (estado, id) => panalApi.endpoints.obtenerColmena.select(id)(estado).data;
+const selectLista = (estado) => selectListaDeColmenas(estado)?.colmenas;
 
 export const selectPestanaDeColmena = (estado) => estado.colmenas.pestanaDeColmena;
 
-/** Celdas de una colmena con el color de quien las llenó. */
-function celdasConColor(colmena) {
-  const colorDe = new Map(
-    colmena.integrantes.map((abeja) => [abeja.id, colorDeAbeja(abeja.color)]),
-  );
-  return colmena.celdas.map((celda) => ({
-    id: celda.actividadId,
-    color: celda.llenaPor ? (colorDe.get(celda.llenaPor) ?? "var(--lino-borde)") : null,
-  }));
-}
+const resumen = (colmena) => ({ ...colmena, ...pintarColmena(colmena) });
 
-function resumen(colmena) {
-  return {
-    ...colmena,
-    integrantes: colmena.integrantes.map((abeja) => ({
-      ...abeja,
-      color: colorDeAbeja(abeja.color),
-    })),
-    celdasConColor: celdasConColor(colmena),
-  };
-}
-
-/** Las colmenas en marcha: no archivadas y sin cerrar. */
-export const selectColmenasActivas = createSelector([selectListaDeColmenas], (lista) =>
-  (lista ?? []).filter((colmena) => !colmena.archivadaEn && !colmena.avance.cerrada).map(resumen),
-);
-
-/** El colmenar: las colmenas cerradas al cien por cien. */
-export const selectColmenar = createSelector([selectListaDeColmenas], (lista) =>
+export const selectColmenar = createSelector([selectLista], (lista) =>
   (lista ?? []).filter((colmena) => colmena.avance.cerrada).map(resumen),
 );
 
-/** El detalle de una colmena, listo para P08. */
-export const selectColmena = createSelector([selectDetalle, selectYo], (detalle, yo) => {
+/** Las archivadas sin llenar: fuera de la vista, pero su fundadora las puede recuperar. */
+export const selectColmenasArchivadas = createSelector([selectLista], (lista) =>
+  (lista ?? []).filter((colmena) => colmena.archivadaEn && !colmena.avance.cerrada),
+);
+
+export const selectColmena = createSelector([selectDetalleDeColmena, selectYo], (detalle, yo) => {
   if (!detalle) return null;
   const { colmena, enjambre, actividades, hoy } = detalle;
   const zona = yo?.zonaHoraria;
@@ -55,9 +29,7 @@ export const selectColmena = createSelector([selectDetalle, selectYo], (detalle,
     enjambre.map((abeja) => [
       abeja.id,
       {
-        ...abeja,
-        color: colorDeAbeja(abeja.color),
-        inicial: abeja.nombre.charAt(0).toUpperCase(),
+        ...pintarAbeja(abeja),
         // El día de llegada en la zona de quien mira, no el de UTC.
         unidaEl: zona ? diaLogico(abeja.unidaEn, zona) : null,
       },
@@ -72,19 +44,21 @@ export const selectColmena = createSelector([selectDetalle, selectYo], (detalle,
     const llena = Boolean(actividad.llenaPor);
     const mia = actividad.asignadaA === miId;
     const libre = !actividad.asignadaA;
-    let detalle;
-    if (llena)
-      detalle = `Llenada por ${quien?.nombre ?? "una abeja que ya salió"} el ${fechaCorta(actividad.llenadaEl)}`;
-    else if (asignada) detalle = mia ? "Asignada a ti" : `Asignada a ${asignada.nombre}`;
-    else detalle = "Libre: la llena quien llegue primero";
-    if (actividad.vence && !llena) detalle += ` · vence el ${fechaCorta(actividad.vence)}`;
+    const vencida = Boolean(!llena && actividad.vence && actividad.vence < hoy);
     return {
       id: actividad.id,
       titulo: actividad.titulo,
-      detalle,
+      detalle: detalleDeCelda({
+        llena,
+        quien,
+        asignada,
+        mia,
+        llenadaEl: actividad.llenadaEl,
+        vence: actividad.vence,
+      }),
       prioridad: actividad.prioridad,
       vence: actividad.vence,
-      vencida: Boolean(!llena && actividad.vence && actividad.vence < hoy),
+      vencida,
       colmenaId: colmena.id,
       llena,
       celdaId: actividad.celdaId,
@@ -92,8 +66,9 @@ export const selectColmena = createSelector([selectDetalle, selectYo], (detalle,
       libre,
       // Solo quien la llenó la puede deshacer; vacía, la llena su abeja o cualquiera si está libre.
       sePuedeTocar: !cerrada && (llena ? actividad.llenaPor === miId : mia || libre),
-      gotas: gotasDeCelda({ tipo: "unica", prioridad: actividad.prioridad }),
-      color: quien?.color ?? null,
+      permisos: permisosDe(actividad, { miId, hoy }),
+      gotas: gotasDeCelda({ tipo: "unica", prioridad: actividad.prioridad, vencida }),
+      color: llena ? (quien?.color ?? COLOR_DE_QUIEN_SALIO) : null,
       inicial: quien?.inicial ?? null,
     };
   });
@@ -101,16 +76,23 @@ export const selectColmena = createSelector([selectDetalle, selectYo], (detalle,
   return {
     hoy,
     ...colmena,
-    soyFundadora: colmena.fundadoraId === miId,
     cerrada,
+    permisos: permisosSobreColmena(
+      { fundadoraId: colmena.fundadoraId, archivada: Boolean(colmena.archivadaEn) },
+      { personaId: miId, abejas: enjambre.length },
+    ),
+    pedirEnjambre: enjambre.length === 1 && !cerrada,
     miId,
     enjambre: [...abejas.values()],
-    celdas: filas.map((fila) => ({ id: fila.id, color: fila.color, inicial: fila.inicial })),
+    cuadros: Array.from({ length: CUADROS_POR_COLMENA }, (_, indice) =>
+      filas
+        .slice(umbralDeCuadro(indice, filas.length), umbralDeCuadro(indice + 1, filas.length))
+        .map(({ id, color, inicial }) => ({ id, color, inicial })),
+    ),
     filas,
   };
 });
 
-/** Las celdas de la colmena en la pestaña elegida. */
 export const selectCeldasDeColmena = createSelector(
   [selectColmena, selectPestanaDeColmena],
   (colmena, pestana) => {

@@ -1,36 +1,48 @@
 import { nuevaCuenta } from "@panal/contratos";
 import { Link } from "react-router";
-import { Boton } from "../../componentes/Controles.jsx";
-import { Campo, CampoDeClave, ErrorDelFormulario } from "../../componentes/Formulario.jsx";
-import { puntosDeHexagono } from "../../componentes/hexagono.js";
-import { useFormulario } from "../../componentes/useFormulario.js";
-import { useVerInvitacionQuery } from "../../api/panalApi.js";
-import { useConexion } from "../conexion/useConexion.js";
+import { AvisoSinConexion, Boton } from "../../componentes/ui/Controles.jsx";
+import { Campo, CampoDeClave, ErrorDelFormulario } from "../../componentes/ui/Formulario.jsx";
+import { puntosDeHexagono } from "../../componentes/ui/hexagono.js";
+import { useFormulario } from "../../componentes/ui/useFormulario.js";
 import { Acceso } from "./Acceso.jsx";
 import estilos from "./Acceso.module.css";
-import { fuerzaDeClave, LO_QUE_SE_GANA } from "./textos.js";
-import { useCrearCuenta, useInvitacionPendiente } from "./useSesion.js";
-import { leerError, mensajeGeneral } from "../../api/errores.js";
+import { CREAR_MI_PANAL, YA_TENGO_UN_PANAL } from "../../nucleo/textos.js";
+import {
+  CLAVE,
+  CORREO,
+  CORREO_EN_USO,
+  CREANDO_TU_PANAL,
+  ENTRA_CON_EL,
+  fuerzaDeClave,
+  LO_QUE_SE_GANA,
+  NOMBRE,
+  SIN_CONEXION_AL_CREAR,
+  teEsperaLaColmena,
+} from "./textos.js";
+import { useCrearCuenta } from "./useSesion.js";
+import { leerError } from "../../store/errores.js";
 
 /** P02. Crear mi panal. */
 export function CrearPanal() {
-  const { crearCuenta, enviando, error } = useCrearCuenta();
-  const { enLinea } = useConexion();
-  const invitacion = useInvitacionPendiente();
-  const { data: vista } = useVerInvitacionQuery(invitacion, { skip: !invitacion });
+  const {
+    crearCuenta,
+    enviando,
+    mensaje,
+    correoEnUso,
+    enLinea,
+    invitacion: vista,
+  } = useCrearCuenta();
   const formulario = useFormulario(nuevaCuenta, { nombre: "", correo: "", clave: "" });
   const fuerza = fuerzaDeClave(formulario.valores.clave);
 
   const enviar = formulario.alEnviar(async (datos) => {
-    // La zona del dispositivo decide desde el primer día cuándo cambia el día de Panal.
-    const zonaHoraria = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const resultado = await crearCuenta(zonaHoraria ? { ...datos, zonaHoraria } : datos);
+    const resultado = await crearCuenta(datos);
     if (resultado.error) formulario.mostrarErroresDelServidor(leerError(resultado.error).campos);
   });
 
   return (
     <Acceso
-      titulo="Crear mi panal"
+      titulo={CREAR_MI_PANAL}
       zum="animando"
       lema={
         <ul role="list">
@@ -40,20 +52,20 @@ export function CrearPanal() {
         </ul>
       }
     >
-      {vista && <p className={estilos.aviso}>Te espera la colmena {vista.colmena.nombre}.</p>}
+      {vista && <p className={estilos.aviso}>{teEsperaLaColmena(vista.colmena.nombre)}</p>}
       <form ref={formulario.formulario} className={estilos.campos} onSubmit={enviar} noValidate>
         <ErrorDelFormulario>
-          {error?.codigo === "correo_en_uso" ? (
+          {correoEnUso ? (
             <>
-              Ese correo ya tiene un panal. <Link to="/entrar">Entra con él</Link>.
+              {CORREO_EN_USO} <Link to="/entrar">{ENTRA_CON_EL}</Link>.
             </>
           ) : (
-            mensajeGeneral(error)
+            mensaje
           )}
         </ErrorDelFormulario>
-        <Campo etiqueta="Nombre" autoComplete="name" required {...formulario.campo("nombre")} />
+        <Campo etiqueta={NOMBRE} autoComplete="name" required {...formulario.campo("nombre")} />
         <Campo
-          etiqueta="Correo"
+          etiqueta={CORREO}
           type="email"
           autoComplete="username"
           inputMode="email"
@@ -64,7 +76,7 @@ export function CrearPanal() {
         />
         <div className={estilos.campos}>
           <CampoDeClave
-            etiqueta="Contraseña"
+            etiqueta={CLAVE}
             autoComplete="new-password"
             minLength={8}
             required
@@ -92,14 +104,12 @@ export function CrearPanal() {
           </p>
         </div>
         <Boton type="submit" className={estilos.enviar} disabled={enviando || !enLinea}>
-          {enviando ? "Creando tu panal…" : "Crear mi panal"}
+          {enviando ? CREANDO_TU_PANAL : CREAR_MI_PANAL}
         </Boton>
-        {!enLinea && (
-          <p className={estilos.aviso}>Sin conexión. Para crear tu panal hace falta señal.</p>
-        )}
+        {!enLinea && <AvisoSinConexion recuadro>{SIN_CONEXION_AL_CREAR}</AvisoSinConexion>}
       </form>
       <p className={estilos.pie}>
-        <Link to="/entrar">Ya tengo un panal</Link>
+        <Link to="/entrar">{YA_TENGO_UN_PANAL}</Link>
       </p>
     </Acceso>
   );

@@ -143,12 +143,20 @@ export function actividadDe(fila, zona) {
     regla: reglaDe(fila),
     vence: fila.vence_el,
     colmenaId: fila.colmena_id,
-    colmena: fila.colmena_id ? { id: fila.colmena_id, nombre: fila.colmena_nombre } : null,
+    colmena: fila.colmena_id
+      ? {
+          id: fila.colmena_id,
+          nombre: fila.colmena_nombre,
+          fundadoraId: fila.colmena_fundadora_id,
+          archivada: Boolean(fila.colmena_archivada_en),
+        }
+      : null,
     asignadaA: fila.asignada_a,
     creadaPor: fila.creada_por,
     creadaEl: diaLogico(fila.creada_en, zona),
     creadaEn: iso(fila.creada_en),
     archivadaEl: archivos.length > 0 ? diaLogico(Math.min(...archivos), zona) : null,
+    primeraLlenaEl: fila.primera_llena_el,
   };
 }
 

@@ -1,18 +1,48 @@
-import { conMayuscula, cuenta, enLetras, plural } from "../../componentes/textos.js";
+import { conMayuscula, cuenta, enLetras, plural } from "../../lib/formato.js";
 
 /**
- * Los textos de "Hoy". La voz de Panal: cercana, breve y sin culpa.
+ * La voz de Panal: cercana, breve y sin culpa.
  * Fuente: docs/propuestas/A-panal/estrategia-gamificacion.md.
  */
 
-/** El título de la tarjeta principal. */
+export const HOY = "Hoy";
+
+export const CARGANDO_TU_PANAL = "Cargando tu panal";
+
+export const ERROR_AL_CARGAR = "No pudimos traer tus celdas";
+
+export const CELDAS_DE_HOY = "Celdas de hoy";
+
+export const llenasDe = (llenas, total) => `${llenas} de ${total}`;
+
+export const COLMENA = "Colmena";
+
+export const tituloDeColmena = (nombre) => `Colmena: ${nombre}`;
+
+export const FUNDAR_UNA_COLMENA = "Fundar una colmena";
+
+export const VER_TODAS_TUS_COLMENAS = "Ver todas tus colmenas";
+
+export const descripcionDeLaColmena = (avance) =>
+  `Panal de la colmena: ${avance}. Cada celda llena lleva el color de quien la completó.`;
+
+export const aporteDeAbeja = (celdas) => cuenta(celdas, "celda", "celdas");
+
+export const CONSTANCIA = "Constancia";
+
+export const notaDeConstancia = (semanas) => `Últimas ${semanas} semanas, un día por celda`;
+
+export const descripcionDeConstancia = ({ semanas, dias, conCeldas, cerrados }) =>
+  `Panal de constancia de las últimas ${semanas.length} semanas: ` +
+  `${conCeldas} de ${dias.length} días con celdas llenas, ` +
+  `${cerrados} de ellos con el panal cerrado.`;
+
 export function saludoDeHoy(estado, nombre) {
   if (estado === "celebrando") return `¡Panal cerrado, ${nombre}!`;
   if (estado === "descansando") return `Buen descanso, ${nombre}`;
   return `¡Buen vuelo, ${nombre}!`;
 }
 
-/** Lo que dice Zum según su estado. */
 export function fraseDeZum(estado, resumen) {
   const { llenas, meta, faltan, programadas } = resumen;
   const avance = `Llevas ${llenas} de ${meta} celdas llenas.`;
@@ -37,17 +67,6 @@ export function fraseDeZum(estado, resumen) {
   }
 }
 
-export function textoDeRacha(racha) {
-  if (racha.actual === 0) return "Tu racha empieza hoy";
-  return `Racha de vuelo: ${cuenta(racha.actual, "día", "días")}`;
-}
-
-export function textoDeReservas(reservas) {
-  if (reservas === 0) return "Sin reservas de miel";
-  return `${cuenta(reservas, "reserva", "reservas")} de miel`;
-}
-
-/** Descripción del panal de hoy para quien no lo ve. */
 export function descripcionDelPanal(resumen) {
   const { llenas, meta, cerrado } = resumen;
   if (cerrado) return `Panal de hoy cerrado: ${llenas} de ${meta} celdas llenas`;
@@ -58,7 +77,6 @@ export function descripcionDelPanal(resumen) {
   );
 }
 
-/** Las franjas que aparecen sobre la tarjeta principal, sin culpa. */
 export function textoDeFranja(racha) {
   if (racha.perdidaAyer > 0) {
     return (

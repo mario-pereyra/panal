@@ -1,0 +1,6 @@
+.arranque {
+  inline-size: 100%;
+  max-inline-size: calc(var(--ancho-maximo) + 2 * var(--margen-pagina));
+  margin-inline: auto;
+  padding: 24px var(--margen-pagina);
+}

@@ -1,12 +1,16 @@
+import { META_POR_DEFECTO } from "@panal/contratos/errores";
 import { createSlice } from "@reduxjs/toolkit";
-import { leer } from "../../app/almacen.js";
+import { recuerdo } from "../../lib/almacen.js";
 
-export const CLAVE_DEL_PRIMER_VUELO = "panal:primer-vuelo";
+const INICIAL = { paso: 1, meta: META_POR_DEFECTO, actividadId: null, titulo: "", celdaId: null };
 
-const INICIAL = { paso: 1, meta: 5, actividadId: null, titulo: "", celdaId: null };
+/** El paso pendiente se retoma si la persona sale y vuelve; al terminar, se olvida. */
+export const recuerdoDelPrimerVuelo = recuerdo("panal:primer-vuelo", (estado) =>
+  estado.primerVuelo === INICIAL ? null : JSON.stringify(estado.primerVuelo),
+);
 
 function guardado() {
-  const texto = leer(CLAVE_DEL_PRIMER_VUELO);
+  const texto = recuerdoDelPrimerVuelo.leido();
   try {
     return texto ? { ...INICIAL, ...JSON.parse(texto) } : INICIAL;
   } catch {
@@ -15,10 +19,6 @@ function guardado() {
   }
 }
 
-/**
- * El recorrido inicial: en qué paso va y lo elegido. Se recuerda en el
- * navegador para retomar el paso pendiente si la persona sale y vuelve.
- */
 const primerVueloSlice = createSlice({
   name: "primerVuelo",
   initialState: guardado,

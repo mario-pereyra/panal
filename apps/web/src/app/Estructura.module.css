@@ -54,7 +54,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  min-block-size: 44px;
+  min-block-size: var(--toque);
   font-family: var(--fuente-titulos);
   font-weight: 700;
   font-size: 1.625rem;
@@ -95,7 +95,7 @@
   justify-content: center;
   gap: 2px;
   min-block-size: 52px;
-  border-radius: 16px;
+  border-radius: var(--radio-campo);
   color: var(--tinta-suave);
   font-weight: 800;
   font-size: 0.75rem;
@@ -104,7 +104,6 @@
 
 /* La sección en la que estás: tinta, con su icono relleno de miel. */
 .seccion[aria-current="page"] {
-  --relleno: var(--miel);
   color: var(--tinta);
 }
 
@@ -122,7 +121,7 @@
   border: var(--borde);
   border-radius: 50%;
   background: var(--miel);
-  box-shadow: 0 4px 0 var(--tinta);
+  box-shadow: var(--sombra-chica);
   translate: 0 -12px;
 }
 
@@ -134,7 +133,7 @@
   }
 
   .crear:active {
-    box-shadow: 0 1px 0 var(--tinta);
+    box-shadow: var(--sombra-hundida);
     translate: 0 -9px;
   }
 }
@@ -157,8 +156,8 @@
 .avatar {
   display: grid;
   place-items: center;
-  inline-size: 44px;
-  block-size: 44px;
+  inline-size: var(--toque);
+  block-size: var(--toque);
   border: var(--borde);
   border-radius: 50%;
   background: var(--tinta);
@@ -206,9 +205,9 @@
 
   .seccion {
     flex-direction: row;
-    min-block-size: 44px;
+    min-block-size: var(--toque);
     padding-inline: 20px;
-    border-radius: 22px;
+    border-radius: var(--radio-amplio);
     color: var(--tinta);
     font-size: 1rem;
   }
@@ -235,8 +234,4 @@
   .oficio {
     display: inline;
   }
-}
-
-.contenido:focus {
-  outline: none;
 }
