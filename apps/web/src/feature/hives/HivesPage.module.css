@@ -1,0 +1,125 @@
+.nota {
+  color: var(--tinta-suave);
+}
+
+.rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  align-items: start;
+  gap: var(--separacion);
+}
+
+.cabezaDeTarjeta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-block-end: 6px;
+}
+
+.tituloDeTarjeta {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.datoDeTarjeta {
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: var(--tinta-suave);
+}
+
+.notaDeTarjeta {
+  margin-block-end: 12px;
+  color: var(--tinta-suave);
+  font-size: 0.9375rem;
+}
+
+.tituloDeSeccion {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.vacia {
+  padding: 24px;
+  border: var(--borde);
+  border-radius: var(--radio-tarjeta);
+  background: var(--blanco);
+  box-shadow: var(--sombra);
+}
+
+.cuadro {
+  margin-block: 10px;
+  font-weight: 800;
+}
+
+.pieDeTarjeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.entrega {
+  padding: 4px 12px;
+  border-radius: var(--radio-control);
+  background: var(--cera);
+  font-weight: 800;
+  font-size: 0.875rem;
+}
+
+.colmenar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tarros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.tarro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  inline-size: 112px;
+  min-block-size: var(--toque);
+  padding: 10px 6px;
+  border-radius: var(--radio-recuadro);
+  font-weight: 800;
+  font-size: 0.875rem;
+  text-align: center;
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .tarro:hover {
+    background: var(--cera-clara);
+  }
+}
+
+.archivadas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.archivada {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--toque);
+  padding-inline: 16px;
+  border: var(--borde);
+  border-radius: var(--radio-control);
+  color: inherit;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.archivada:hover {
+  background: var(--cera-clara);
+}

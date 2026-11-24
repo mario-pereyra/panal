@@ -1,0 +1,154 @@
+.nota {
+  color: var(--tinta-suave);
+}
+
+.tituloDeSeccion {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.botones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 699px) {
+  .botones > * {
+    flex: 1 1 auto;
+  }
+}
+
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-block-size: var(--toque);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.volver svg {
+  inline-size: 20px;
+  block-size: 20px;
+}
+
+.masAcciones {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--toque-amplio);
+  max-inline-size: var(--toque-amplio);
+  block-size: var(--toque-amplio);
+  padding: 0;
+  border: var(--borde);
+  border-radius: 50%;
+  background: var(--blanco);
+  color: inherit;
+  cursor: pointer;
+}
+
+.masAcciones svg {
+  inline-size: 22px;
+  block-size: 22px;
+}
+
+@media (hover: hover) {
+  .masAcciones:hover {
+    background: var(--cera);
+  }
+}
+
+.detalle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+}
+
+@media (min-width: 1080px) {
+  .detalle {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+
+  .panelCeldas {
+    grid-column: 1 / -1;
+  }
+}
+
+.panelColmena,
+.panelEnjambre,
+.panelCeldas {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-inline-size: 0;
+  padding: 20px;
+  border: var(--borde);
+  border-radius: var(--radio-tarjeta);
+  background: var(--blanco);
+  box-shadow: var(--sombra);
+}
+
+.cabezaDePanel {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.porcentaje {
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  font-size: 1.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cerrada {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radio-medio);
+  background: var(--cera);
+  font-weight: 800;
+}
+
+.cuadro {
+  font-weight: 800;
+}
+
+.rol {
+  padding: 1px 10px;
+  border-radius: var(--radio-control);
+  background: var(--tinta);
+  color: var(--miel);
+  font-size: 0.75rem;
+}
+
+.invitar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  border: 2px dashed var(--lino-borde);
+  border-radius: var(--radio-medio);
+}
+
+.filas {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filas > li + li {
+  padding-block-start: 4px;
+  border-block-start: 1px solid var(--lino);
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

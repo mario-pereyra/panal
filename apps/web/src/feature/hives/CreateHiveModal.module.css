@@ -1,0 +1,22 @@
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.botones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 699px) {
+  .botones > * {
+    flex: 1 1 auto;
+  }
+}
+
+.sinConexion {
+  color: var(--tinta-suave);
+}

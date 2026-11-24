@@ -1,0 +1,36 @@
+.ladder {
+  inline-size: 100%;
+  max-inline-size: 760px;
+  block-size: auto;
+  margin-inline: auto;
+}
+
+.step {
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.step[data-state="filled"] {
+  fill: var(--miel);
+  stroke: var(--tinta);
+}
+
+.step[data-state="current"] {
+  fill: var(--miel-profunda);
+  stroke: var(--tinta);
+  stroke-width: 3.5;
+}
+
+.step[data-state="pending"] {
+  fill: var(--blanco);
+  stroke: var(--lino-borde);
+  stroke-dasharray: 4 3;
+}
+
+.stepNumber {
+  fill: var(--tinta);
+  font-family: var(--fuente-titulos);
+  font-size: 13px;
+  font-weight: 600;
+  text-anchor: middle;
+}

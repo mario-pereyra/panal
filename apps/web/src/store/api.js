@@ -1,202 +1,266 @@
-import { gotasDeCelda } from "@panal/motor";
+import { getCellDrops } from "@panal/motor";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-/**
- * Todo lo que es verdad en el servidor vive aquí, en el caché de RTK Query.
- *
- * Las peticiones van a `/api` en el mismo origen: en desarrollo, Vite las
- * reenvía al servidor de `apps/api`. La forma de cada respuesta está en
- * `packages/contratos/src/respuestas.js`.
- */
+const rawBaseQuery = fetchBaseQuery({ baseUrl: "/api", credentials: "same-origin" });
 
-const consultar = fetchBaseQuery({ baseUrl: "/api", credentials: "same-origin" });
-
-/** Si la sesión vence en mitad del uso, se vuelve a pedir el perfil y la ruta protegida lleva a "Entrar". */
-async function baseDePanal(peticion, api, extra) {
-  const respuesta = await consultar(peticion, api, extra);
-  const sinSesion = respuesta.error?.status === 401;
-  if (sinSesion && !["obtenerYo", "entrar", "crearCuenta"].includes(api.endpoint)) {
-    api.dispatch(panalApi.util.invalidateTags(["Yo"]));
+async function baseQueryWithAuthCheck(args, api, extraOptions) {
+  const response = await rawBaseQuery(args, api, extraOptions);
+  if (response.error?.status === 401 && !["getMe", "login", "register"].includes(api.endpoint)) {
+    api.dispatch(panalApi.util.invalidateTags(["Me"]));
   }
-  return respuesta;
+  return response;
 }
 
-/** Guarda el perfil que devolvió una mutación, sin pedirlo otra vez. */
-async function guardarPerfil(_, { dispatch, queryFulfilled }) {
+async function upsertMeCache(_, { dispatch, queryFulfilled }) {
   try {
     const { data } = await queryFulfilled;
-    dispatch(panalApi.util.upsertQueryData("obtenerYo", undefined, data));
+    dispatch(panalApi.util.upsertQueryData("getMe", undefined, data));
   } catch {
-    // El formulario muestra el error con lo que devuelve la mutación.
+    return;
   }
 }
 
-/** Lo que cambia en cualquier pantalla cuando se llena o se vacía una celda. */
-const TRAS_UNA_CELDA = ["Progreso", "Colmenas", "Reporte"];
-/** Lo que cambia cuando se crea, edita o archiva una actividad. */
-const TRAS_UNA_ACTIVIDAD = ["Actividades", "Panal", "Colmenas", "Reporte", "Progreso"];
+function applyOptimisticFillToHive(hiveData, { id, activityId, userId, day }) {
+  const hive = hiveData?.hive ?? hiveData;
+  if (!hive) return;
+  const targetDay = day ?? hive.today;
+  const activity = hive.activities?.find((candidate) => candidate.id === activityId);
+  if (activity) {
+    activity.filled = true;
+    activity.filledBy = userId;
+    activity.filledDay = targetDay;
+    activity.cellId = id;
+    activity.filledToday = true;
+    activity.todayCellId = id;
+  }
+  if (Array.isArray(hive.filledCells) && !hive.filledCells.some((cell) => cell.id === id)) {
+    hive.filledCells.push({
+      id,
+      activityId,
+      userId,
+      day: targetDay,
+      filledAt: new Date().toISOString(),
+    });
+  }
+}
+
+function applyOptimisticFillToDashboard(dashboard, { id, activityId, overdue }) {
+  if (!dashboard) return;
+  const activity = dashboard.activities?.find((candidate) => candidate.id === activityId);
+  if (activity) {
+    const filledBefore = (dashboard.filledCells ?? []).filter(
+      (cell) => cell.day === dashboard.today,
+    ).length;
+    dashboard.filledCells.push({
+      id,
+      activityId,
+      userId: dashboard.user?.id,
+      day: dashboard.today,
+      filledAt: new Date().toISOString(),
+      drops: getCellDrops({ ...activity, overdue }, { filledBefore }),
+    });
+    activity.filledToday = true;
+    activity.todayCellId = id;
+  }
+  if (dashboard.activeHive) {
+    applyOptimisticFillToHive(dashboard.activeHive, {
+      id,
+      activityId,
+      userId: dashboard.user?.id,
+      day: dashboard.today,
+    });
+  }
+}
+
+function applyOptimisticUnfillToHive(hiveData, { id, activityId }) {
+  const hive = hiveData?.hive ?? hiveData;
+  if (!hive) return;
+  const activity = hive.activities?.find(
+    (candidate) => candidate.cellId === id || (activityId && candidate.id === activityId),
+  );
+  if (activity) {
+    activity.filled = false;
+    activity.filledBy = null;
+    activity.filledDay = null;
+    activity.cellId = null;
+    activity.filledToday = false;
+    activity.todayCellId = null;
+  }
+  if (Array.isArray(hive.filledCells)) {
+    hive.filledCells = hive.filledCells.filter((cell) => cell.id !== id);
+  }
+}
+
+function applyOptimisticUnfillToDashboard(dashboard, { id }) {
+  if (!dashboard) return;
+  const removed = dashboard.filledCells?.find((candidate) => candidate.id === id);
+  if (removed) {
+    dashboard.filledCells = dashboard.filledCells.filter((cell) => cell.id !== id);
+    const activity = dashboard.activities?.find((item) => item.id === removed.activityId);
+    if (activity) {
+      activity.filledToday = false;
+      activity.todayCellId = null;
+    }
+  }
+  if (dashboard.activeHive) {
+    applyOptimisticUnfillToHive(dashboard.activeHive, {
+      id,
+      activityId: removed?.activityId,
+    });
+  }
+}
+
+const AFTER_CELL_TAGS = ["Progress", "Hives", "Report"];
+const AFTER_ACTIVITY_TAGS = ["Activities", "Dashboard", "Hives", "Report", "Progress"];
 
 export const panalApi = createApi({
   reducerPath: "api",
-  baseQuery: baseDePanal,
-  tagTypes: ["Yo", "Panal", "Actividades", "Colmenas", "Invitacion", "Progreso", "Reporte"],
-  // Al volver a la pestaña o recuperar la red, lo visible se pone al día por detrás.
+  baseQuery: baseQueryWithAuthCheck,
+  tagTypes: ["Me", "Dashboard", "Activities", "Hives", "Invitation", "Progress", "Report"],
   refetchOnFocus: true,
   refetchOnReconnect: true,
-  endpoints: (crear) => ({
-    obtenerYo: crear.query({ query: () => "/yo", providesTags: ["Yo"] }),
-
-    crearCuenta: crear.mutation({
-      query: (cuenta) => ({ url: "/cuenta", method: "POST", body: cuenta }),
-      onQueryStarted: guardarPerfil,
+  endpoints: (builder) => ({
+    getMe: builder.query({
+      query: () => "/me",
+      providesTags: ["Me"],
     }),
 
-    entrar: crear.mutation({
-      query: (credenciales) => ({ url: "/sesion", method: "POST", body: credenciales }),
-      onQueryStarted: guardarPerfil,
+    register: builder.mutation({
+      query: (account) => ({ url: "/account", method: "POST", body: account }),
+      onQueryStarted: upsertMeCache,
     }),
 
-    salir: crear.mutation({ query: () => ({ url: "/sesion", method: "DELETE" }) }),
-
-    cambiarPerfil: crear.mutation({
-      query: (cambios) => ({ url: "/yo", method: "PATCH", body: cambios }),
-      onQueryStarted: guardarPerfil,
-      invalidatesTags: ["Panal", "Progreso", "Reporte"],
+    login: builder.mutation({
+      query: (credentials) => ({ url: "/session", method: "POST", body: credentials }),
+      onQueryStarted: upsertMeCache,
     }),
 
-    completarPrimerVuelo: crear.mutation({
-      query: (datos) => ({ url: "/yo/primer-vuelo", method: "POST", body: datos }),
-      onQueryStarted: guardarPerfil,
-      invalidatesTags: ["Panal", "Progreso"],
+    logout: builder.mutation({
+      query: () => ({ url: "/session", method: "DELETE" }),
     }),
 
-    obtenerProgreso: crear.query({ query: () => "/yo/progreso", providesTags: ["Progreso"] }),
-
-    /** Todo lo que necesita "Hoy", en una sola llamada. */
-    obtenerPanal: crear.query({ query: () => "/panal", providesTags: ["Panal"] }),
-
-    obtenerActividades: crear.query({
-      query: (ver) => `/actividades?ver=${ver}`,
-      providesTags: ["Actividades"],
+    updateProfile: builder.mutation({
+      query: (changes) => ({ url: "/me", method: "PATCH", body: changes }),
+      onQueryStarted: upsertMeCache,
+      invalidatesTags: ["Dashboard", "Progress", "Report"],
     }),
 
-    /** Crear o reemplazar. El identificador nace en el navegador: repetir el envío no duplica. */
-    guardarActividad: crear.mutation({
-      query: ({ id, ...actividad }) => ({
-        url: `/actividades/${id}`,
+    completeOnboarding: builder.mutation({
+      query: (data) => ({ url: "/me/onboarding", method: "POST", body: data }),
+      onQueryStarted: upsertMeCache,
+      invalidatesTags: ["Dashboard", "Progress"],
+    }),
+
+    startPause: builder.mutation({
+      query: () => ({ url: "/me/pause", method: "POST" }),
+      onQueryStarted: upsertMeCache,
+      invalidatesTags: ["Dashboard", "Progress", "Report"],
+    }),
+
+    cancelPause: builder.mutation({
+      query: () => ({ url: "/me/pause", method: "DELETE" }),
+      onQueryStarted: upsertMeCache,
+      invalidatesTags: ["Dashboard", "Progress", "Report"],
+    }),
+
+    getProgress: builder.query({
+      query: () => "/me/progress",
+      providesTags: ["Progress"],
+    }),
+
+    getDashboard: builder.query({
+      query: () => "/dashboard",
+      providesTags: ["Dashboard"],
+    }),
+
+    getActivities: builder.query({
+      query: (view = "active") => `/activities?view=${view}`,
+      providesTags: ["Activities"],
+    }),
+
+    saveActivity: builder.mutation({
+      query: ({ id, ...activity }) => ({
+        url: `/activities/${id}`,
         method: "PUT",
-        body: actividad,
+        body: activity,
       }),
-      invalidatesTags: TRAS_UNA_ACTIVIDAD,
+      invalidatesTags: AFTER_ACTIVITY_TAGS,
     }),
 
-    cambiarActividad: crear.mutation({
-      query: ({ id, ...cambios }) => ({
-        url: `/actividades/${id}`,
+    updateActivity: builder.mutation({
+      query: ({ id, ...changes }) => ({
+        url: `/activities/${id}`,
         method: "PATCH",
-        body: cambios,
+        body: changes,
       }),
-      invalidatesTags: TRAS_UNA_ACTIVIDAD,
+      invalidatesTags: AFTER_ACTIVITY_TAGS,
     }),
 
-    /**
-     * Llenar una celda. La pantalla cambia antes de que el servidor responda:
-     * la celda se agrega al caché y, si el servidor falla, se deshace.
-     */
-    llenarCelda: crear.mutation({
-      query: ({ id, actividadId }) => ({
-        url: `/celdas/${id}`,
+    fillCell: builder.mutation({
+      query: ({ id, activityId }) => ({
+        url: `/cells/${id}`,
         method: "PUT",
-        body: { actividadId },
+        body: { activityId },
       }),
       async onQueryStarted(
-        { id, actividadId, vencida, colmenaId },
+        { id, activityId, overdue, hiveId },
         { dispatch, queryFulfilled, getState },
       ) {
-        const personaId = selectYo(getState())?.id ?? null;
-        const cambios = [
+        const userId = selectMe(getState())?.id ?? null;
+        const patches = [
           dispatch(
-            panalApi.util.updateQueryData("obtenerPanal", undefined, (panal) => {
-              const actividad = panal.actividades.find((candidata) => candidata.id === actividadId);
-              if (actividad) {
-                const llenasAntes = panal.celdasLlenas.filter(
-                  (celda) => celda.dia === panal.hoy,
-                ).length;
-                panal.celdasLlenas.push({
-                  id,
-                  actividadId,
-                  personaId: panal.persona.id,
-                  dia: panal.hoy,
-                  llenadaEn: new Date().toISOString(),
-                  // El mismo motor que usa el servidor: las gotas aparecen al instante.
-                  gotas: gotasDeCelda({ ...actividad, vencida }, { llenasAntes }),
-                });
-              }
-              const enColmena = panal.colmena?.celdas.find(
-                (otra) => otra.actividadId === actividadId,
-              );
-              if (enColmena) enColmena.llenaPor = panal.persona.id;
+            panalApi.util.updateQueryData("getDashboard", undefined, (dashboard) => {
+              applyOptimisticFillToDashboard(dashboard, { id, activityId, overdue });
             }),
           ),
         ];
-        if (colmenaId) {
-          cambios.push(
+        if (hiveId) {
+          patches.push(
             dispatch(
-              panalApi.util.updateQueryData("obtenerColmena", colmenaId, (detalle) => {
-                const actividad = detalle.actividades.find(
-                  (candidata) => candidata.id === actividadId,
-                );
-                if (!actividad) return;
-                actividad.llenaPor = personaId;
-                actividad.llenadaEl = detalle.hoy;
-                actividad.celdaId = id;
+              panalApi.util.updateQueryData("getHive", hiveId, (hiveData) => {
+                applyOptimisticFillToHive(hiveData, { id, activityId, userId });
               }),
             ),
           );
         }
         try {
           const { data } = await queryFulfilled;
-          // El servidor es la autoridad: su celda reemplaza a la que supusimos.
           dispatch(
-            panalApi.util.updateQueryData("obtenerPanal", undefined, (panal) => {
-              const celda = panal.celdasLlenas.find((candidata) => candidata.id === id);
-              if (celda) Object.assign(celda, data.celda);
-              panal.progreso.bonosDeHoy = data.bonosDeHoy;
+            panalApi.util.updateQueryData("getDashboard", undefined, (dashboard) => {
+              const cell = dashboard.filledCells?.find((candidate) => candidate.id === id);
+              if (cell && data?.cell) Object.assign(cell, data.cell);
+              if (data?.todayBonuses !== undefined && dashboard.progress) {
+                dashboard.progress.todayBonuses = data.todayBonuses;
+              }
             }),
           );
         } catch {
-          for (const cambio of cambios) cambio.undo();
+          for (const patch of patches) patch.undo();
         }
       },
-      invalidatesTags: (_, error) => (error ? [] : TRAS_UNA_CELDA),
+      invalidatesTags: (_, error, arg) => {
+        if (error) return [];
+        return arg?.type && arg.type !== "unica"
+          ? AFTER_CELL_TAGS
+          : [...AFTER_CELL_TAGS, "Activities"];
+      },
     }),
 
-    /** Deshacer una celda llena. Sus gotas desaparecen con ella. */
-    vaciarCelda: crear.mutation({
-      query: ({ id }) => ({ url: `/celdas/${id}`, method: "DELETE" }),
-      async onQueryStarted({ id, colmenaId }, { dispatch, queryFulfilled }) {
-        const cambios = [
+    unfillCell: builder.mutation({
+      query: ({ id }) => ({ url: `/cells/${id}`, method: "DELETE" }),
+      async onQueryStarted({ id, activityId, hiveId }, { dispatch, queryFulfilled }) {
+        const patches = [
           dispatch(
-            panalApi.util.updateQueryData("obtenerPanal", undefined, (panal) => {
-              const celda = panal.celdasLlenas.find((candidata) => candidata.id === id);
-              if (!celda) return;
-              panal.celdasLlenas = panal.celdasLlenas.filter((otra) => otra.id !== id);
-              const enColmena = panal.colmena?.celdas.find(
-                (otra) => otra.actividadId === celda.actividadId,
-              );
-              if (enColmena) enColmena.llenaPor = null;
+            panalApi.util.updateQueryData("getDashboard", undefined, (dashboard) => {
+              applyOptimisticUnfillToDashboard(dashboard, { id });
             }),
           ),
         ];
-        if (colmenaId) {
-          cambios.push(
+        if (hiveId) {
+          patches.push(
             dispatch(
-              panalApi.util.updateQueryData("obtenerColmena", colmenaId, (detalle) => {
-                const actividad = detalle.actividades.find((candidata) => candidata.celdaId === id);
-                if (!actividad) return;
-                actividad.llenaPor = null;
-                actividad.llenadaEl = null;
-                actividad.celdaId = null;
+              panalApi.util.updateQueryData("getHive", hiveId, (hiveData) => {
+                applyOptimisticUnfillToHive(hiveData, { id, activityId });
               }),
             ),
           );
@@ -204,101 +268,143 @@ export const panalApi = createApi({
         try {
           await queryFulfilled;
         } catch {
-          for (const cambio of cambios) cambio.undo();
+          for (const patch of patches) patch.undo();
         }
       },
-      // Vaciar puede deshacer un bono de hoy (una cuota semanal), y una única
-      // terminada vuelve a estar activa: el panal y las listas se vuelven a pedir.
-      invalidatesTags: (_, error) => (error ? [] : [...TRAS_UNA_CELDA, "Panal", "Actividades"]),
+      invalidatesTags: (_, error) => (error ? [] : [...AFTER_CELL_TAGS, "Dashboard", "Activities"]),
     }),
 
-    obtenerColmenas: crear.query({ query: () => "/colmenas", providesTags: ["Colmenas"] }),
-
-    obtenerColmena: crear.query({
-      query: (id) => `/colmenas/${id}`,
-      providesTags: (_, __, id) => [{ type: "Colmenas", id }],
+    getHives: builder.query({
+      query: () => "/hives",
+      providesTags: ["Hives"],
     }),
 
-    fundarColmena: crear.mutation({
-      query: (colmena) => ({ url: "/colmenas", method: "POST", body: colmena }),
-      invalidatesTags: ["Colmenas", "Panal", "Progreso"],
+    createHive: builder.mutation({
+      query: (hive) => ({ url: "/hives", method: "POST", body: hive }),
+      invalidatesTags: ["Hives", "Dashboard", "Progress"],
     }),
 
-    cambiarColmena: crear.mutation({
-      query: ({ id, ...cambios }) => ({ url: `/colmenas/${id}`, method: "PATCH", body: cambios }),
-      invalidatesTags: ["Colmenas", "Panal"],
+    getHive: builder.query({
+      query: (id) => `/hives/${id}`,
+      providesTags: (_, __, id) => [{ type: "Hives", id }],
     }),
 
-    salirDeColmena: crear.mutation({
-      query: ({ colmenaId, personaId }) => ({
-        url: `/colmenas/${colmenaId}/integrantes/${personaId}`,
+    updateHive: builder.mutation({
+      query: ({ id, ...changes }) => ({ url: `/hives/${id}`, method: "PATCH", body: changes }),
+      invalidatesTags: ["Hives", "Dashboard"],
+    }),
+
+    removeHiveMember: builder.mutation({
+      query: ({ hiveId, id, userId }) => ({
+        url: `/hives/${hiveId ?? id}/members/${userId}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Colmenas", "Panal", "Actividades", "Progreso"],
+      invalidatesTags: ["Hives", "Dashboard", "Activities", "Progress"],
     }),
 
-    obtenerInvitacion: crear.query({
-      query: (colmenaId) => `/colmenas/${colmenaId}/invitacion`,
-      providesTags: (_, __, colmenaId) => [{ type: "Invitacion", id: colmenaId }],
+    getHiveInvitation: builder.query({
+      query: (hiveId) => `/hives/${hiveId}/invitation`,
+      providesTags: (_, __, hiveId) => [{ type: "Invitation", id: hiveId }],
     }),
 
-    /** Crea el enlace, o anula el actual y crea otro. */
-    crearInvitacion: crear.mutation({
-      query: (colmenaId) => ({ url: `/colmenas/${colmenaId}/invitacion`, method: "POST" }),
-      invalidatesTags: (_, error, colmenaId) =>
-        error ? [] : [{ type: "Invitacion", id: colmenaId }],
+    createHiveInvitation: builder.mutation({
+      query: (hiveId) => ({ url: `/hives/${hiveId}/invitation`, method: "POST" }),
+      invalidatesTags: (_, error, hiveId) => (error ? [] : [{ type: "Invitation", id: hiveId }]),
     }),
 
-    /** A qué colmena invita un enlace. No pide sesión. */
-    verInvitacion: crear.query({ query: (codigo) => `/invitaciones/${codigo}` }),
-
-    aceptarInvitacion: crear.mutation({
-      query: (codigo) => ({ url: `/invitaciones/${codigo}/aceptar`, method: "POST" }),
-      invalidatesTags: ["Colmenas", "Panal", "Actividades", "Progreso"],
+    revokeHiveInvitation: builder.mutation({
+      query: (hiveId) => ({ url: `/hives/${hiveId}/invitation`, method: "DELETE" }),
+      invalidatesTags: (_, error, hiveId) => (error ? [] : [{ type: "Invitation", id: hiveId }]),
     }),
 
-    obtenerReporte: crear.query({
-      query: ({ desde, hasta }) => `/reportes?desde=${desde}&hasta=${hasta}`,
-      providesTags: ["Reporte"],
+    getInvitation: builder.query({
+      query: (code) => `/invitations/${code}`,
+    }),
+
+    acceptInvitation: builder.mutation({
+      query: (code) => ({ url: `/invitations/${code}/accept`, method: "POST" }),
+      invalidatesTags: ["Hives", "Dashboard", "Activities", "Progress"],
+    }),
+
+    getReport: builder.query({
+      query: ({ from, to }) => `/reports?from=${from}&to=${to}`,
+      providesTags: ["Report"],
     }),
   }),
 });
 
 export const {
-  useObtenerYoQuery,
-  useCrearCuentaMutation,
-  useEntrarMutation,
-  useSalirMutation,
-  useCambiarPerfilMutation,
-  useCompletarPrimerVueloMutation,
-  useObtenerProgresoQuery,
-  useObtenerPanalQuery,
-  useObtenerActividadesQuery,
-  useGuardarActividadMutation,
-  useCambiarActividadMutation,
-  useLlenarCeldaMutation,
-  useVaciarCeldaMutation,
-  useObtenerColmenasQuery,
-  useObtenerColmenaQuery,
-  useFundarColmenaMutation,
-  useCambiarColmenaMutation,
-  useSalirDeColmenaMutation,
-  useObtenerInvitacionQuery,
-  useCrearInvitacionMutation,
-  useVerInvitacionQuery,
-  useAceptarInvitacionMutation,
-  useObtenerReporteQuery,
+  useGetMeQuery,
+  useRegisterMutation,
+  useLoginMutation,
+  useLogoutMutation,
+  useUpdateProfileMutation,
+  useCompleteOnboardingMutation,
+  useStartPauseMutation,
+  useCancelPauseMutation,
+  useGetProgressQuery,
+  useGetDashboardQuery,
+  useGetActivitiesQuery,
+  useSaveActivityMutation,
+  useUpdateActivityMutation,
+  useFillCellMutation,
+  useUnfillCellMutation,
+  useGetHivesQuery,
+  useCreateHiveMutation,
+  useGetHiveQuery,
+  useUpdateHiveMutation,
+  useRemoveHiveMemberMutation,
+  useGetHiveInvitationQuery,
+  useCreateHiveInvitationMutation,
+  useRevokeHiveInvitationMutation,
+  useGetInvitationQuery,
+  useAcceptInvitationMutation,
+  useGetReportQuery,
 } = panalApi;
 
-// Lo que respondió el servidor a cada consulta, o `undefined` mientras carga.
-export const selectYo = (estado) => panalApi.endpoints.obtenerYo.select()(estado).data;
-export const selectPanal = (estado) => panalApi.endpoints.obtenerPanal.select()(estado).data;
-export const selectProgreso = (estado) => panalApi.endpoints.obtenerProgreso.select()(estado).data;
-export const selectActividades = (estado, ver) =>
-  panalApi.endpoints.obtenerActividades.select(ver)(estado).data;
-export const selectListaDeColmenas = (estado) =>
-  panalApi.endpoints.obtenerColmenas.select()(estado).data;
-export const selectDetalleDeColmena = (estado, id) =>
-  panalApi.endpoints.obtenerColmena.select(id)(estado).data;
-export const selectReporte = (estado, rango) =>
-  rango ? panalApi.endpoints.obtenerReporte.select(rango)(estado).data : undefined;
+const selectMeResult = panalApi.endpoints.getMe.select();
+const selectDashboardResult = panalApi.endpoints.getDashboard.select();
+const selectProgressResult = panalApi.endpoints.getProgress.select();
+const selectHivesListResult = panalApi.endpoints.getHives.select();
+
+export const selectMe = (state) => {
+  const data = selectMeResult(state).data;
+  return data?.user ?? data;
+};
+
+export const selectDashboard = (state) => selectDashboardResult(state).data;
+
+export const selectProgress = (state) => selectProgressResult(state).data;
+
+export function selectActivities(viewOrState, maybeView) {
+  if (typeof viewOrState === "object" && viewOrState !== null && "api" in viewOrState) {
+    return panalApi.endpoints.getActivities.select(maybeView)(viewOrState).data;
+  }
+  const selectView = panalApi.endpoints.getActivities.select(viewOrState);
+  return (state) => selectView(state).data;
+}
+
+export const selectHivesList = (state) => selectHivesListResult(state).data;
+
+export function selectHiveById(idOrState, maybeId) {
+  if (typeof idOrState === "object" && idOrState !== null && "api" in idOrState) {
+    const data = panalApi.endpoints.getHive.select(maybeId)(idOrState).data;
+    return data?.hive ?? data;
+  }
+  const selectById = panalApi.endpoints.getHive.select(idOrState);
+  return (state) => {
+    const data = selectById(state).data;
+    return data?.hive ?? data;
+  };
+}
+
+export function selectReport(periodOrState, maybePeriod) {
+  if (typeof periodOrState === "object" && periodOrState !== null && "api" in periodOrState) {
+    return maybePeriod
+      ? panalApi.endpoints.getReport.select(maybePeriod)(periodOrState).data
+      : undefined;
+  }
+  if (!periodOrState) return () => undefined;
+  const selectByPeriod = panalApi.endpoints.getReport.select(periodOrState);
+  return (state) => selectByPeriod(state).data;
+}

@@ -1,0 +1,46 @@
+.dailyHoneycomb {
+  block-size: auto;
+}
+
+.cell polygon {
+  fill: var(--cera);
+  stroke: var(--tinta);
+  stroke-width: 5;
+  stroke-linejoin: round;
+}
+
+.dailyHoneycomb[data-rest] .cell polygon {
+  fill: var(--ala);
+}
+
+.cell[data-filled] polygon {
+  fill: var(--miel-oscura);
+}
+
+.dailyHoneycomb[data-closed] .cell[data-filled] polygon {
+  fill: var(--miel-profunda);
+}
+
+.cell path {
+  fill: none;
+  stroke: var(--tinta);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.cell[data-filled] path {
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cell polygon {
+    transition: fill 0.25s var(--suave);
+  }
+
+  .cell path {
+    transition: stroke-dashoffset 0.35s var(--suave) 0.1s;
+  }
+}

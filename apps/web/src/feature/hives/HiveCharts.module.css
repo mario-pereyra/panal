@@ -1,0 +1,60 @@
+.desplazable {
+  max-inline-size: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.colmenaGrande {
+  inline-size: 100%;
+  block-size: auto;
+}
+
+.rotuloDeCuadro {
+  fill: var(--tinta-suave);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.celdaVacia {
+  fill: var(--cera-clara);
+  stroke: var(--tinta);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+}
+
+.celdaLlena {
+  stroke: var(--tinta);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+}
+
+.inicialEnCelda {
+  fill: var(--blanco);
+  font-family: var(--fuente-titulos);
+  font-size: 14px;
+  font-weight: 600;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: var(--tinta);
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
+}
+
+.avatares {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.extra {
+  display: grid;
+  place-items: center;
+  inline-size: 32px;
+  block-size: 32px;
+  border: 2px solid var(--tinta);
+  border-radius: 50%;
+  background: var(--lino);
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  font-size: 0.875rem;
+}

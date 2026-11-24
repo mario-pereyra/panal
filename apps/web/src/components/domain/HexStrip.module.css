@@ -1,0 +1,31 @@
+.strip {
+  max-inline-size: 100%;
+  block-size: auto;
+  flex: none;
+}
+
+.cell {
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+
+.cell[data-status="done"] {
+  fill: var(--miel);
+  stroke: var(--tinta);
+}
+
+.cell[data-status="missed"] {
+  fill: var(--blanco);
+  stroke: var(--tinta);
+}
+
+.cell[data-status="rest"] {
+  fill: var(--ala);
+  stroke: var(--tinta);
+}
+
+.cell[data-status="off"] {
+  fill: none;
+  stroke: var(--lino-borde);
+  stroke-dasharray: 3 3;
+}

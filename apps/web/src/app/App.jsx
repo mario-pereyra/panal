@@ -1,94 +1,98 @@
 import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router";
-import { LimiteDeError } from "../componentes/ui/Estados.jsx";
-import { useFondo } from "../componentes/ui/useFondo.js";
-import { useVigilarConexion } from "../nucleo/conexion/useConexion.js";
-import { NoEncontrada } from "../feature/errores/Errores.jsx";
-import { Hoy } from "../feature/hoy/Hoy.jsx";
-import { useAplicarMovimiento } from "../nucleo/preferencias/usePreferencias.js";
-import { Arranque, ConSesion, SinSesion, SoloConSesion } from "../feature/sesion/Guardias.jsx";
-import { Estructura } from "./Estructura.jsx";
+import { ErrorBoundary } from "../components/ui/FeedbackStates.jsx";
+import { useModalRoute } from "../components/ui/useModalRoute.js";
+import { useConnection } from "../core/connection/useConnection.js";
+import { useReducedMotion } from "../core/preferences/usePreferences.js";
+import {
+  AuthBootstrap,
+  GuestOnly,
+  OnboardedOnly,
+  ProtectedRoutes,
+} from "../feature/auth/AuthGuards.jsx";
+import { NotFoundPage } from "../feature/errors/NotFoundPage.jsx";
+import { TodayPage } from "../feature/today/TodayPage.jsx";
+import { AppLayout } from "./AppLayout.jsx";
 
-/**
- * Una pantalla que se descarga la primera vez que se visita. Hoy, la puerta de
- * entrada, va en el archivo principal; el resto, aparte. Los formularios traen
- * Zod consigo. El service worker guarda todas al instalarse, así que también
- * abren sin red. `nombre` es la exportación del módulo.
- */
-const perezosa = (cargar, nombre) =>
-  lazy(() => cargar().then((modulo) => ({ default: modulo[nombre] })));
+const lazyNamed = (loader, exportName) =>
+  lazy(() => loader().then((module) => ({ default: module[exportName] ?? module.default })));
 
-const Entrar = perezosa(() => import("../feature/sesion/Entrar.jsx"), "Entrar");
-const CrearPanal = perezosa(() => import("../feature/sesion/CrearPanal.jsx"), "CrearPanal");
-const PrimerVuelo = perezosa(() => import("../feature/primerVuelo/PrimerVuelo.jsx"), "PrimerVuelo");
-const Celdas = perezosa(() => import("../feature/celdas/Celdas.jsx"), "Celdas");
-const Colmenas = perezosa(() => import("../feature/colmenas/Colmenas.jsx"), "Colmenas");
-const Colmena = perezosa(() => import("../feature/colmenas/Colmena.jsx"), "Colmena");
-const Invitar = perezosa(() => import("../feature/colmenas/Invitar.jsx"), "Invitar");
-const Unirme = perezosa(() => import("../feature/unirme/Unirme.jsx"), "Unirme");
-const Reportes = perezosa(() => import("../feature/reportes/Reportes.jsx"), "Reportes");
-const MiVuelo = perezosa(() => import("../feature/miVuelo/MiVuelo.jsx"), "MiVuelo");
-const VentanaDeActividad = perezosa(
-  () => import("../feature/actividad/VentanaDeActividad.jsx"),
-  "VentanaDeActividad",
+const LoginPage = lazyNamed(() => import("../feature/auth/LoginPage.jsx"), "LoginPage");
+const RegisterPage = lazyNamed(() => import("../feature/auth/RegisterPage.jsx"), "RegisterPage");
+const OnboardingPage = lazyNamed(
+  () => import("../feature/onboarding/OnboardingPage.jsx"),
+  "OnboardingPage",
+);
+const CellsPage = lazyNamed(() => import("../feature/cells/CellsPage.jsx"), "CellsPage");
+const HivesPage = lazyNamed(() => import("../feature/hives/HivesPage.jsx"), "HivesPage");
+const HiveDetailPage = lazyNamed(
+  () => import("../feature/hives/HiveDetailPage.jsx"),
+  "HiveDetailPage",
+);
+const InviteModal = lazyNamed(() => import("../feature/hives/InviteModal.jsx"), "InviteModal");
+const JoinHivePage = lazyNamed(
+  () => import("../feature/joinHive/JoinHivePage.jsx"),
+  "JoinHivePage",
+);
+const ReportsPage = lazyNamed(() => import("../feature/reports/ReportsPage.jsx"), "ReportsPage");
+const ProfilePage = lazyNamed(() => import("../feature/profile/ProfilePage.jsx"), "ProfilePage");
+const ActivityModal = lazyNamed(
+  () => import("../feature/activity/ActivityModal.jsx"),
+  "ActivityModal",
 );
 
-/**
- * Las ventanas con ruta propia (P06 y P09) se dibujan sobre la pantalla desde
- * la que se abrieron: esa ubicación viaja en `state.fondo`. El primer
- * `Routes` dibuja el fondo; el segundo, la ventana. Con un enlace directo no
- * hay fondo y debajo queda la pantalla madre.
- */
-const VENTANAS = [
-  { ruta: "celdas/nueva", madre: <Celdas />, ventana: <VentanaDeActividad /> },
-  { ruta: "celdas/:id", madre: <Celdas />, ventana: <VentanaDeActividad /> },
-  { ruta: "colmenas/:id/invitar", madre: <Colmena />, ventana: <Invitar /> },
+const MODAL_ROUTES = [
+  { path: "celdas/nueva", parentElement: <CellsPage />, modalElement: <ActivityModal /> },
+  { path: "celdas/:id", parentElement: <CellsPage />, modalElement: <ActivityModal /> },
+  {
+    path: "colmenas/:id/invitar",
+    parentElement: <HiveDetailPage />,
+    modalElement: <InviteModal />,
+  },
 ];
 
-/** Las rutas de Panal (docs/proyecto/03-pantallas.md, sección 2). */
 export function App() {
-  useVigilarConexion();
-  useAplicarMovimiento();
-  const { fondo } = useFondo();
+  useConnection();
+  useReducedMotion();
+  const { backgroundLocation } = useModalRoute();
 
   return (
-    <LimiteDeError>
-      <Suspense fallback={<Arranque />}>
-        <Routes location={fondo}>
-          <Route element={<SinSesion />}>
-            <Route path="entrar" element={<Entrar />} />
-            <Route path="crear" element={<CrearPanal />} />
+    <ErrorBoundary>
+      <Suspense fallback={<AuthBootstrap />}>
+        <Routes location={backgroundLocation}>
+          <Route element={<GuestOnly />}>
+            <Route path="entrar" element={<LoginPage />} />
+            <Route path="crear" element={<RegisterPage />} />
           </Route>
-          <Route path="unirme/:codigo" element={<Unirme />} />
-          <Route element={<ConSesion />}>
-            <Route path="primer-vuelo" element={<PrimerVuelo />} />
-            <Route element={<Estructura />}>
-              <Route index element={<Hoy />} />
-              <Route path="celdas" element={<Celdas />} />
-              <Route path="colmenas" element={<Colmenas />} />
-              <Route path="colmenas/:id" element={<Colmena />} />
-              {VENTANAS.map(({ ruta, madre }) => (
-                <Route key={ruta} path={ruta} element={madre} />
+          <Route path="unirme/:codigo" element={<JoinHivePage />} />
+          <Route element={<ProtectedRoutes />}>
+            <Route path="primer-vuelo" element={<OnboardingPage />} />
+            <Route element={<AppLayout />}>
+              <Route index element={<TodayPage />} />
+              <Route path="celdas" element={<CellsPage />} />
+              <Route path="colmenas" element={<HivesPage />} />
+              <Route path="colmenas/:id" element={<HiveDetailPage />} />
+              {MODAL_ROUTES.map(({ path, parentElement }) => (
+                <Route key={path} path={path} element={parentElement} />
               ))}
-              <Route path="reportes" element={<Reportes />} />
-              <Route path="mi-vuelo" element={<MiVuelo />} />
+              <Route path="reportes" element={<ReportsPage />} />
+              <Route path="mi-vuelo" element={<ProfilePage />} />
             </Route>
           </Route>
-          <Route path="*" element={<NoEncontrada />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
 
-      {/* La ventana aparece cuando llega su código; el fondo sigue a la vista. */}
       <Suspense fallback={null}>
         <Routes>
-          <Route element={<SoloConSesion />}>
-            {VENTANAS.map(({ ruta, ventana }) => (
-              <Route key={ruta} path={ruta} element={ventana} />
+          <Route element={<OnboardedOnly />}>
+            {MODAL_ROUTES.map(({ path, modalElement }) => (
+              <Route key={path} path={path} element={modalElement} />
             ))}
           </Route>
           <Route path="*" element={null} />
         </Routes>
       </Suspense>
-    </LimiteDeError>
+    </ErrorBoundary>
   );
 }

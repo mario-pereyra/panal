@@ -1,0 +1,72 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.consistencyGrid {
+  inline-size: 100%;
+  block-size: 250px;
+}
+
+.weekdayLabel {
+  fill: var(--tinta-suave);
+  font-size: 10px;
+  font-weight: 800;
+  text-anchor: middle;
+}
+
+.dayCell {
+  fill: var(--lino);
+  stroke-linejoin: round;
+}
+
+.dayCell[data-level="1"] {
+  fill: var(--miel-clara);
+}
+
+.dayCell[data-level="2"] {
+  fill: var(--miel);
+}
+
+.dayCell[data-level="3"] {
+  fill: var(--miel-profunda);
+}
+
+.dayCell[data-today] {
+  stroke: var(--tinta);
+  stroke-width: 2.5;
+}
+
+.dayCell[data-future] {
+  fill: none;
+  stroke: var(--lino-borde);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-size: 0.8125rem;
+  color: var(--tinta-suave);
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  inline-size: 18px;
+  block-size: 16px;
+  flex: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dayCell {
+    transition: fill 0.25s var(--suave);
+  }
+}

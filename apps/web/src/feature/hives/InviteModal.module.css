@@ -1,0 +1,71 @@
+.invitacion {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.zumChica {
+  --tamano-zum: 96px;
+  align-self: center;
+}
+
+.nota {
+  color: var(--tinta-suave);
+}
+
+.enlace input {
+  inline-size: 100%;
+  min-block-size: var(--toque-amplio);
+  padding: 0 16px;
+  border: var(--borde);
+  border-radius: var(--radio-campo);
+  background: var(--cera-clara);
+  color: inherit;
+  font: inherit;
+  font-size: 0.9375rem;
+}
+
+.botones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 699px) {
+  .botones > * {
+    flex: 1 1 auto;
+  }
+}
+
+.iconoDeBoton {
+  inline-size: 20px;
+  block-size: 20px;
+}
+
+.vence {
+  color: var(--tinta-suave);
+  font-size: 0.9375rem;
+}
+
+.enlaceDeTexto {
+  min-block-size: var(--toque);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--tinta);
+  font: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.enlaceDeTexto:disabled {
+  color: var(--tinta-suave);
+  cursor: default;
+}
+
+.subtitulo {
+  font-size: 1rem;
+}

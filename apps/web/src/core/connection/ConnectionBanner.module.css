@@ -1,0 +1,39 @@
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-block-size: 52px;
+  padding: 6px 8px 6px 18px;
+  border: var(--borde);
+  border-radius: var(--radio-recuadro);
+  background: var(--cera);
+}
+
+.banner[data-tone="wing"] {
+  background: var(--ala);
+}
+
+.banner > svg {
+  flex: none;
+  inline-size: 22px;
+  block-size: 22px;
+}
+
+.text {
+  flex: 1 1 auto;
+  padding-block: 6px;
+  font-size: 0.9375rem;
+}
+
+.action {
+  flex: none;
+  min-block-size: var(--toque);
+  padding: 0 18px;
+  border: var(--borde);
+  border-radius: var(--radio-control);
+  background: var(--tinta);
+  color: var(--miel);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}

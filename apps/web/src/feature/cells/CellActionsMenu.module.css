@@ -1,0 +1,9 @@
+.acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sinConexion {
+  color: var(--tinta-suave);
+}

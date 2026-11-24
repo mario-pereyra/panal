@@ -1,0 +1,71 @@
+.zum {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  inline-size: var(--tamano-zum, 240px);
+  aspect-ratio: 1;
+}
+
+.zum[data-fondo]::before {
+  content: "";
+  position: absolute;
+  inset: 2%;
+  border-radius: 50%;
+  background: var(--cera-clara);
+}
+
+.image {
+  position: relative;
+  inline-size: 94%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .image {
+    animation:
+      fadeIn 0.45s var(--resorte) both,
+      float 3.2s ease-in-out 0.45s infinite alternate;
+  }
+
+  .zum[data-estado="celebrando"] .image {
+    animation:
+      fadeIn 0.45s var(--resorte) both,
+      bounce 0.7s var(--suave) 0.45s infinite alternate;
+  }
+
+  .zum[data-estado="descansando"] .image {
+    animation:
+      fadeIn 0.45s var(--resorte) both,
+      breathe 4s ease-in-out 0.45s infinite alternate;
+  }
+
+  .zum[data-estado="preocupada"] .image {
+    animation: fadeIn 0.45s var(--resorte) both;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    scale: 0.86;
+  }
+}
+
+@keyframes float {
+  to {
+    translate: 0 -6px;
+  }
+}
+
+@keyframes bounce {
+  to {
+    translate: 0 -12px;
+    rotate: 3deg;
+  }
+}
+
+@keyframes breathe {
+  to {
+    scale: 1.03;
+  }
+}

@@ -1,0 +1,38 @@
+.hiveGrid {
+  inline-size: 100%;
+  block-size: auto;
+  max-block-size: 200px;
+}
+
+.filledCell,
+.emptyCell {
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.filledCell {
+  stroke: var(--tinta);
+}
+
+.emptyCell {
+  fill: var(--lino-claro);
+  stroke: var(--lino-borde);
+}
+
+.interactiveCell {
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .filledCell {
+    animation: popIn 0.35s var(--resorte);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+}
+
+@keyframes popIn {
+  from {
+    scale: 0.6;
+  }
+}

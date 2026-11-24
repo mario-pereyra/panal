@@ -1,0 +1,35 @@
+.avatar {
+  position: relative;
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  border: 2px solid var(--tinta);
+  border-radius: 50%;
+  background: var(--miel);
+  color: var(--blanco);
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  text-shadow: 0 0 2px var(--tinta);
+}
+
+.sm {
+  inline-size: 32px;
+  block-size: 32px;
+  font-size: 0.875rem;
+}
+
+.md {
+  inline-size: 40px;
+  block-size: 40px;
+  font-size: 1.0625rem;
+}
+
+.lg {
+  inline-size: 48px;
+  block-size: 48px;
+  font-size: 1.25rem;
+}
+
+.avatar[data-owner] {
+  box-shadow: 0 0 0 2px var(--miel-oscura);
+}

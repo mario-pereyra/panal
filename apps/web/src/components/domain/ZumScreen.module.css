@@ -1,0 +1,43 @@
+.screen {
+  display: grid;
+  place-items: center;
+  min-block-size: 100dvh;
+  padding: 24px max(16px, env(safe-area-inset-left, 0px));
+}
+
+.screen:focus {
+  outline: none;
+}
+
+.card {
+  composes: card from "../ui/surface.module.css";
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  inline-size: 100%;
+  max-inline-size: 34rem;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.zum {
+  --tamano-zum: 160px;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 2rem;
+}
+
+.description {
+  color: var(--tinta-suave);
+  font-size: 1.0625rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}

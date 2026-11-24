@@ -1,0 +1,163 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-block-size: 50px;
+  padding: 8px 26px;
+  border: var(--borde);
+  border-radius: var(--radio-control);
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  font-size: 1.125rem;
+  line-height: 1.1;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.primary {
+  background: var(--tinta);
+  color: var(--blanco);
+}
+
+.secondary {
+  background: var(--blanco);
+  color: var(--tinta);
+}
+
+.danger {
+  border-color: var(--coral-oscuro);
+  background: var(--blanco);
+  color: var(--coral-oscuro);
+}
+
+.ghost {
+  border-color: transparent;
+  background: none;
+  color: var(--tinta);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sm {
+  min-block-size: var(--toque);
+  padding: 6px 18px;
+  font-size: 1rem;
+}
+
+.lg {
+  min-block-size: 54px;
+  padding: 10px 30px;
+  font-size: 1.1875rem;
+}
+
+.button:disabled,
+.button[aria-disabled="true"] {
+  opacity: var(--opacidad-deshabilitado);
+  cursor: not-allowed;
+}
+
+@media (hover: hover) {
+  .primary:not(:disabled, [aria-disabled="true"]):hover {
+    background: var(--tinta-al-pasar);
+  }
+
+  .secondary:not(:disabled, [aria-disabled="true"]):hover {
+    background: var(--cera);
+  }
+
+  .danger:not(:disabled, [aria-disabled="true"]):hover {
+    background: var(--coral-claro);
+  }
+
+  .ghost:not(:disabled, [aria-disabled="true"]):hover {
+    background: var(--lino);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .button {
+    transition:
+      background-color 0.15s var(--suave),
+      scale 0.2s var(--resorte);
+  }
+
+  .button:not(:disabled, [aria-disabled="true"]):active {
+    scale: 0.96;
+  }
+}
+
+.iconButton {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--toque);
+  block-size: var(--toque);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tabs ul {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: inline proximity;
+  scrollbar-width: none;
+  padding: 4px;
+  margin: -4px;
+}
+
+.tabs li {
+  flex: none;
+}
+
+.tab {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-block-size: var(--toque);
+  padding: 6px 18px;
+  border: var(--borde);
+  border-radius: var(--radio-control);
+  background: var(--blanco);
+  color: var(--tinta);
+  font-weight: 800;
+  white-space: nowrap;
+  text-decoration: none;
+  scroll-snap-align: start;
+  cursor: pointer;
+}
+
+.tab[aria-current="page"],
+.tab[data-active] {
+  background: var(--tinta);
+  color: var(--miel);
+}
+
+.tabCount {
+  min-inline-size: 26px;
+  padding: 1px 8px;
+  border-radius: var(--radio-control);
+  background: var(--lino);
+  color: var(--tinta);
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+.tab[aria-current="page"] .tabCount,
+.tab[data-active] .tabCount {
+  background: var(--miel);
+}
+
+@media (hover: hover) {
+  .tab:not([aria-current="page"], [data-active]):hover {
+    background: var(--cera);
+  }
+}

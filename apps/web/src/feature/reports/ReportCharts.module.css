@@ -1,0 +1,97 @@
+.columnas {
+  inline-size: 100%;
+  block-size: 180px;
+}
+
+.celdaDeColumna,
+.barra {
+  fill: var(--miel-clara);
+  stroke: var(--tinta);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.celdaDeColumna[data-cerrada],
+.barra[data-cerrada] {
+  fill: var(--miel);
+}
+
+.lineaDeMeta {
+  stroke: var(--tinta-suave);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 4;
+}
+
+.rotulo {
+  fill: var(--tinta-suave);
+  font-size: 11px;
+  font-weight: 800;
+  text-anchor: middle;
+}
+
+.rotulo[data-futuro] {
+  opacity: 0.45;
+}
+
+.tarros {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 28px;
+  padding-block: 8px;
+}
+
+.itemTarro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.cifraDeTarro {
+  font-family: var(--fuente-titulos);
+  font-size: 1.375rem;
+  font-weight: 600;
+}
+
+.rotuloDeTarro {
+  color: var(--tinta-suave);
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+
+.desplazable {
+  max-inline-size: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.comoTabla summary {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--toque);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.comoTabla table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.comoTabla th,
+.comoTabla td {
+  padding: 6px 10px;
+  border-block-end: 1px solid var(--lino);
+  text-align: start;
+  white-space: nowrap;
+}
+
+.comoTabla thead th {
+  color: var(--tinta-suave);
+  font-size: 0.8125rem;
+}

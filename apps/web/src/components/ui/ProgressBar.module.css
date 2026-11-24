@@ -1,0 +1,48 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+
+.value {
+  color: var(--tinta-suave);
+}
+
+.bar {
+  display: block;
+  block-size: 14px;
+  border: 2px solid var(--tinta);
+  border-radius: var(--radio-control);
+  background: var(--cera-clara);
+  overflow: hidden;
+}
+
+.bar > span {
+  display: block;
+  block-size: 100%;
+  border-radius: var(--radio-control);
+  background: var(--miel);
+}
+
+.bar[data-variant="wing"] > span {
+  background: var(--ala);
+}
+
+.bar[data-variant="leaf"] > span {
+  background: var(--hoja);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bar > span {
+    transition: inline-size 0.5s var(--suave);
+  }
+}

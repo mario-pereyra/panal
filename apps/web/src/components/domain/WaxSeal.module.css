@@ -1,0 +1,54 @@
+.seal {
+  flex: none;
+}
+
+.wax {
+  fill: var(--lino-claro);
+  stroke: var(--lino-borde);
+  stroke-width: 1.8;
+  stroke-dasharray: 3 2.5;
+}
+
+.cell {
+  fill: none;
+  stroke: var(--lino-borde);
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+
+.drawing {
+  fill: none;
+  stroke: var(--lino-borde);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fill {
+  fill: var(--lino);
+}
+
+.seal[data-earned] .wax {
+  fill: var(--miel);
+  stroke: var(--tinta);
+  stroke-dasharray: none;
+}
+
+.seal[data-earned] .cell {
+  fill: var(--cera-clara);
+  stroke: var(--tinta);
+}
+
+.seal[data-earned] .drawing {
+  stroke: var(--tinta);
+}
+
+.seal[data-earned] .fill {
+  fill: var(--miel-oscura);
+}
+
+@media (forced-colors: active) {
+  .seal[data-earned] .wax {
+    fill: Highlight;
+  }
+}

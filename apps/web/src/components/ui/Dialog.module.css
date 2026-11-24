@@ -1,0 +1,145 @@
+.dialog {
+  composes: card from "./surface.module.css";
+  inline-size: min(100% - 32px, 560px);
+  max-inline-size: none;
+  max-block-size: min(100dvh - 48px, 880px);
+  padding: 0;
+  color: var(--tinta);
+}
+
+.dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog:modal {
+  overscroll-behavior: contain;
+}
+
+.dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background: var(--velo-de-fondo);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 20px 8px 24px;
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-block-start: 6px;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+.subtitle {
+  color: var(--tinta-suave);
+  font-size: 0.9375rem;
+}
+
+.close {
+  composes: iconButton from "./Button.module.css";
+}
+
+.close svg {
+  inline-size: 24px;
+  block-size: 24px;
+}
+
+@media (hover: hover) {
+  .close:hover {
+    background: var(--lino);
+  }
+}
+
+.body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 18px;
+  padding: 8px 24px 24px;
+  overflow-y: auto;
+}
+
+.footer {
+  composes: buttons from "./surface.module.css";
+  padding: 14px 24px max(14px, env(safe-area-inset-bottom, 0px));
+  border-block-start: 2px solid var(--lino);
+  background: var(--blanco);
+}
+
+@media (max-width: 699px) {
+  .dialog {
+    inline-size: 100%;
+    max-block-size: calc(100dvh - 24px);
+    margin: auto 0 0;
+    border-block-end: 0;
+    border-radius: var(--radio-tarjeta) var(--radio-tarjeta) 0 0;
+    box-shadow: none;
+  }
+
+  .dialog:not(:has(.footer)) .body {
+    padding-block-end: max(24px, env(safe-area-inset-bottom, 0px));
+  }
+
+  .dialog[data-size="lg"],
+  .dialog[data-size="full"],
+  .dialog[data-size="completa"] {
+    block-size: 100dvh;
+    max-block-size: 100dvh;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .dialog[data-size="lg"] .header,
+  .dialog[data-size="full"] .header,
+  .dialog[data-size="completa"] .header {
+    padding-block-start: max(20px, env(safe-area-inset-top, 0px));
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dialog[open] {
+    animation: fadeIn 0.24s var(--suave);
+  }
+
+  .dialog[open]::backdrop {
+    animation: darken 0.24s ease-out;
+  }
+
+  @media (max-width: 699px) {
+    .dialog[open] {
+      animation-name: slideUp;
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    scale: 0.96;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    translate: 0 40%;
+  }
+}
+
+@keyframes darken {
+  from {
+    opacity: 0;
+  }
+}

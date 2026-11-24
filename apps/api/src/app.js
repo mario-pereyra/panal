@@ -1,65 +1,42 @@
 import { Hono } from "hono";
 import { secureHeaders } from "hono/secure-headers";
-import { ErrorDePanal, falla } from "./errores.js";
-import { rutasDeActividades } from "./rutas/actividades.js";
-import { rutasDeCeldas } from "./rutas/celdas.js";
-import { rutasDeColmenas, rutasDeInvitaciones } from "./rutas/colmenas.js";
-import { rutasDeCuenta } from "./rutas/cuenta.js";
-import { rutasDePanal } from "./rutas/panal.js";
-import { rutasDeReportes } from "./rutas/reportes.js";
-import { rutasDeYo } from "./rutas/yo.js";
-import { cargarSesion } from "./seguridad/sesion.js";
+import { loadSessionMiddleware } from "./auth/session.js";
+import { AppError, errorHandler } from "./errors.js";
+import { activityRoutes } from "./routes/activityRoutes.js";
+import { authRoutes } from "./routes/authRoutes.js";
+import { cellRoutes } from "./routes/cellRoutes.js";
+import { dashboardRoutes } from "./routes/dashboardRoutes.js";
+import { hiveRoutes } from "./routes/hiveRoutes.js";
+import { profileRoutes } from "./routes/profileRoutes.js";
+import { reportRoutes } from "./routes/reportRoutes.js";
 
-/**
- * La aplicación de Hono: una función que recibe una petición estándar y
- * devuelve una respuesta estándar. Se prueba con `app.request()` sin levantar
- * ningún servidor.
- *
- * @typedef {object} Contexto Lo que comparten todas las rutas.
- * @property {import("./datos/base.js").Base} base
- * @property {() => number} reloj Instante actual en milisegundos. Se inyecta para
- *   probar con cualquier fecha; el motor nunca lee el reloj por su cuenta.
- */
-
-/**
- * @param {{ base: import("./datos/base.js").Base, reloj?: () => number }} opciones
- */
-export function crearApp({ base, reloj = () => Date.now() }) {
-  /** @type {Contexto} */
-  const contexto = { base, reloj };
+export function createApp({ db, clock = () => Date.now() }) {
+  const context = { db, clock };
   const app = new Hono();
 
   app.use("*", secureHeaders());
-  app.use("/api/*", cargarSesion(contexto));
+  app.use("/api/*", loadSessionMiddleware(context));
 
-  for (const rutas of [
-    rutasDeCuenta,
-    rutasDeYo,
-    rutasDePanal,
-    rutasDeActividades,
-    rutasDeCeldas,
-    rutasDeColmenas,
-    rutasDeInvitaciones,
-    rutasDeReportes,
+  for (const createRoutes of [
+    authRoutes,
+    profileRoutes,
+    dashboardRoutes,
+    activityRoutes,
+    cellRoutes,
+    hiveRoutes,
+    reportRoutes,
   ]) {
-    app.route("/api", rutas(contexto));
+    app.route("/api", createRoutes(context));
   }
 
   app.notFound((c) => {
-    const error = falla("no_existe", { mensaje: "Esa dirección no existe en el panal." });
-    return c.json(error.cuerpo, 404);
+    const error = new AppError("not_found", {
+      message: "Esa dirección no existe en el panal.",
+    });
+    return c.json(error.body, 404);
   });
 
-  app.onError((error, c) => {
-    if (error instanceof ErrorDePanal) {
-      if (typeof error.extra.reintentarEn === "number") {
-        c.header("Retry-After", String(error.extra.reintentarEn));
-      }
-      return c.json(error.cuerpo, /** @type {any} */ (error.estado));
-    }
-    console.error(error);
-    return c.json(falla("error_interno").cuerpo, 500);
-  });
+  app.onError(errorHandler);
 
   return app;
 }

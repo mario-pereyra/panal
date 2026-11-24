@@ -1,0 +1,19 @@
+.card {
+  border: var(--borde);
+  border-radius: var(--radio-tarjeta);
+  background: var(--blanco);
+  box-shadow: var(--sombra);
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 699px) {
+  .buttons > * {
+    flex: 1 1 auto;
+  }
+}

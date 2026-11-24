@@ -1,9 +1,0 @@
-/* La invitación llega sobre miel, como la mitad de Zum en las pantallas de acceso. */
-.unirme {
-  background: var(--miel);
-}
-
-.botones {
-  composes: botones from "../../componentes/ui/superficie.module.css";
-  justify-content: center;
-}

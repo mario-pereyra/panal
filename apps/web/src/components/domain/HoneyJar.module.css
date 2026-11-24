@@ -1,0 +1,33 @@
+.jar {
+  flex: none;
+  block-size: auto;
+}
+
+.lid {
+  fill: var(--ala);
+  stroke: var(--tinta);
+  stroke-width: 3;
+}
+
+.jar[data-closed] .lid {
+  fill: var(--tinta);
+}
+
+.glass {
+  fill: none;
+  stroke: var(--tinta);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.honey {
+  fill: var(--miel);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .honey {
+    transition:
+      y 0.5s var(--suave),
+      height 0.5s var(--suave);
+  }
+}

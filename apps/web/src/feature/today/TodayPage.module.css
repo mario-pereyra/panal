@@ -1,0 +1,107 @@
+.hoy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--separacion);
+}
+
+.franja {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border: var(--borde);
+  border-radius: var(--radio-recuadro);
+  background: var(--cera);
+  box-shadow: var(--sombra-chica);
+  font-weight: 800;
+}
+
+.franja[data-tono="wing"] {
+  background: var(--ala);
+}
+
+.franjaTexto {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.franjaTexto svg {
+  flex: none;
+}
+
+.cerrarFranja {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--toque);
+  block-size: var(--toque);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tarjetas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: var(--separacion);
+}
+
+.tarjetas > * {
+  flex: 1 1 340px;
+  min-inline-size: 0;
+}
+
+@media (min-width: 700px) {
+  .tarjetas > * {
+    min-block-size: 420px;
+  }
+}
+
+.cabezaDeTarjeta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-block-end: 12px;
+}
+
+.tituloDeTarjeta {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.datoDeTarjeta {
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  font-size: 1.125rem;
+  color: var(--tinta-suave);
+}
+
+.notaDeTarjeta {
+  margin-block-end: 12px;
+  color: var(--tinta-suave);
+  font-size: 0.9375rem;
+}
+
+.filas {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vacio {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px;
+  color: var(--tinta-suave);
+  font-size: 1.0625rem;
+}

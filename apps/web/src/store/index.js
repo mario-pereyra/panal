@@ -1,60 +1,63 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
-import actividadReducer from "../feature/actividad/actividadSlice.js";
-import celdasReducer from "../feature/celdas/celdasSlice.js";
-import colmenasReducer from "../feature/colmenas/colmenasSlice.js";
-import hoyReducer, { recuerdoDeFranja } from "../feature/hoy/hoySlice.js";
-import miVueloReducer from "../feature/miVuelo/miVueloSlice.js";
-import primerVueloReducer, {
-  recuerdoDelPrimerVuelo,
-} from "../feature/primerVuelo/primerVueloSlice.js";
-import reportesReducer from "../feature/reportes/reportesSlice.js";
-import { recordarEnElNavegador } from "../lib/almacen.js";
-import avisosReducer from "../nucleo/avisos/avisosSlice.js";
-import celebracionesReducer from "../nucleo/celebraciones/celebracionesSlice.js";
-import conexionReducer from "../nucleo/conexion/conexionSlice.js";
-import cuentaReducer, { recuerdoDeInvitacion } from "../nucleo/cuenta/cuentaSlice.js";
-import preferenciasReducer, {
-  recuerdoDeMovimiento,
-} from "../nucleo/preferencias/preferenciasSlice.js";
-import relojReducer from "../nucleo/reloj/relojSlice.js";
+import authReducer from "../core/auth/authSlice.js";
+import celebrationsReducer from "../core/celebrations/celebrationsSlice.js";
+import clockReducer from "../core/clock/clockSlice.js";
+import connectionReducer from "../core/connection/connectionSlice.js";
+import preferencesReducer from "../core/preferences/preferencesSlice.js";
+import toastsReducer from "../core/toasts/toastsSlice.js";
+import activityReducer from "../feature/activity/activitySlice.js";
+import cellsReducer from "../feature/cells/cellsSlice.js";
+import onboardingReducer from "../feature/onboarding/onboardingSlice.js";
+import todayReducer from "../feature/today/todaySlice.js";
 import { panalApi } from "./api.js";
 
-/**
- * El store de Panal (docs/proyecto/05-datos-y-api.md, sección 6).
- *
- * - `api`: lo que es verdad en el servidor (RTK Query, `store/api.js`).
- * - `nucleo/`: el estado que comparten varias pantallas.
- * - `feature/`: un slice por pantalla con lo que solo existe en ella.
- */
-export function crearStore() {
-  const store = configureStore({
-    reducer: {
-      [panalApi.reducerPath]: panalApi.reducer,
-      cuenta: cuentaReducer,
-      reloj: relojReducer,
-      avisos: avisosReducer,
-      conexion: conexionReducer,
-      celebraciones: celebracionesReducer,
-      preferencias: preferenciasReducer,
-      hoy: hoyReducer,
-      celdas: celdasReducer,
-      actividad: actividadReducer,
-      colmenas: colmenasReducer,
-      reportes: reportesReducer,
-      miVuelo: miVueloReducer,
-      primerVuelo: primerVueloReducer,
-    },
-    middleware: (porDefecto) => porDefecto().concat(panalApi.middleware),
-  });
-  setupListeners(store.dispatch);
-  recordarEnElNavegador(store, [
-    recuerdoDeInvitacion,
-    recuerdoDeMovimiento,
-    recuerdoDeFranja,
-    recuerdoDelPrimerVuelo,
-  ]);
-  return store;
+const extraFeatureSliceModules = import.meta.glob(
+  "../feature/{hives,reports,profile,flight,joinHive,auth,errors}/*Slice.js",
+  { eager: true },
+);
+
+function getExtraFeatureReducers() {
+  const reducers = {};
+  for (const [path, mod] of Object.entries(extraFeatureSliceModules)) {
+    const slice = Object.values(mod).find(
+      (exported) =>
+        exported &&
+        typeof exported === "object" &&
+        typeof exported.name === "string" &&
+        typeof exported.reducer === "function",
+    );
+    if (slice) {
+      reducers[slice.reducerPath ?? slice.name] = slice.reducer;
+    } else if (typeof mod.default === "function") {
+      const match = path.match(/\/([^/]+)Slice\.js$/);
+      if (match) reducers[match[1]] = mod.default;
+    }
+  }
+  return reducers;
 }
 
-export const store = crearStore();
+export function createAppStore(preloadedState) {
+  const appStore = configureStore({
+    reducer: {
+      [panalApi.reducerPath]: panalApi.reducer,
+      auth: authReducer,
+      clock: clockReducer,
+      connection: connectionReducer,
+      preferences: preferencesReducer,
+      toasts: toastsReducer,
+      celebrations: celebrationsReducer,
+      activity: activityReducer,
+      cells: cellsReducer,
+      onboarding: onboardingReducer,
+      today: todayReducer,
+      ...getExtraFeatureReducers(),
+    },
+    preloadedState,
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(panalApi.middleware),
+  });
+  setupListeners(appStore.dispatch);
+  return appStore;
+}
+
+export const store = createAppStore();

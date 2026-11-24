@@ -1,80 +1,75 @@
-/**
- * Service worker de Panal (D7 de 04-stack-y-arquitectura.md).
- *
- * No se publica tal cual: al compilar, `complemento.js` le antepone
- * `self.__PANAL__` con la versión, la lista de archivos de esa compilación y
- * los nombres que comparte con la página (`acuerdos.js`).
- *
- * - La aplicación (JS, CSS, fuentes latinas, iconos) se guarda al instalar y se
- *   sirve desde el caché: abre sin red.
- * - Las respuestas `GET /api/*` van primero a la red y se guardan; sin red se
- *   devuelve la última: se ve lo último consultado. Escribir siempre pide red.
- * - Una versión nueva espera a que la persona pulse "Actualizar".
- */
+const { version, precache, dataCacheName, updateMessage } = self.__PANAL__;
+const APP_CACHE_NAME = `panal-app-${version}`;
 
-const { version, precarga, cacheDeDatos, mensajeActualizar } = self.__PANAL__;
-const CACHE_DE_LA_APP = `panal-app-${version}`;
-
-self.addEventListener("install", (evento) => {
-  evento.waitUntil(caches.open(CACHE_DE_LA_APP).then((cache) => cache.addAll(precarga)));
+self.addEventListener("install", (event) => {
+  event.waitUntil(caches.open(APP_CACHE_NAME).then((cache) => cache.addAll(precache)));
 });
 
-self.addEventListener("activate", (evento) => {
-  evento.waitUntil(
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
     (async () => {
-      const nombres = await caches.keys();
+      const names = await caches.keys();
       await Promise.all(
-        nombres
-          .filter((nombre) => nombre.startsWith("panal-app-") && nombre !== CACHE_DE_LA_APP)
-          .map((nombre) => caches.delete(nombre)),
+        names
+          .filter((name) => name.startsWith("panal-app-") && name !== APP_CACHE_NAME)
+          .map((name) => caches.delete(name)),
       );
       await self.clients.claim();
     })(),
   );
 });
 
-self.addEventListener("message", (evento) => {
-  if (evento.data === mensajeActualizar) self.skipWaiting();
+self.addEventListener("message", (event) => {
+  if (event.data === updateMessage) self.skipWaiting();
 });
 
-self.addEventListener("fetch", (evento) => {
-  const peticion = evento.request;
-  const url = new URL(peticion.url);
-  if (peticion.method !== "GET" || url.origin !== self.location.origin) return;
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+  if (request.method !== "GET" || url.origin !== self.location.origin) return;
 
   if (url.pathname.startsWith("/api/")) {
-    evento.respondWith(primeroLaRed(peticion));
-  } else if (peticion.mode === "navigate") {
-    // Cualquier dirección de la aplicación abre la misma página; sin red, la guardada.
-    evento.respondWith(fetch(peticion).catch(() => caches.match("/")));
+    event.respondWith(networkFirst(request));
+  } else if (request.mode === "navigate") {
+    event.respondWith(navigateWithFallback(request));
   } else {
-    evento.respondWith(primeroLoGuardado(peticion));
+    event.respondWith(cacheFirst(request));
   }
 });
 
-async function primeroLaRed(peticion) {
+async function navigateWithFallback(request) {
   try {
-    const respuesta = await fetch(peticion);
-    if (respuesta.ok) {
-      const cache = await caches.open(cacheDeDatos);
-      await cache.put(peticion, respuesta.clone());
+    return await fetch(request);
+  } catch {
+    const cached = await caches.match("/");
+    return cached ?? new Response("Sin conexión", { status: 503 });
+  }
+}
+
+async function networkFirst(request) {
+  try {
+    const response = await fetch(request);
+    if (response.status === 401) {
+      await caches.delete(dataCacheName);
+    } else if (response.ok) {
+      const cache = await caches.open(dataCacheName);
+      await cache.put(request, response.clone());
     }
-    return respuesta;
+    return response;
   } catch (error) {
-    const guardada = await caches.match(peticion, { cacheName: cacheDeDatos });
-    if (guardada) return guardada;
+    const cached = await caches.match(request, { cacheName: dataCacheName });
+    if (cached) return cached;
     throw error;
   }
 }
 
-// Los archivos llevan la huella del contenido en el nombre: si está guardado, no cambió.
-async function primeroLoGuardado(peticion) {
-  const guardada = await caches.match(peticion);
-  if (guardada) return guardada;
-  const respuesta = await fetch(peticion);
-  if (respuesta.ok) {
-    const cache = await caches.open(CACHE_DE_LA_APP);
-    await cache.put(peticion, respuesta.clone());
+async function cacheFirst(request) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+  const response = await fetch(request);
+  if (response.ok) {
+    const cache = await caches.open(APP_CACHE_NAME);
+    await cache.put(request, response.clone());
   }
-  return respuesta;
+  return response;
 }

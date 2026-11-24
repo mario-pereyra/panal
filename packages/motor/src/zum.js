@@ -1,7 +1,6 @@
-import { HORA_DE_CAMBIO } from "./dia.js";
+import { DAY_ROLLOVER_HOUR } from "./day.js";
 
-/** Los seis estados de Zum, en el orden en que se evalúan: gana el primero que se cumple. */
-export const ESTADOS_DE_ZUM = [
+export const ZUM_MOODS = [
   "descansando",
   "celebrando",
   "feliz",
@@ -10,23 +9,13 @@ export const ESTADOS_DE_ZUM = [
   "esperando",
 ];
 
-/** Hora local desde la que Zum se preocupa por una racha sin celdas. */
-export const HORA_DE_PREOCUPARSE = 18;
+export const WORRY_HOUR = 18;
 
-/**
- * Estado de Zum según el día y la racha. Zum se preocupa por la racha; nunca reprocha.
- *
- * @param {{ llenas: number, meta: number, programadas: number, cerrado: boolean, descanso: boolean }} resumen
- * @param {{ actual: number }} racha
- * @param {{ hora: number }} ahora Hora local (0 a 23). El motor no lee el reloj.
- * @returns {"descansando" | "celebrando" | "feliz" | "animando" | "preocupada" | "esperando"}
- */
-export function estadoDeZum(resumen, racha, ahora) {
-  if (resumen.descanso) return "descansando";
-  if (resumen.cerrado) return "celebrando";
-  if (resumen.llenas > 0) return resumen.llenas * 2 >= resumen.meta ? "feliz" : "animando";
-  // El día de Panal sigue hasta las 03:00, así que la madrugada también cuenta como tarde.
-  const esTarde = ahora.hora >= HORA_DE_PREOCUPARSE || ahora.hora < HORA_DE_CAMBIO;
-  if (esTarde && resumen.programadas > 0 && racha.actual > 0) return "preocupada";
+export function getZumMood(summary, streak, now) {
+  if (summary.rest) return "descansando";
+  if (summary.closed) return "celebrando";
+  if (summary.filled > 0) return summary.filled * 2 >= summary.goal ? "feliz" : "animando";
+  const isLate = now.hour >= WORRY_HOUR || now.hour < DAY_ROLLOVER_HOUR;
+  if (isLate && summary.scheduled > 0 && streak.current > 0) return "preocupada";
   return "esperando";
 }

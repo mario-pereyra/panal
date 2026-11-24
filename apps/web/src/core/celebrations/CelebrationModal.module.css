@@ -1,0 +1,70 @@
+.celebration {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.zum {
+  --tamano-zum: 160px;
+}
+
+.achievement {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  inline-size: 100%;
+}
+
+.achievement:not([data-primary]) {
+  padding-block-start: 14px;
+  border-block-start: 2px dashed var(--lino);
+}
+
+.illustration {
+  max-inline-size: 220px;
+}
+
+.texts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.secondaryTitle {
+  font-weight: 600;
+  font-size: 1.1875rem;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.badgeChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: var(--toque);
+  padding: 6px 16px;
+  border: var(--borde);
+  border-radius: var(--radio-control);
+  background: var(--blanco);
+  color: var(--tinta);
+  font-weight: 800;
+  font-size: 0.9375rem;
+  line-height: 1.2;
+}
+
+.detail {
+  color: var(--tinta-suave);
+}
+
+.continueButton {
+  inline-size: min(100%, 280px);
+}
